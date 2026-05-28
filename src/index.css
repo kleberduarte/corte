@@ -29,10 +29,13 @@
 }
 
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-html, body, #root { height: 100%; overflow: hidden; background: var(--bg); font-family: var(--font-sans); color: var(--t1); -webkit-tap-highlight-color: transparent; user-select: none; }
+html, body, #root { height: 100%; overflow: hidden; background: var(--bg); font-family: var(--font-sans); color: var(--t1); -webkit-tap-highlight-color: transparent; }
 
-.scroll { overflow-y: auto; overflow-x: hidden; scrollbar-width: none; -webkit-overflow-scrolling: touch; touch-action: pan-y; }
+.scroll { overflow-y: scroll; overflow-x: hidden; scrollbar-width: none; -webkit-overflow-scrolling: touch; touch-action: pan-y; overscroll-behavior-y: contain; }
 .scroll::-webkit-scrollbar { display: none; }
+
+/* Impede seleção de texto em elementos não editáveis sem bloquear scroll */
+.totem-shell, .totem-shell *:not(input):not(textarea) { user-select: none; }
 
 .totem-shell { width: 100%; height: 100%; display: flex; flex-direction: column; background: var(--bg); position: relative; overflow: hidden; }
 
@@ -50,8 +53,8 @@ html, body, #root { height: 100%; overflow: hidden; background: var(--bg); font-
 .back-btn:hover { background: var(--s3); color: var(--t1); }
 
 .screen { flex: 1; min-height: 0; display: flex; flex-direction: column; overflow: hidden; animation: screenIn 0.28s cubic-bezier(0.4,0,0.2,1) both; }
-/* Garante que .scroll sobrescreve o overflow:hidden do .screen quando combinados */
-.screen.scroll { overflow-y: auto; overflow-x: hidden; -webkit-overflow-scrolling: touch; touch-action: pan-y; }
+/* Sobrescreve overflow:hidden do .screen — scroll forçado para Android/iOS */
+.screen.scroll { overflow-y: scroll; overflow-x: hidden; -webkit-overflow-scrolling: touch; touch-action: pan-y; overscroll-behavior-y: contain; }
 @keyframes screenIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: none; } }
 
 .btn-primary { display: flex; align-items: center; justify-content: center; gap: 8px; padding: 18px 24px; background: var(--primary); color: white; border-radius: var(--r); font-size: 16px; font-weight: 600; cursor: pointer; box-shadow: 0 6px 22px var(--primary-glow); transition: background 0.15s, transform 0.15s, box-shadow 0.15s; border: none; font-family: var(--font-sans); width: 100%; }
