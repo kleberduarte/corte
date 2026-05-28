@@ -1,0 +1,32 @@
+type Props = { current: number; total: number; labels?: string[] }
+
+export default function StepProgress({ current, total, labels }: Props) {
+  return (
+    <div style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '8px 24px 0', flexShrink: 0 }}>
+      {Array.from({ length: total }).map((_, i) => (
+        <div key={i} style={{ display: 'flex', alignItems: 'center', flex: i < total - 1 ? 1 : undefined, gap: 6 }}>
+          <div style={{
+            width: 24, height: 24, borderRadius: '50%',
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+            flexShrink: 0,
+            background: i < current ? 'var(--green)' : i === current ? 'var(--primary)' : 'var(--s3)',
+            border: `2px solid ${i < current ? 'var(--green)' : i === current ? 'var(--primary)' : 'var(--border)'}`,
+            fontSize: 11, fontWeight: 700,
+            color: i <= current ? 'white' : 'var(--t4)',
+            transition: 'all .3s',
+          }}>
+            {i < current ? '✓' : i + 1}
+          </div>
+          {labels && (
+            <div style={{ fontSize: 10, color: i === current ? 'var(--t2)' : 'var(--t4)', whiteSpace: 'nowrap', display: i < total - 1 ? 'none' : undefined }}>
+              {labels[i]}
+            </div>
+          )}
+          {i < total - 1 && (
+            <div style={{ flex: 1, height: 2, borderRadius: 1, background: i < current ? 'var(--green)' : 'var(--s4)', transition: 'background .3s' }} />
+          )}
+        </div>
+      ))}
+    </div>
+  )
+}
