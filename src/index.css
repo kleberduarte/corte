@@ -50,6 +50,8 @@ html, body, #root { height: 100%; overflow: hidden; background: var(--bg); font-
 .back-btn:hover { background: var(--s3); color: var(--t1); }
 
 .screen { flex: 1; min-height: 0; display: flex; flex-direction: column; overflow: hidden; animation: screenIn 0.28s cubic-bezier(0.4,0,0.2,1) both; }
+/* Garante que .scroll sobrescreve o overflow:hidden do .screen quando combinados */
+.screen.scroll { overflow-y: auto; overflow-x: hidden; -webkit-overflow-scrolling: touch; touch-action: pan-y; }
 @keyframes screenIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: none; } }
 
 .btn-primary { display: flex; align-items: center; justify-content: center; gap: 8px; padding: 18px 24px; background: var(--primary); color: white; border-radius: var(--r); font-size: 16px; font-weight: 600; cursor: pointer; box-shadow: 0 6px 22px var(--primary-glow); transition: background 0.15s, transform 0.15s, box-shadow 0.15s; border: none; font-family: var(--font-sans); width: 100%; }
