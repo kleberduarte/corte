@@ -17,7 +17,8 @@ export default function PhoneScreen({ items, slotTime, onConfirm }: Props) {
   }
 
   return (
-    <div className="screen scroll" style={{ padding: '16px 28px 28px' }}>
+    <div className="screen">
+    <div className="scroll" style={{ flex: 1, padding: '16px 28px 28px' }}>
       <div style={{ fontFamily: 'var(--font-serif)', fontSize: 28, fontWeight: 700, color: 'var(--accent)', marginBottom: 8 }}>
         Seu WhatsApp
       </div>
@@ -73,6 +74,7 @@ export default function PhoneScreen({ items, slotTime, onConfirm }: Props) {
       <p style={{ fontSize: 12, color: 'var(--t3)', textAlign: 'center', marginTop: 16, lineHeight: 1.5 }}>
         Você receberá a confirmação no WhatsApp e um comprovante impresso aqui no totem. Dados usados apenas para este pedido (LGPD).
       </p>
+    </div>
     </div>
   )
 }

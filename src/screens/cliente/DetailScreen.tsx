@@ -13,7 +13,8 @@ export default function DetailScreen({ product: p, onSchedule }: Props) {
   const estimated = (p.pricePerKg * weight).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })
 
   return (
-    <div className="screen scroll" style={{ paddingBottom: 28 }}>
+    <div className="screen">
+    <div className="scroll" style={{ flex: 1, paddingBottom: 28 }}>
       {/* Hero */}
       <div style={{ position: 'relative', height: 248, flexShrink: 0 }}>
         <img src={p.imageUrl} alt={p.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
@@ -109,6 +110,7 @@ export default function DetailScreen({ product: p, onSchedule }: Props) {
           📅 Agendar este corte
         </button>
       </div>
+    </div>
     </div>
   )
 }
