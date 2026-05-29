@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import type { Product, CutType } from '../../data/products'
+import { CATEGORY_LABELS } from '../../data/products'
 
 type Props = {
   product: Product
@@ -24,7 +25,7 @@ export default function DetailScreen({ product: p, onSchedule }: Props) {
       <div style={{ padding: '0 24px 24px' }}>
         {/* Nome e avaliação */}
         <div style={{ fontSize: 11, fontWeight: 600, color: 'var(--primary)', textTransform: 'uppercase', letterSpacing: 1, marginBottom: 6, marginTop: 12 }}>
-          {p.category} · {p.badge || 'Seleção'}
+          {CATEGORY_LABELS[p.category]} · {p.badge || 'Seleção'}
         </div>
         <div style={{ fontFamily: 'var(--font-serif)', fontSize: 30, fontWeight: 700, color: 'var(--accent)', lineHeight: 1.1, marginBottom: 10 }}>
           {p.name}

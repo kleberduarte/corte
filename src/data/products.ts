@@ -4,10 +4,22 @@ export type CutType = {
   desc: string
 }
 
+export type ProductCategory = 'bovino' | 'aves' | 'suino' | 'linguicas' | 'peixe' | 'mar' | 'especial'
+
+export const CATEGORY_LABELS: Record<ProductCategory, string> = {
+  bovino: 'Bovino',
+  aves: 'Aves',
+  suino: 'Suíno',
+  linguicas: 'Linguiças',
+  peixe: 'Peixe',
+  mar: 'Frutos do mar',
+  especial: 'Especial',
+}
+
 export type Product = {
   id: string
   name: string
-  category: 'bovino' | 'aves' | 'suino' | 'peixe' | 'mar' | 'especial'
+  category: ProductCategory
   description: string
   pricePerKg: number
   imageUrl: string
@@ -97,10 +109,10 @@ export const PRODUCTS: Product[] = [
     id: 'frango-inteiro',
     name: 'Frango Inteiro',
     category: 'aves',
-    description: 'Frango cru, inteiro. Corte na hora no balcão.',
+    description: 'Frango inteiro. Corte na hora no balcão.',
     pricePerKg: 18.9,
-    imageUrl: '/assets/produtos/aves/peitoDeFrango.jpg',
-    badge: 'Cru · Granja',
+    imageUrl: '/assets/produtos/aves/frangoInteiro.jpg',
+    badge: 'Granja',
     rating: 4.9,
     reviews: 310,
     cutTypes: [
@@ -108,32 +120,31 @@ export const PRODUCTS: Product[] = [
       { id: 'metade', name: 'Metade', desc: 'Dividido ao meio' },
       { id: 'ao_molho', name: 'A passarinho', desc: 'Pedaços pequenos' },
     ],
-    tags: ['🐔 Granja', '🥩 Cru'],
+    tags: ['🐔 Granja'],
   },
   {
     id: 'sobrecoxa',
     name: 'Sobrecoxa sem Osso',
     category: 'aves',
-    description: 'Sobrecoxa crua, desossada na hora.',
+    description: 'Sobrecoxa desossada na hora.',
     pricePerKg: 22.9,
     imageUrl: '/assets/produtos/aves/sobrecoxa.jpg',
-    badge: 'Cru',
     rating: 4.4,
     reviews: 74,
     cutTypes: [
       { id: 'sem_osso', name: 'Sem osso', desc: 'Desossada na hora' },
       { id: 'com_osso', name: 'Com osso', desc: 'Peça inteira' },
     ],
-    tags: ['🐔 Frango', '🥩 Cru'],
+    tags: ['🐔 Frango'],
   },
   {
     id: 'peito-frango',
     name: 'Peito de Frango',
     category: 'aves',
-    description: 'Peito cru, sem osso e sem pele.',
+    description: 'Peito sem osso e sem pele.',
     pricePerKg: 24.9,
     imageUrl: '/assets/produtos/aves/peitoDeFrango.jpg',
-    badge: 'Cru · Leve',
+    badge: 'Leve',
     rating: 4.9,
     reviews: 186,
     cutTypes: [
@@ -147,10 +158,9 @@ export const PRODUCTS: Product[] = [
     id: 'asa-frango',
     name: 'Asa de Frango',
     category: 'aves',
-    description: 'Asas cruas — tempero da casa opcional.',
+    description: 'Asas — tempero da casa opcional.',
     pricePerKg: 16.9,
     imageUrl: '/assets/produtos/aves/azinha.jpg',
-    badge: 'Cru',
     rating: 4.9,
     reviews: 203,
     cutTypes: [
@@ -166,7 +176,7 @@ export const PRODUCTS: Product[] = [
     description: 'Asa cortada em tulipa — carne exposta, fácil de segurar. Ideal para churrasco e festas.',
     pricePerKg: 19.9,
     imageUrl: '/assets/produtos/aves/tulipa.jpg',
-    badge: 'Cru · Festa',
+    badge: 'Festa',
     rating: 4.7,
     reviews: 118,
     cutTypes: [
@@ -178,10 +188,10 @@ export const PRODUCTS: Product[] = [
     id: 'coracao-frango',
     name: 'Coração de Frango',
     category: 'aves',
-    description: 'Coração cru, limpo e fresco. Clássico de churrasco, espetinho ou frigideira.',
+    description: 'Coração limpo e fresco. Clássico de churrasco, espetinho ou frigideira.',
     pricePerKg: 14.9,
     imageUrl: '/assets/produtos/aves/coracao.jpg',
-    badge: 'Cru · Espetinho',
+    badge: 'Espetinho',
     rating: 4.6,
     reviews: 91,
     cutTypes: [
@@ -196,7 +206,7 @@ export const PRODUCTS: Product[] = [
     category: 'suino',
     description: 'Ribs estilo americano. Corte em rack ou individual.',
     pricePerKg: 34.9,
-    imageUrl: 'https://images.unsplash.com/photo-1588944651162-57080995b92d?w=600&h=500&fit=crop&q=80',
+    imageUrl: '/assets/produtos/suinos/costelinha.jpg',
     badge: 'Defumada',
     rating: 4.9,
     reviews: 156,
@@ -207,19 +217,98 @@ export const PRODUCTS: Product[] = [
     tags: ['🐷 Suíno', '🔥 Defumada'],
   },
   {
-    id: 'linguica-toscana',
-    name: 'Linguiça Toscana',
+    id: 'panceta',
+    name: 'Panceta',
     category: 'suino',
-    description: 'Feita na hora no açougue. Tempero artesanal da casa.',
-    pricePerKg: 29.9,
-    imageUrl: 'https://images.unsplash.com/photo-1771243108040-696d2544adf3?w=600&h=500&fit=crop&q=80',
-    rating: 4.9,
-    reviews: 289,
+    description: 'Panceta suína fresca. Fatias ou peça inteira na hora.',
+    pricePerKg: 32.9,
+    imageUrl: '/assets/produtos/suinos/panceta.jpg',
+    badge: 'Fresca',
+    rating: 4.8,
+    reviews: 124,
     cutTypes: [
-      { id: 'link', name: 'Gomo', desc: 'Porções individuais' },
+      { id: 'inteiro', name: 'Peça inteira', desc: 'Como sai da peça' },
+      { id: 'fatia', name: 'Fatias', desc: 'Espessura na hora' },
+      { id: 'cubo', name: 'Cubos', desc: 'Para refogado' },
+    ],
+    tags: ['🐷 Suíno', '🔥 Brasa'],
+  },
+  {
+    id: 'bacon-suino',
+    name: 'Bacon',
+    category: 'suino',
+    description: 'Bacon suíno em fatias. Ideal para café da manhã e churrasco.',
+    pricePerKg: 38.9,
+    imageUrl: '/assets/produtos/suinos/bancon.jpg',
+    rating: 4.7,
+    reviews: 98,
+    cutTypes: [
+      { id: 'fatia', name: 'Fatias', desc: 'Espessura na hora' },
       { id: 'granel', name: 'A granel', desc: 'Peso exato' },
     ],
-    tags: ['🌿 Artesanal', '🐷 Suíno'],
+    tags: ['🐷 Suíno', '🔥 Churrasco'],
+  },
+  {
+    id: 'torresmo',
+    name: 'Torresmo',
+    category: 'suino',
+    description: 'Torresmo de barriga em cubos. Crocante na hora ou para fritar em casa.',
+    pricePerKg: 24.9,
+    imageUrl: '/assets/produtos/suinos/torresmo.jpg',
+    rating: 4.6,
+    reviews: 87,
+    cutTypes: [
+      { id: 'cubo', name: 'Cubos', desc: 'Pedaços prontos' },
+      { id: 'granel', name: 'A granel', desc: 'Peso exato' },
+    ],
+    tags: ['🐷 Suíno', '✨ Crocante'],
+  },
+  {
+    id: 'linguica-aurora',
+    name: 'Linguiça Aurora',
+    category: 'linguicas',
+    description: 'Linguiça toscana Aurora. Seleção do açougue para churrasco e grelha.',
+    pricePerKg: 27.9,
+    imageUrl: '/assets/produtos/linguicas/aurora.jpg',
+    badge: 'Toscana',
+    rating: 4.8,
+    reviews: 214,
+    cutTypes: [
+      { id: 'gomo', name: 'Gomo', desc: 'Porções individuais' },
+      { id: 'granel', name: 'A granel', desc: 'Peso exato' },
+    ],
+    tags: ['🌭 Linguiça', '🔥 Churrasco'],
+  },
+  {
+    id: 'linguica-perdigao',
+    name: 'Linguiça Perdigão',
+    category: 'linguicas',
+    description: 'Linguiça calabresa Perdigão. Sabor marcante na brasa.',
+    pricePerKg: 26.9,
+    imageUrl: '/assets/produtos/linguicas/perdigao.jpg',
+    badge: 'Calabresa',
+    rating: 4.7,
+    reviews: 178,
+    cutTypes: [
+      { id: 'gomo', name: 'Gomo', desc: 'Porções individuais' },
+      { id: 'granel', name: 'A granel', desc: 'Peso exato' },
+    ],
+    tags: ['🌭 Linguiça', '🔥 Brasa'],
+  },
+  {
+    id: 'linguica-sadia',
+    name: 'Linguiça Sadia',
+    category: 'linguicas',
+    description: 'Linguiça Sadia, qualidade de mercado com frescor do balcão.',
+    pricePerKg: 25.9,
+    imageUrl: '/assets/produtos/linguicas/sadia.jpg',
+    rating: 4.6,
+    reviews: 142,
+    cutTypes: [
+      { id: 'gomo', name: 'Gomo', desc: 'Porções individuais' },
+      { id: 'granel', name: 'A granel', desc: 'Peso exato' },
+    ],
+    tags: ['🌭 Linguiça', '🏠 Família'],
   },
   {
     id: 'salmao-posta',
@@ -281,16 +370,16 @@ export type Suggestion = {
 
 export const SUGGESTIONS: Record<string, Suggestion> = {
   'picanha-angus': {
-    productId: 'linguica-toscana',
+    productId: 'linguica-aurora',
     badge: '🔥 Churrasco de respeito',
     hook: 'Fecha o churrasco com estilo!',
-    message: 'Para acompanhar essa picanha, uma linguiça artesanal na brasa deixa o churrasco em família completo.',
+    message: 'Para acompanhar essa picanha, linguiça na brasa deixa o churrasco em família completo.',
   },
   'contrafile': {
-    productId: 'linguica-toscana',
+    productId: 'linguica-perdigao',
     badge: '🥩 Combo campeão',
     hook: 'Monte o kit churrasqueiro!',
-    message: 'Contrafilé na grelha + linguiça toscana na brasa — churrasco que ninguém esquece.',
+    message: 'Contrafilé na grelha + linguiça calabresa na brasa — churrasco que ninguém esquece.',
   },
   'alcatra': {
     productId: 'costelinha-suina',
@@ -305,10 +394,10 @@ export const SUGGESTIONS: Record<string, Suggestion> = {
     message: 'Filé nobre merece companhia à altura. Camarão limpo na hora eleva o jantar ao nível chef.',
   },
   'costela-bovina': {
-    productId: 'linguica-toscana',
+    productId: 'panceta',
     badge: '🪵 Brasa longa',
     hook: 'Domingo na brasa pede parceiro!',
-    message: 'Costela pede paciência na brasa — e uma linguiça saborosa mantém a galera animada enquanto a ripa fica no ponto.',
+    message: 'Costela pede paciência na brasa — e panceta na grelha mantém a galera animada enquanto a ripa fica no ponto.',
   },
   'frango-inteiro': {
     productId: 'coracao-frango',
@@ -323,10 +412,10 @@ export const SUGGESTIONS: Record<string, Suggestion> = {
     message: 'Sobrecoxa prática + tulipa de frango: a dupla favorita para o churrasco de fim de semana.',
   },
   'peito-frango': {
-    productId: 'linguica-toscana',
+    productId: 'torresmo',
     badge: '🥗 Leve e saboroso',
     hook: 'Varie na grelha!',
-    message: 'Peito rende no dia a dia — uma linguiça toscana na grelha deixa qualquer encontro mais saboroso.',
+    message: 'Peito rende no dia a dia — torresmo crocante deixa qualquer encontro mais saboroso.',
   },
   'asa-frango': {
     productId: 'coracao-frango',
@@ -352,11 +441,41 @@ export const SUGGESTIONS: Record<string, Suggestion> = {
     hook: 'Ribs e picanha = sucesso!',
     message: 'Costelinha estilo americano brilha com picanha Angus — dois sabores, um só churrasco lendário.',
   },
-  'linguica-toscana': {
+  'bacon-suino': {
+    productId: 'linguica-aurora',
+    badge: '🔥 Combo raiz',
+    hook: 'Complete o churrasco!',
+    message: 'Bacon na grelha pede linguiça na brasa — dupla suína que a família adora.',
+  },
+  'linguica-aurora': {
     productId: 'picanha-angus',
     badge: '🔥 Combo raiz',
     hook: 'Subiu a fumaça? Tem picanha!',
     message: 'Linguiça abre o apetite — a picanha Angus fecha com chave de ouro no fim de semana em família.',
+  },
+  'linguica-perdigao': {
+    productId: 'costelinha-suina',
+    badge: '🐷 Dupla na brasa',
+    hook: 'Churrasco completo!',
+    message: 'Calabresa Perdigão com costelinha suína — sabor de domingo na brasa.',
+  },
+  'linguica-sadia': {
+    productId: 'linguica-aurora',
+    badge: '🌭 Varie o sabor',
+    hook: 'Monte a bandeja!',
+    message: 'Sadia e Aurora juntas — variedade de linguiças para agradar toda a família no churrasco.',
+  },
+  'panceta': {
+    productId: 'costelinha-suina',
+    badge: '🐷 Dupla suína',
+    hook: 'Churrasco completo!',
+    message: 'Panceta na brasa combina com costelinha — dois cortes suínos, um só churrasco.',
+  },
+  'torresmo': {
+    productId: 'panceta',
+    badge: '✨ Crocante',
+    hook: 'Complete o prato!',
+    message: 'Torresmo crocante é o par perfeito da panceta na mesa — sabor e textura de respeito.',
   },
   'salmao-posta': {
     productId: 'camarao-vg',
@@ -383,6 +502,7 @@ export const CATEGORIES = [
   { id: 'bovino', label: '🐄 Bovino', filter: 'bovino' },
   { id: 'aves', label: '🐔 Aves', filter: 'aves' },
   { id: 'suino', label: '🐷 Suíno', filter: 'suino' },
+  { id: 'linguicas', label: '🌭 Linguiças', filter: 'linguicas' },
   { id: 'peixe', label: '🐟 Peixe', filter: 'peixe' },
   { id: 'especial', label: '⭐ Especiais', filter: 'especial' },
 ] as const
@@ -411,19 +531,30 @@ export const HERO_SLIDES = [
   },
 ]
 
-export const CATEGORY_CARDS = [
+export type CategoryCard = {
+  id: string
+  name: string
+  count: string
+  imageUrl: string
+  filter: string
+  /** Card em destaque no topo — largura total e mais alto */
+  featured?: boolean
+  /** Card em largura total na base do grid */
+  wide?: boolean
+}
+
+export const CATEGORY_CARDS: CategoryCard[] = [
   {
     id: 'carnes',
     name: 'Carnes',
-    icon: '🥩',
     count: 'Bovino · Nobres · Premium',
-    imageUrl: 'https://images.unsplash.com/photo-1590507385303-b25eca128cc6?w=600&h=400&fit=crop&q=85',
+    imageUrl: 'https://images.unsplash.com/photo-1590507385303-b25eca128cc6?w=900&h=500&fit=crop&q=85',
     filter: 'bovino',
+    featured: true,
   },
   {
     id: 'frangos',
     name: 'Frangos',
-    icon: '🐔',
     count: 'Inteiro · Peito · Asa · Sassami',
     imageUrl: '/assets/produtos/aves/azinha.jpg',
     filter: 'aves',
@@ -431,15 +562,20 @@ export const CATEGORY_CARDS = [
   {
     id: 'suino',
     name: 'Suíno',
-    icon: '🐷',
-    count: 'Costela · Linguiça Artesanal',
-    imageUrl: 'https://images.unsplash.com/photo-1771243108040-696d2544adf3?w=600&h=400&fit=crop&q=85',
+    count: 'Costelinha · Panceta · Bacon · Torresmo',
+    imageUrl: '/assets/produtos/suinos/panceta.jpg',
     filter: 'suino',
+  },
+  {
+    id: 'linguicas',
+    name: 'Linguiças',
+    count: 'Aurora · Perdigão · Sadia',
+    imageUrl: '/assets/produtos/linguicas/aurora.jpg',
+    filter: 'linguicas',
   },
   {
     id: 'peixes',
     name: 'Peixes',
-    icon: '🐟',
     count: 'Frescos · Postas · Filés',
     imageUrl: 'https://images.unsplash.com/photo-1559058789-672da06263d8?w=600&h=400&fit=crop&q=85',
     filter: 'peixe',
@@ -447,7 +583,6 @@ export const CATEGORY_CARDS = [
   {
     id: 'mar',
     name: 'Frutos do Mar',
-    icon: '🦐',
     count: 'Camarão · Frescos do dia',
     imageUrl: 'https://images.unsplash.com/photo-1565557623262-b51c2513a641?w=900&h=320&fit=crop&q=85',
     filter: 'mar',

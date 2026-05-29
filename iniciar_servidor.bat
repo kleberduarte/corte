@@ -5,15 +5,13 @@
 cd /d "%~dp0"
 echo Diretorio: %CD%
 
-:: Verifica se o build existe; se não, constrói
-if not exist "dist\" (
-  echo Construindo aplicativo...
-  call npm run build
-  if errorlevel 1 (
-    echo ERRO: falha no build.
-    pause
-    exit /b 1
-  )
+:: Sempre reconstrói para refletir alterações em src/ no totem (localhost:4173)
+echo Gerando build atualizado...
+call npm run build
+if errorlevel 1 (
+  echo ERRO: falha no build.
+  pause
+  exit /b 1
 )
 
 echo Iniciando servidor CORTE em http://localhost:4173 ...
