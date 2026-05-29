@@ -66,8 +66,8 @@ export default function ScheduleScreen({
   }
 
   return (
-    <div className="screen screen--schedule">
-      <div className="schedule-scroll">
+    <div className="screen screen--schedule" style={{ position: 'relative' }}>
+      <div className="scroll" style={{ flex: 1, minHeight: 0, paddingBottom: 180 }}>
         <div style={{ margin: '8px 24px 16px' }}>
           <div style={{ fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: 1, color: 'var(--t3)', marginBottom: 8 }}>
             {cartItems.length > 1 ? `${cartItems.length} itens no pedido` : 'Seu corte'}
