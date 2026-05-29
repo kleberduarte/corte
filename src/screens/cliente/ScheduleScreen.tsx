@@ -66,8 +66,7 @@ export default function ScheduleScreen({
   }
 
   return (
-    <div className="screen">
-    <div className="scroll" style={{ flex: 1, paddingBottom: 28 }}>
+    <div className="screen scroll" style={{ paddingBottom: 28 }}>
       {/* Itens do pedido */}
       <div style={{ margin: '8px 24px 16px' }}>
         <div style={{ fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: 1, color: 'var(--t3)', marginBottom: 8 }}>
@@ -197,7 +196,6 @@ export default function ScheduleScreen({
           Pagamento no caixa do mercado
         </div>
       </div>
-    </div>
     </div>
   )
 }
