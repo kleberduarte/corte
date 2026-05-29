@@ -65,10 +65,19 @@ export default function ScheduleScreen({
     setDismissed(true)
   }
 
+  /* Etapa 3: .screen--flow rola direto (protótipo totem-schedule-screen), sem .scroll aninhado */
   return (
-    <div className="screen">
-    <div className="scroll" style={{ flex: 1, paddingBottom: 28 }}>
-      <div style={{ margin: '8px 24px 16px' }}>
+    <div className="screen screen--flow" style={{ paddingBottom: 28 }}>
+      <div style={{ padding: '4px 24px 14px' }}>
+        <div style={{ fontFamily: 'var(--font-serif)', fontSize: 26, fontWeight: 600, color: 'var(--accent)' }}>
+          Agendar retirada
+        </div>
+        <div style={{ fontSize: 12, color: 'var(--t3)', marginTop: 4 }}>
+          Escolha o peso e o horário para buscar hoje
+        </div>
+      </div>
+
+      <div style={{ margin: '0 24px 16px' }}>
         <div style={{ fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: 1, color: 'var(--t3)', marginBottom: 8 }}>
           {cartItems.length > 1 ? `${cartItems.length} itens no pedido` : 'Seu corte'}
         </div>
@@ -191,7 +200,6 @@ export default function ScheduleScreen({
           Pagamento no caixa do mercado
         </div>
       </div>
-    </div>
     </div>
   )
 }

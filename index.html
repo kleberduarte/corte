@@ -10,8 +10,8 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
     <title>CORTE · Açougue Inteligente</title>
     <style>
-      /* Impede context menu e seleção de texto no totem */
-      body { -webkit-touch-callout: none; -webkit-user-select: none; user-select: none; }
+      /* Impede context menu e seleção no totem — áreas .scroll reativam touch no CSS do app */
+      body { -webkit-touch-callout: none; }
       /* Cursor padrão — sem cursor no totem físico */
       * { cursor: default !important; }
       input, textarea, select { cursor: text !important; }

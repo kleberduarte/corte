@@ -31,11 +31,23 @@
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 html, body, #root { height: 100%; height: 100dvh; overflow: hidden; background: var(--bg); font-family: var(--font-sans); color: var(--t1); -webkit-tap-highlight-color: transparent; }
 
-.scroll { flex: 1 1 0; min-height: 0; overflow-y: auto; overflow-x: hidden; scrollbar-width: none; -webkit-overflow-scrolling: touch; touch-action: pan-y; overscroll-behavior-y: contain; }
+.scroll {
+  flex: 1 1 0;
+  min-height: 0;
+  overflow-y: auto;
+  overflow-x: hidden;
+  scrollbar-width: none;
+  -webkit-overflow-scrolling: touch;
+  touch-action: pan-y;
+  overscroll-behavior-y: contain;
+  /* body/totem usam user-select:none — isso trava scroll touch no iOS/Android */
+  -webkit-user-select: auto;
+  user-select: auto;
+}
 .scroll::-webkit-scrollbar { display: none; }
 
-/* Impede seleção de texto em elementos não editáveis sem bloquear scroll */
-.totem-shell, .totem-shell *:not(input):not(textarea) { user-select: none; }
+/* Impede seleção de texto sem aplicar em .scroll (área rolável) */
+.totem-shell *:not(input):not(textarea):not(.scroll) { user-select: none; }
 
 .totem-shell { width: 100%; height: 100%; height: 100dvh; display: flex; flex-direction: column; background: var(--bg); position: relative; overflow: hidden; }
 .totem-shell > .screen { flex: 1 1 0; min-height: 0; overflow: hidden; }
@@ -54,7 +66,36 @@ html, body, #root { height: 100%; height: 100dvh; overflow: hidden; background: 
 .back-btn:hover { background: var(--s3); color: var(--t1); }
 
 .screen { flex: 1 1 0; min-height: 0; display: flex; flex-direction: column; overflow: hidden; animation: screenIn 0.28s cubic-bezier(0.4,0,0.2,1) both; }
-.screen > .scroll { flex: 1 1 0; min-height: 0; overflow-y: auto; overflow-x: hidden; scrollbar-width: none; -webkit-overflow-scrolling: touch; touch-action: pan-y; overscroll-behavior-y: contain; }
+.screen > .scroll {
+  flex: 1 1 0;
+  min-height: 0;
+  height: 0;
+  overflow-y: auto;
+  overflow-x: hidden;
+  scrollbar-width: none;
+  -webkit-overflow-scrolling: touch;
+  touch-action: pan-y;
+  overscroll-behavior-y: contain;
+  -webkit-user-select: auto;
+  user-select: auto;
+}
+
+/* Etapa 3 — mesmo padrão do protótipo: a própria .screen rola (sem filho flex) */
+.totem-shell > .screen.screen--flow {
+  display: block;
+  flex: 1 1 0;
+  min-height: 0;
+  overflow-x: hidden;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  touch-action: pan-y;
+  overscroll-behavior-y: contain;
+  scrollbar-width: none;
+  -webkit-user-select: auto;
+  user-select: auto;
+  animation: none;
+}
+.totem-shell > .screen.screen--flow::-webkit-scrollbar { display: none; }
 @keyframes screenIn { from { opacity: 0; } to { opacity: 1; } }
 
 .slots-grid--compact { grid-template-columns: repeat(4, 1fr); gap: 8px; }
@@ -130,15 +171,11 @@ html, body, #root { height: 100%; height: 100dvh; overflow: hidden; background: 
   border-radius: var(--r-lg);
   background: linear-gradient(135deg, var(--gold) 0%, var(--primary) 45%, #ff6b35 100%);
   box-shadow: 0 8px 32px rgba(200, 151, 58, 0.28), 0 0 0 1px rgba(255, 255, 255, 0.06) inset;
-  animation: comboIn 0.55s cubic-bezier(0.34, 1.2, 0.64, 1) both, comboGlow 3s ease-in-out infinite;
+  animation: comboIn 0.55s cubic-bezier(0.34, 1.2, 0.64, 1) both;
 }
 @keyframes comboIn {
   from { opacity: 0; }
   to { opacity: 1; }
-}
-@keyframes comboGlow {
-  0%, 100% { box-shadow: 0 8px 32px rgba(200, 151, 58, 0.28); }
-  50% { box-shadow: 0 12px 40px rgba(192, 39, 45, 0.4); }
 }
 .combo-suggest-inner {
   background: linear-gradient(160deg, rgba(30, 24, 18, 0.98) 0%, var(--s1) 55%);
