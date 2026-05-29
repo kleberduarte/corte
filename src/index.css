@@ -57,21 +57,8 @@ html, body, #root { height: 100%; height: 100dvh; overflow: hidden; background: 
 .screen > .scroll { flex: 1 1 0; min-height: 0; overflow-y: auto; overflow-x: hidden; scrollbar-width: none; -webkit-overflow-scrolling: touch; touch-action: pan-y; overscroll-behavior-y: contain; }
 @keyframes screenIn { from { opacity: 0; } to { opacity: 1; } }
 
-/* Agendamento: mesmo padrão do catálogo (.scroll in-flow + rodapé absoluto como o FAB) */
-.screen--schedule .slots-grid { grid-template-columns: repeat(4, 1fr); gap: 8px; }
-.screen--schedule .slot { padding: 11px 0; font-size: 14px; }
-.screen--schedule .schedule-footer {
-  position: absolute;
-  left: 24px;
-  right: 24px;
-  bottom: 16px;
-  z-index: 30;
-  padding: 16px;
-  background: var(--s2);
-  border: 1px solid var(--border2);
-  border-radius: var(--r-lg);
-  box-shadow: 0 -8px 32px rgba(0, 0, 0, 0.45);
-}
+.slots-grid--compact { grid-template-columns: repeat(4, 1fr); gap: 8px; }
+.slots-grid--compact .slot { padding: 11px 0; font-size: 14px; }
 
 .btn-primary { display: flex; align-items: center; justify-content: center; gap: 8px; padding: 18px 24px; background: var(--primary); color: white; border-radius: var(--r); font-size: 16px; font-weight: 600; cursor: pointer; box-shadow: 0 6px 22px var(--primary-glow); transition: background 0.15s, transform 0.15s, box-shadow 0.15s; border: none; font-family: var(--font-sans); width: 100%; }
 .btn-primary:hover { background: #D93030; transform: translateY(-1px); box-shadow: 0 10px 28px rgba(192,39,45,.45); }

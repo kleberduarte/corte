@@ -149,6 +149,7 @@ function ClienteView() {
       {screen === 'detail'     && selectedProduct && <DetailScreen key={selectedProduct.id} product={selectedProduct} onSchedule={handleSchedule} />}
       {screen === 'schedule'   && selectedProduct && selectedCut && (
         <ScheduleScreen
+          key={`schedule-${screenKey}`}
           product={selectedProduct}
           cutType={selectedCut}
           weightKg={scheduleWeight}
