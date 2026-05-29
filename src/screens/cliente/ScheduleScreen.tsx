@@ -66,9 +66,8 @@ export default function ScheduleScreen({
   }
 
   return (
-    <div className="screen" style={{ position: 'relative' }}>
-      <div className="scroll" style={{ flex: 1, paddingBottom: 8 }}>
-        {/* Itens do pedido */}
+    <div className="screen screen--schedule">
+      <div className="schedule-scroll">
         <div style={{ margin: '8px 24px 16px' }}>
           <div style={{ fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: 1, color: 'var(--t3)', marginBottom: 8 }}>
             {cartItems.length > 1 ? `${cartItems.length} itens no pedido` : 'Seu corte'}
@@ -98,7 +97,6 @@ export default function ScheduleScreen({
           </div>
         </div>
 
-        {/* Sugestão de combinação */}
         {showSuggestion && suggestedProduct && (
           <ComboSuggestionCard
             product={product}
@@ -122,7 +120,6 @@ export default function ScheduleScreen({
           />
         )}
 
-        {/* Peso */}
         <div style={{ margin: '0 24px 18px' }}>
           <div style={{ fontSize: 13, fontWeight: 600, color: 'var(--t2)', marginBottom: 10 }}>
             {cartItems.length > 1 ? 'Peso para todos os itens' : 'Quanto você quer?'}
@@ -146,7 +143,6 @@ export default function ScheduleScreen({
           </div>
         </div>
 
-        {/* Dia */}
         <div style={{ margin: '0 24px 18px' }}>
           <div style={{ fontSize: 13, fontWeight: 600, color: 'var(--t2)', marginBottom: 10 }}>Retirada</div>
           <div style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '14px 16px', background: 'rgba(52,199,89,.1)', border: '1px solid rgba(52,199,89,.28)', borderRadius: 14 }}>
@@ -158,8 +154,7 @@ export default function ScheduleScreen({
           </p>
         </div>
 
-        {/* Horário */}
-        <div style={{ margin: '0 24px 8px' }}>
+        <div style={{ margin: '0 24px 0' }}>
           <div style={{ fontSize: 13, fontWeight: 600, color: 'var(--t2)', marginBottom: 10 }}>Horário</div>
           <div className="slots-grid">
             {slots.map((s) => (
@@ -175,8 +170,7 @@ export default function ScheduleScreen({
         </div>
       </div>
 
-      {/* Rodapé fixo — fora do .scroll, como o FAB do catálogo */}
-      <div style={{ flexShrink: 0, margin: '0 24px 16px', padding: 16, background: 'var(--s2)', border: '1px solid var(--border2)', borderRadius: 'var(--r-lg)' }}>
+      <div className="schedule-footer">
         <div style={{ fontSize: 15, fontWeight: 600, color: 'var(--accent)', textAlign: 'center', marginBottom: 6 }}>
           Hoje · {selectedSlot} · {weight}kg
           {cartItems.length > 1 && ` · ${cartItems.length} itens`}
