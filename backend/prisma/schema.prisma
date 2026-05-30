@@ -59,13 +59,25 @@ enum Chain {
 model StoreConfig {
   id                String  @id @default(cuid())
   storeId           String  @unique
-  openingTime       String  // "08:00"
-  closingTime       String  // "22:00"
-  slotIntervalMin   Int     @default(15)
+
+  // Horários de funcionamento
+  morningOpen       String  @default("08:00")
+  morningClose      String  @default("12:00")
+  afternoonOpen     String  @default("14:00")
+  afternoonClose    String  @default("22:00")
+
+  // Agendamento
+  slotIntervalMin   Int     @default(30)
+  minLeadTimeMin    Int     @default(30)
   maxOrdersPerSlot  Int     @default(5)
-  inactivityTimeout Int     @default(90)   // segundos
-  primaryColor      String  @default("#6B21A8")
+  inactivityTimeout Int     @default(90)
+
+  // Identidade visual — configurado por cliente, sem necessidade de redeploy
+  primaryColor      String  @default("#C0272D")
+  primaryDark       String  @default("#7A1015")
+  accentColor       String  @default("#F5EDDB")
   logoUrl           String?
+  fontFamily        String?
 
   store Store @relation(fields: [storeId], references: [id], onDelete: Cascade)
 

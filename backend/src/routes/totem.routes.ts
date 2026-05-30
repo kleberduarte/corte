@@ -11,6 +11,39 @@ import { findProductsByStore } from '../repositories/product.repository'
 import { NotFoundError } from '../errors/AppError'
 
 export async function totemRoutes(app: FastifyInstance) {
+  // GET /totem/:storeSlug/config — configuração completa da loja (tema, horários)
+  app.get<{ Params: { storeSlug: string } }>(
+    '/:storeSlug/config',
+    {
+      config: { rateLimit: { max: 60, timeWindow: '1 minute' } },
+    },
+    async (req, reply) => {
+      const store = await findStoreBySlug(req.params.storeSlug)
+      if (!store || !store.active) throw new NotFoundError('Loja')
+
+      const cfg = store.config
+      return reply.send({
+        id:   store.slug,
+        name: store.name,
+        chain: store.chain,
+        theme: {
+          primaryColor: cfg?.primaryColor  ?? '#C0272D',
+          primaryDark:  cfg?.primaryDark   ?? '#7A1015',
+          accentColor:  cfg?.accentColor   ?? '#F5EDDB',
+          logoUrl:      cfg?.logoUrl       ?? null,
+          fontFamily:   cfg?.fontFamily    ?? null,
+        },
+        hours: {
+          morning:   { open: cfg?.morningOpen   ?? '08:00', close: cfg?.morningClose   ?? '12:00' },
+          afternoon: { open: cfg?.afternoonOpen ?? '14:00', close: cfg?.afternoonClose ?? '22:00' },
+        },
+        slotIntervalMin:   cfg?.slotIntervalMin   ?? 30,
+        minLeadTimeMin:    cfg?.minLeadTimeMin     ?? 30,
+        inactivityTimeout: cfg?.inactivityTimeout  ?? 90,
+      })
+    },
+  )
+
   // GET /totem/:storeSlug/products — catálogo com preços da loja
   app.get<{ Params: { storeSlug: string } }>(
     '/:storeSlug/products',

@@ -5,133 +5,82 @@ export type StoreHours = {
   close: string
 }
 
-// ─── Redes ────────────────────────────────────────────────────────────────────
-// Ficam no código: raramente mudam, uma por rede de supermercado.
-
-export type NetworkConfig = {
-  id: string
-  themeKey: string
-  defaultHours: {
-    morning: StoreHours
-    afternoon: StoreHours
-  }
-  slotIntervalMin: number
-  minLeadTimeMin: number
-}
-
-export const NETWORKS: Record<string, NetworkConfig> = {
-  'pao-de-acucar': {
-    id: 'pao-de-acucar',
-    themeKey: 'pao-de-acucar',
-    defaultHours: {
-      morning:   { open: '07:00', close: '12:00' },
-      afternoon: { open: '14:00', close: '22:00' },
-    },
-    slotIntervalMin: 30,
-    minLeadTimeMin: 30,
-  },
-  'extra': {
-    id: 'extra',
-    themeKey: 'extra',
-    defaultHours: {
-      morning:   { open: '07:00', close: '12:00' },
-      afternoon: { open: '13:00', close: '22:00' },
-    },
-    slotIntervalMin: 30,
-    minLeadTimeMin: 30,
-  },
-  'violeta': {
-    id: 'violeta',
-    themeKey: 'violeta',
-    defaultHours: {
-      morning:   { open: '07:00', close: '12:00' },
-      afternoon: { open: '13:00', close: '22:00' },
-    },
-    slotIntervalMin: 30,
-    minLeadTimeMin: 30,
-  },
-  'carrefour': {
-    id: 'carrefour',
-    themeKey: 'carrefour',
-    defaultHours: {
-      morning:   { open: '07:00', close: '12:00' },
-      afternoon: { open: '13:00', close: '23:00' },
-    },
-    slotIntervalMin: 30,
-    minLeadTimeMin: 30,
-  },
-}
-
-// ─── Tipo do JSON (stores.json / API) ─────────────────────────────────────────
-// Só o que é diferente do padrão da rede precisa ser declarado.
-
-type StoreRecord = {
-  id: string
-  networkId: string
-  name: string
-  hours?: {
-    morning?: Partial<StoreHours>
-    afternoon?: Partial<StoreHours>
-  }
-  slotIntervalMin?: number
-  minLeadTimeMin?: number
-  mockFullSlotIndexes?: number[]
-}
-
-// ─── Tipo resolvido (usado pelo app) ─────────────────────────────────────────
-
 export type StoreConfig = {
   id: string
   name: string
-  themeKey: string
+  theme: {
+    primaryColor: string
+    primaryDark:  string
+    accentColor:  string
+    logoUrl:      string | null
+    fontFamily:   string | null
+  }
   hours: {
-    morning: StoreHours
+    morning:   StoreHours
     afternoon: StoreHours
   }
-  slotIntervalMin: number
-  minLeadTimeMin: number
+  slotIntervalMin:   number
+  minLeadTimeMin:    number
+  inactivityTimeout: number
   mockFullSlotIndexes: number[]
 }
 
-function resolveStore(record: StoreRecord): StoreConfig {
-  const net = NETWORKS[record.networkId]
-  if (!net) throw new Error(`Rede desconhecida: ${record.networkId}`)
-  return {
-    id: record.id,
-    name: record.name,
-    themeKey: net.themeKey,
-    hours: {
-      morning: {
-        open:  record.hours?.morning?.open  ?? net.defaultHours.morning.open,
-        close: record.hours?.morning?.close ?? net.defaultHours.morning.close,
-      },
-      afternoon: {
-        open:  record.hours?.afternoon?.open  ?? net.defaultHours.afternoon.open,
-        close: record.hours?.afternoon?.close ?? net.defaultHours.afternoon.close,
-      },
-    },
-    slotIntervalMin:     record.slotIntervalMin  ?? net.slotIntervalMin,
-    minLeadTimeMin:      record.minLeadTimeMin   ?? net.minLeadTimeMin,
-    mockFullSlotIndexes: record.mockFullSlotIndexes ?? [],
+const API_BASE = import.meta.env.VITE_API_URL ?? 'http://localhost:3333'
+
+const FALLBACK_STORE: StoreConfig = {
+  id:   'corte',
+  name: 'Corte',
+  theme: {
+    primaryColor: '#C0272D',
+    primaryDark:  '#7A1015',
+    accentColor:  '#F5EDDB',
+    logoUrl:      null,
+    fontFamily:   null,
+  },
+  hours: {
+    morning:   { open: '08:00', close: '12:00' },
+    afternoon: { open: '14:00', close: '22:00' },
+  },
+  slotIntervalMin:   30,
+  minLeadTimeMin:    30,
+  inactivityTimeout: 90,
+  mockFullSlotIndexes: [],
+}
+
+export async function fetchActiveStore(): Promise<StoreConfig> {
+  // Slug da loja vem da URL (?store=corte) ou usa o padrão do stores.json
+  const storeSlug = await resolveStoreSlug()
+
+  try {
+    const res = await fetch(`${API_BASE}/totem/${storeSlug}/config`)
+    if (!res.ok) throw new Error('Config não encontrada')
+    const data = await res.json()
+    return { ...data, mockFullSlotIndexes: [] }
+  } catch {
+    // Fallback: retorna config padrão sem quebrar o app
+    console.warn('[config] API indisponível — usando config padrão')
+    return { ...FALLBACK_STORE, id: storeSlug }
   }
 }
 
-// ─── Fonte de dados ───────────────────────────────────────────────────────────
-// Trocar esta URL por uma API REST quando necessário — o resto do app não muda.
+async function resolveStoreSlug(): Promise<string> {
+  // 1. ?store= na URL
+  const fromUrl = new URLSearchParams(window.location.search).get('store')
+  if (fromUrl) return fromUrl
 
-const STORES_URL = '/stores.json'
+  // 2. stores.json local (mantido como fallback de desenvolvimento)
+  try {
+    const res = await fetch('/stores.json')
+    if (res.ok) {
+      const list: { id: string }[] = await res.json()
+      if (list.length > 0) return list[0].id
+    }
+  } catch { /* ignora */ }
 
-export async function fetchActiveStore(): Promise<StoreConfig> {
-  const storeId = new URLSearchParams(window.location.search).get('store')
-  const res = await fetch(STORES_URL)
-  if (!res.ok) throw new Error('Falha ao carregar lista de lojas')
-  const list: StoreRecord[] = await res.json()
-  const found = storeId ? list.find((s) => s.id === storeId) : null
-  return resolveStore(found ?? list[0])
+  return 'corte'
 }
 
 // ─── Contexto React ───────────────────────────────────────────────────────────
-// Qualquer componente acessa a loja ativa com useStore() — sem prop drilling.
 
 export const StoreContext = createContext<StoreConfig | null>(null)
 

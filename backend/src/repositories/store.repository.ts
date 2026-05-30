@@ -7,6 +7,13 @@ export async function findStoreBySlug(slug: string) {
   })
 }
 
+export async function findStoreById(id: string) {
+  return prisma.store.findUnique({
+    where: { id },
+    include: { config: true },
+  })
+}
+
 export async function findOperatorByEmail(storeId: string, email: string) {
   return prisma.operator.findUnique({
     where: { storeId_email: { storeId, email } },

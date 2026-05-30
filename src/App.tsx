@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState, useCallback } from 'react'
-import { THEMES, DEFAULT_THEME, applyTheme } from './data/theme'
+import { applyStoreTheme } from './data/theme'
 import { fetchActiveStore, StoreContext, useStore } from './data/config'
 import type { StoreConfig } from './data/config'
 import { useCartStore } from './store/cartStore'
@@ -284,16 +284,10 @@ export default function App() {
   const [store, setStore] = useState<StoreConfig | null>(null)
 
   useEffect(() => {
-    fetchActiveStore()
-      .then((s) => {
-        const theme = THEMES[s.themeKey] ?? DEFAULT_THEME
-        applyTheme(theme)
-        setStore(s)
-      })
-      .catch(() => {
-        applyTheme(DEFAULT_THEME)
-        setStore({ id: 'fallback', name: 'Açougue', themeKey: 'pao-de-acucar', hours: { morning: { open: '08:00', close: '12:00' }, afternoon: { open: '14:00', close: '21:00' } }, slotIntervalMin: 30, minLeadTimeMin: 30, mockFullSlotIndexes: [] })
-      })
+    fetchActiveStore().then((s) => {
+      applyStoreTheme(s)
+      setStore(s)
+    })
   }, [])
 
   if (!store) return (
