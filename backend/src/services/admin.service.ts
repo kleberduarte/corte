@@ -8,7 +8,8 @@ import { NotFoundError, UnauthorizedError, ConflictError } from '../errors/AppEr
 // ─── Auth ─────────────────────────────────────────────────────────────────────
 
 export async function loginAdmin(app: FastifyInstance, input: AdminLoginInput) {
-  const admin = await prisma.admin.findUnique({ where: { email: input.email } })
+  const email = input.email.trim().toLowerCase()
+  const admin = await prisma.admin.findUnique({ where: { email } })
   if (!admin || !admin.active) throw new UnauthorizedError('Credenciais inválidas')
 
   const ok = await bcrypt.compare(input.password, admin.passwordHash)

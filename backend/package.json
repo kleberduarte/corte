@@ -11,7 +11,8 @@
     "db:migrate:dev": "prisma migrate dev",
     "db:generate": "prisma generate",
     "db:studio": "prisma studio",
-    "db:seed": "tsx prisma/seed.ts"
+    "db:seed": "tsx prisma/seed.ts",
+    "db:bootstrap-admin": "node prisma/bootstrap-admin.cjs"
   },
   "dependencies": {
     "@fastify/cors": "^10.0.2",

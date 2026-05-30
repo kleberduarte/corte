@@ -7,13 +7,14 @@ import bcrypt from 'bcryptjs'
 const prisma = new PrismaClient()
 
 async function seedAdmin() {
+  const passwordHash = await bcrypt.hash('corte@admin123', 10)
   await prisma.admin.upsert({
     where: { email: 'admin@corte.com.br' },
-    update: {},
+    update: { passwordHash, active: true },
     create: {
       name: 'Admin',
       email: 'admin@corte.com.br',
-      passwordHash: await bcrypt.hash('corte@admin123', 10),
+      passwordHash,
     },
   })
   console.log('✓ Admin criado: admin@corte.com.br / corte@admin123')

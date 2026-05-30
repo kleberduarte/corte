@@ -24,4 +24,4 @@ COPY prisma ./prisma
 EXPOSE 3333
 
 # Executa migrations e inicia o servidor
-CMD ["sh", "-c", "npx prisma migrate deploy && node dist/server.js"]
+CMD ["sh", "-c", "npx prisma migrate deploy && ADMIN_BOOTSTRAP_ON_START=true node prisma/bootstrap-admin.cjs; node dist/server.js"]
