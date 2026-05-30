@@ -1,5 +1,6 @@
 [
   { "id": "pao-de-acucar-moema",       "networkId": "pao-de-acucar", "name": "Pão de Açúcar Moema",       "mockFullSlotIndexes": [1, 4, 7] },
+  { "id": "violeta-embaixador",        "networkId": "violeta",       "name": "Violeta · Av. Embaixador Cavalcanti" },
   { "id": "pao-de-acucar-higienopolis","networkId": "pao-de-acucar", "name": "Pão de Açúcar Higienópolis" },
   { "id": "pao-de-acucar-jardins",     "networkId": "pao-de-acucar", "name": "Pão de Açúcar Jardins" },
   { "id": "extra-paulista",            "networkId": "extra",         "name": "Extra Av. Paulista",         "mockFullSlotIndexes": [2, 5] },

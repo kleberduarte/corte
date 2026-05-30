@@ -7,9 +7,14 @@ type Props = {
   hideStatus?: boolean
 }
 
+function useTenantLogo() {
+  return document.documentElement.dataset.logoUrl ?? ''
+}
+
 export default function Topbar({ storeName, showBack, onBack, hideStatus }: Props) {
   const store = useStore()
   const displayName = storeName ?? store.name
+  const logoUrl = useTenantLogo()
 
   return (
     <div style={{ flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '18px 24px 12px', position: 'relative', zIndex: 20 }}>
@@ -19,11 +24,21 @@ export default function Topbar({ storeName, showBack, onBack, hideStatus }: Prop
       }
 
       <div className="brand" style={{ position: 'absolute', left: '50%', transform: 'translateX(-50%)', pointerEvents: 'none' }}>
-        <div className="brand-icon">🔪</div>
-        <div>
-          <div className="brand-name">CORTE</div>
-          <div className="brand-sub">{displayName}</div>
-        </div>
+        {logoUrl ? (
+          <img
+            src={logoUrl}
+            alt={displayName}
+            style={{ height: 40, maxWidth: 140, objectFit: 'contain', display: 'block' }}
+          />
+        ) : (
+          <>
+            <div className="brand-icon">🔪</div>
+            <div>
+              <div className="brand-name">CORTE</div>
+              <div className="brand-sub">{displayName}</div>
+            </div>
+          </>
+        )}
       </div>
 
       {!hideStatus && (

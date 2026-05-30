@@ -40,6 +40,16 @@ export const NETWORKS: Record<string, NetworkConfig> = {
     slotIntervalMin: 30,
     minLeadTimeMin: 30,
   },
+  'violeta': {
+    id: 'violeta',
+    themeKey: 'violeta',
+    defaultHours: {
+      morning:   { open: '07:00', close: '12:00' },
+      afternoon: { open: '13:00', close: '22:00' },
+    },
+    slotIntervalMin: 30,
+    minLeadTimeMin: 30,
+  },
   'carrefour': {
     id: 'carrefour',
     themeKey: 'carrefour',

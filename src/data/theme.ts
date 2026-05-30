@@ -4,9 +4,18 @@ export type Theme = {
   accent: string
   storeName: string
   tenantSlug: string
+  logoUrl?: string
 }
 
 export const THEMES: Record<string, Theme> = {
+  'violeta': {
+    primary: '#6B3A9E',
+    primaryDark: '#4A1472',
+    accent: '#F0E8FF',
+    storeName: 'Violeta Supermercados',
+    tenantSlug: 'violeta',
+    logoUrl: '/assets/tenants/violeta/logo.png',
+  },
   'pao-de-acucar': {
     primary: '#C0272D',
     primaryDark: '#7A1015',
@@ -38,6 +47,9 @@ export function applyTheme(theme: Theme) {
   root.style.setProperty('--primary-dark', theme.primaryDark)
   root.style.setProperty('--accent', theme.accent)
   root.style.setProperty('--primary-glow', hexToRgba(theme.primary, 0.35))
+  // logoUrl disponível via atributo data para componentes lerem
+  root.dataset.logoUrl = theme.logoUrl ?? ''
+  root.dataset.tenantSlug = theme.tenantSlug
 }
 
 function hexToRgba(hex: string, alpha: number) {
