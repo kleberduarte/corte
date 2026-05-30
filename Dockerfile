@@ -1,5 +1,7 @@
 FROM node:20-alpine AS builder
 
+RUN apk add --no-cache openssl
+
 WORKDIR /app
 
 COPY backend/package*.json ./
@@ -11,6 +13,8 @@ RUN npm run build
 
 # Imagem final — apenas o necessário para produção
 FROM node:20-alpine AS runner
+
+RUN apk add --no-cache openssl
 
 WORKDIR /app
 
