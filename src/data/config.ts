@@ -24,8 +24,8 @@ export const NETWORKS: Record<string, NetworkConfig> = {
     id: 'pao-de-acucar',
     themeKey: 'pao-de-acucar',
     defaultHours: {
-      morning:   { open: '08:00', close: '12:00' },
-      afternoon: { open: '14:00', close: '21:00' },
+      morning:   { open: '07:00', close: '12:00' },
+      afternoon: { open: '14:00', close: '22:00' },
     },
     slotIntervalMin: 30,
     minLeadTimeMin: 30,

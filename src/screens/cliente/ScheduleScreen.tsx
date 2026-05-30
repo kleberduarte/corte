@@ -166,11 +166,11 @@ export default function ScheduleScreen({
       <div style={{ margin: '0 24px 18px' }}>
         <div style={{ fontSize: 13, fontWeight: 600, color: 'var(--t2)', marginBottom: 10 }}>Horário</div>
         <div className="slots-grid slots-grid--compact">
-          {slots.map((s) => (
+          {slots.filter((s) => s.available).map((s) => (
             <div
               key={s.id}
-              onClick={() => s.available && setSelectedSlot(s.time)}
-              className={`slot${!s.available ? ' slot-full' : selectedSlot === s.time ? ' slot-sel' : ''}`}
+              onClick={() => setSelectedSlot(s.time)}
+              className={`slot${selectedSlot === s.time ? ' slot-sel' : ''}`}
             >
               {s.time}
             </div>

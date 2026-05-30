@@ -27,24 +27,19 @@ export function getTodaySlots(store: StoreConfig): Slot[] {
   const now = new Date()
   const nowTotal = now.getHours() * 60 + now.getMinutes()
 
-  // Último slot possível = fechamento - antecedência mínima
-  const [closeAfH, closeAfM] = hours.afternoon.close.split(':').map(Number)
-  const lastSlotTotal = closeAfH * 60 + closeAfM - minLeadTimeMin
+  // Faixa contínua: abertura da manhã até fechamento da tarde
+  const [closeH, closeM] = hours.afternoon.close.split(':').map(Number)
+  const lastSlotTotal = closeH * 60 + closeM - minLeadTimeMin
 
-  const allSlots = [
-    ...generateSlots(hours.morning.open, hours.morning.close, slotIntervalMin),
-    ...generateSlots(hours.afternoon.open, hours.afternoon.close, slotIntervalMin),
-  ]
+  const allSlots = generateSlots(hours.morning.open, hours.afternoon.close, slotIntervalMin)
 
   return allSlots.map((time, i) => {
     const [h, m] = time.split(':').map(Number)
     const slotTotal = h * 60 + m
-    const isPast = slotTotal <= nowTotal
-    const isTooLate = slotTotal > lastSlotTotal
     return {
       id: `slot-${time}`,
       time,
-      available: !isPast && !isTooLate && !mockFullSlotIndexes.includes(i),
+      available: slotTotal > nowTotal && slotTotal <= lastSlotTotal && !mockFullSlotIndexes.includes(i),
     }
   })
 }
