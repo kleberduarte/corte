@@ -45,9 +45,9 @@ export async function totemRoutes(app: FastifyInstance) {
     },
   )
 
-  // GET /totem/:storeSlug/orders/:orderId — rastreamento público do pedido
-  app.get<{ Params: { storeSlug: string; orderId: string } }>(
-    '/:storeSlug/orders/:orderId',
+  // GET /totem/:storeSlug/orders/:code — rastreamento público por ID ou pickupCode
+  app.get<{ Params: { storeSlug: string; code: string } }>(
+    '/:storeSlug/orders/:code',
     {
       config: { rateLimit: { max: 60, timeWindow: '1 minute' } },
     },
@@ -55,18 +55,28 @@ export async function totemRoutes(app: FastifyInstance) {
       const store = await findStoreBySlug(req.params.storeSlug)
       if (!store || !store.active) throw new NotFoundError('Loja')
 
-      const { findOrderById } = await import('../repositories/order.repository')
-      const order = await findOrderById(store.id, req.params.orderId)
+      const { findOrderById, findOrderByPickupCode } = await import('../repositories/order.repository')
+
+      // Tenta por ID primeiro, depois por pickupCode
+      const order =
+        (await findOrderById(store.id, req.params.code)) ??
+        (await findOrderByPickupCode(store.id, req.params.code))
+
       if (!order) throw new NotFoundError('Pedido')
 
-      // Retorna apenas campos públicos — sem dados sensíveis de outros pedidos
       return reply.send({
         id: order.id,
         orderNumber: order.orderNumber,
-        pickupCode: order.pickupCode ?? order.orderNumber,
+        pickupCode: order.pickupCode,
         status: order.status,
         scheduledAt: order.scheduledAt,
         pickupMode: order.pickupMode,
+        items: order.items.map((i) => ({
+          productName: i.productName,
+          cutType: i.cutType,
+          quantity: Number(i.quantity),
+          totalPrice: Number(i.totalPrice),
+        })),
       })
     },
   )

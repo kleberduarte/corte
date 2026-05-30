@@ -32,6 +32,13 @@ export async function findOrderById(storeId: string, orderId: string) {
   })
 }
 
+export async function findOrderByPickupCode(storeId: string, pickupCode: string) {
+  return prisma.order.findFirst({
+    where: { storeId, pickupCode: { equals: pickupCode, mode: 'insensitive' } },
+    include: { items: { include: { product: true } } },
+  })
+}
+
 export async function createOrder(
   storeId: string,
   data: Omit<Prisma.OrderUncheckedCreateInput, 'storeId'> & { items: { create: Prisma.OrderItemCreateManyOrderInput[] } },
