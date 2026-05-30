@@ -1,4 +1,9 @@
+import path from 'path'
+import { config as loadEnv } from 'dotenv'
 import { z } from 'zod'
+
+// Carrega backend/.env (Node não lê .env sozinho)
+loadEnv({ path: path.resolve(__dirname, '../../.env'), quiet: true })
 
 const envSchema = z.object({
   NODE_ENV: z.enum(['development', 'production', 'test']).default('development'),
