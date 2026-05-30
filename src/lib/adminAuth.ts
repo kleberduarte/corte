@@ -28,3 +28,17 @@ export function getAdminSession(): AdminSession | null {
 export function isAdminLoggedIn(): boolean {
   return !!getAdminToken()
 }
+
+/** Valida token com a API e atualiza sessão local; limpa storage se inválido. */
+export async function validateAdminSession(): Promise<boolean> {
+  const token = getAdminToken()
+  if (!token) return false
+  try {
+    const admin = await api.get<AdminSession>('/admin/me', token)
+    localStorage.setItem(ADMIN_KEY, JSON.stringify(admin))
+    return true
+  } catch {
+    logoutAdmin()
+    return false
+  }
+}

@@ -1,6 +1,8 @@
 import { useEffect, useState } from 'react'
-import { api } from '../../../lib/api'
+import { api, ApiError } from '../../../lib/api'
 import { getAdminToken } from '../../../lib/adminAuth'
+import { CHAIN_OPTIONS } from '../constants'
+import { useAdminUi } from '../adminUi'
 
 type StoreData = {
   name: string; chain: string; slug: string; active: boolean
@@ -12,14 +14,7 @@ type StoreData = {
   }
 }
 
-const CHAINS = [
-  { value: 'CORTE_SUPERMERCADO', label: 'Corte Supermercado' },
-  { value: 'PAO_DE_ACUCAR',      label: 'Pão de Açúcar' },
-  { value: 'EXTRA',              label: 'Extra' },
-  { value: 'VIOLETA',            label: 'Violeta' },
-  { value: 'CARREFOUR',          label: 'Carrefour' },
-  { value: 'OUTROS',             label: 'Outros' },
-]
+const CHAINS = CHAIN_OPTIONS.filter((c) => c.value !== '')
 
 const DEFAULT: StoreData = {
   name: '', chain: 'OUTROS', slug: '', active: true,
@@ -36,6 +31,7 @@ export default function StoreFormPanel({ storeId, onBack, onSaved }: {
   onBack: () => void
   onSaved: () => void
 }) {
+  const { toast } = useAdminUi()
   const [form, setForm]     = useState<StoreData>(DEFAULT)
   const [loading, setLoading] = useState(false)
   const [saving, setSaving]   = useState(false)
@@ -45,128 +41,176 @@ export default function StoreFormPanel({ storeId, onBack, onSaved }: {
   useEffect(() => {
     if (!storeId) { setForm(DEFAULT); return }
     setLoading(true)
-    api.get<any>(`/admin/stores/${storeId}`, getAdminToken() ?? '').then(data => {
+    api.get<any>(`/admin/stores/${storeId}`, getAdminToken() ?? '').then((data) => {
       setForm({
         name: data.name, chain: data.chain, slug: data.slug, active: data.active,
         config: { ...DEFAULT.config, ...data.config, logoUrl: data.config?.logoUrl ?? '' },
       })
+    }).catch((err) => {
+      setError(err instanceof ApiError ? err.message : 'Erro ao carregar loja')
     }).finally(() => setLoading(false))
   }, [storeId])
 
-  function setField(field: keyof StoreData, value: any) {
-    setForm(f => ({ ...f, [field]: value }))
+  function setField(field: keyof StoreData, value: unknown) {
+    setForm((f) => ({ ...f, [field]: value }))
   }
 
-  function setConfig(field: string, value: any) {
-    setForm(f => ({ ...f, config: { ...f.config, [field]: value } }))
+  function setConfig(field: string, value: unknown) {
+    setForm((f) => ({ ...f, config: { ...f.config, [field]: value } }))
   }
 
   function autoSlug(name: string) {
     if (isEdit) return
-    setField('slug', name.toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, ''))
+    setField('slug', name.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, ''))
   }
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
-    setSaving(true); setError(null)
+    setSaving(true)
+    setError(null)
     try {
       const token = getAdminToken() ?? ''
       const payload = { ...form, config: { ...form.config, logoUrl: form.config.logoUrl || null } }
       if (isEdit) {
         await api.put(`/admin/stores/${storeId}`, payload, token)
+        toast('Loja atualizada com sucesso')
       } else {
         await api.post('/admin/stores', payload, token)
+        toast('Loja criada com sucesso')
       }
       onSaved()
-    } catch (err: any) {
-      setError(err.message ?? 'Erro ao salvar')
-    } finally { setSaving(false) }
+    } catch (err) {
+      setError(err instanceof ApiError ? err.message : 'Erro ao salvar')
+    } finally {
+      setSaving(false)
+    }
   }
 
-  if (loading) return <div style={{ color: 'rgba(255,255,255,.4)', padding: 40 }}>Carregando...</div>
+  if (loading) {
+    return (
+      <div className="admin-loading-block">
+        <span className="admin-spinner" aria-hidden />
+        Carregando formulário...
+      </div>
+    )
+  }
 
   return (
-    <div style={{ maxWidth: 680 }}>
-      <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 28 }}>
-        <button onClick={onBack} style={{ background: 'none', border: 'none', color: 'rgba(255,255,255,.4)', fontSize: 20, cursor: 'pointer' }}>←</button>
-        <div style={{ fontSize: 20, fontWeight: 700, color: '#fff' }}>{isEdit ? 'Editar loja' : 'Nova loja'}</div>
-      </div>
+    <div style={{ maxWidth: 720 }}>
+      <h1 className="admin-page-title">{isEdit ? 'Editar loja' : 'Nova loja'}</h1>
+      <p className="admin-page-sub">
+        {isEdit ? 'Altere dados, identidade visual e horários.' : 'Preencha os dados para cadastrar uma nova unidade.'}
+      </p>
 
-      <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
-        {/* Dados básicos */}
-        <Section title="Dados da loja">
-          <Row>
-            <Field label="Nome da loja">
-              <input style={inputStyle} value={form.name} required
-                onChange={e => { setField('name', e.target.value); autoSlug(e.target.value) }} />
-            </Field>
-            <Field label="Rede">
-              <select style={inputStyle} value={form.chain} onChange={e => setField('chain', e.target.value)}>
-                {CHAINS.map(c => <option key={c.value} value={c.value}>{c.label}</option>)}
+      <form onSubmit={handleSubmit}>
+        <section className="admin-form-section">
+          <h2 className="admin-form-section__title">Dados da loja</h2>
+          <div className="admin-grid">
+            <div className="admin-field">
+              <label htmlFor="store-name">Nome da loja</label>
+              <input
+                id="store-name"
+                required
+                value={form.name}
+                onChange={(e) => { setField('name', e.target.value); autoSlug(e.target.value) }}
+              />
+            </div>
+            <div className="admin-field">
+              <label htmlFor="store-chain">Rede</label>
+              <select id="store-chain" value={form.chain} onChange={(e) => setField('chain', e.target.value)}>
+                {CHAINS.map((c) => <option key={c.value} value={c.value}>{c.label}</option>)}
               </select>
-            </Field>
-          </Row>
-          <Row>
-            <Field label="Slug (URL)" hint="Apenas letras minúsculas, números e hífens">
-              <input style={inputStyle} value={form.slug} required disabled={isEdit}
-                onChange={e => setField('slug', e.target.value)} />
-            </Field>
-          </Row>
-        </Section>
+            </div>
+            <div className="admin-field" style={{ gridColumn: '1 / -1' }}>
+              <label htmlFor="store-slug">Slug (URL)</label>
+              <input
+                id="store-slug"
+                required
+                disabled={isEdit}
+                value={form.slug}
+                onChange={(e) => setField('slug', e.target.value)}
+              />
+              <p className="admin-field__hint">Usado em ?store=slug — apenas letras minúsculas, números e hífens</p>
+            </div>
+          </div>
+        </section>
 
-        {/* Identidade visual */}
-        <Section title="Identidade visual">
-          <Row>
-            <Field label="Cor principal">
-              <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
-                <input type="color" value={form.config.primaryColor} onChange={e => setConfig('primaryColor', e.target.value)} style={{ width: 44, height: 38, borderRadius: 8, border: 'none', cursor: 'pointer' }} />
-                <input style={{ ...inputStyle, flex: 1 }} value={form.config.primaryColor} onChange={e => setConfig('primaryColor', e.target.value)} />
+        <section className="admin-form-section">
+          <h2 className="admin-form-section__title">Identidade visual</h2>
+          <div className="admin-grid">
+            {(['primaryColor', 'primaryDark', 'accentColor'] as const).map((key) => (
+              <div className="admin-field" key={key}>
+                <label>{key === 'primaryColor' ? 'Cor principal' : key === 'primaryDark' ? 'Cor escura' : 'Cor de destaque'}</label>
+                <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+                  <input
+                    type="color"
+                    value={form.config[key]}
+                    onChange={(e) => setConfig(key, e.target.value)}
+                    style={{ width: 44, height: 38, borderRadius: 8, border: 'none', padding: 0 }}
+                  />
+                  <input value={form.config[key]} onChange={(e) => setConfig(key, e.target.value)} />
+                </div>
               </div>
-            </Field>
-            <Field label="Cor escura">
-              <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
-                <input type="color" value={form.config.primaryDark} onChange={e => setConfig('primaryDark', e.target.value)} style={{ width: 44, height: 38, borderRadius: 8, border: 'none', cursor: 'pointer' }} />
-                <input style={{ ...inputStyle, flex: 1 }} value={form.config.primaryDark} onChange={e => setConfig('primaryDark', e.target.value)} />
-              </div>
-            </Field>
-            <Field label="Cor de destaque">
-              <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
-                <input type="color" value={form.config.accentColor} onChange={e => setConfig('accentColor', e.target.value)} style={{ width: 44, height: 38, borderRadius: 8, border: 'none', cursor: 'pointer' }} />
-                <input style={{ ...inputStyle, flex: 1 }} value={form.config.accentColor} onChange={e => setConfig('accentColor', e.target.value)} />
-              </div>
-            </Field>
-          </Row>
-          <Field label="URL da logo" hint="Link público da imagem (PNG/SVG)">
-            <input style={inputStyle} value={form.config.logoUrl} placeholder="https://..." onChange={e => setConfig('logoUrl', e.target.value)} />
-          </Field>
-        </Section>
+            ))}
+            <div className="admin-field" style={{ gridColumn: '1 / -1' }}>
+              <label htmlFor="store-logo">URL da logo</label>
+              <input
+                id="store-logo"
+                placeholder="https://..."
+                value={form.config.logoUrl}
+                onChange={(e) => setConfig('logoUrl', e.target.value)}
+              />
+              <p className="admin-field__hint">Link público da imagem (PNG ou SVG)</p>
+              {form.config.logoUrl && (
+                <div className="admin-preview-logo">
+                  <img src={form.config.logoUrl} alt="Prévia da logo" onError={(e) => { (e.target as HTMLImageElement).style.display = 'none' }} />
+                </div>
+              )}
+            </div>
+          </div>
+        </section>
 
-        {/* Horários */}
-        <Section title="Horários de funcionamento">
-          <Row>
-            <Field label="Manhã — abertura"><input style={inputStyle} type="time" value={form.config.morningOpen} onChange={e => setConfig('morningOpen', e.target.value)} /></Field>
-            <Field label="Manhã — fechamento"><input style={inputStyle} type="time" value={form.config.morningClose} onChange={e => setConfig('morningClose', e.target.value)} /></Field>
-            <Field label="Tarde — abertura"><input style={inputStyle} type="time" value={form.config.afternoonOpen} onChange={e => setConfig('afternoonOpen', e.target.value)} /></Field>
-            <Field label="Tarde — fechamento"><input style={inputStyle} type="time" value={form.config.afternoonClose} onChange={e => setConfig('afternoonClose', e.target.value)} /></Field>
-          </Row>
-          <Row>
-            <Field label="Intervalo entre slots (min)">
-              <input style={inputStyle} type="number" min={5} max={120} value={form.config.slotIntervalMin} onChange={e => setConfig('slotIntervalMin', Number(e.target.value))} />
-            </Field>
-            <Field label="Antecedência mínima (min)">
-              <input style={inputStyle} type="number" min={0} max={120} value={form.config.minLeadTimeMin} onChange={e => setConfig('minLeadTimeMin', Number(e.target.value))} />
-            </Field>
-            <Field label="Inatividade do totem (s)">
-              <input style={inputStyle} type="number" min={30} max={300} value={form.config.inactivityTimeout} onChange={e => setConfig('inactivityTimeout', Number(e.target.value))} />
-            </Field>
-          </Row>
-        </Section>
+        <section className="admin-form-section">
+          <h2 className="admin-form-section__title">Horários e totem</h2>
+          <div className="admin-grid">
+            <div className="admin-field">
+              <label htmlFor="morning-open">Manhã — abertura</label>
+              <input id="morning-open" type="time" value={form.config.morningOpen} onChange={(e) => setConfig('morningOpen', e.target.value)} />
+            </div>
+            <div className="admin-field">
+              <label htmlFor="morning-close">Manhã — fechamento</label>
+              <input id="morning-close" type="time" value={form.config.morningClose} onChange={(e) => setConfig('morningClose', e.target.value)} />
+            </div>
+            <div className="admin-field">
+              <label htmlFor="afternoon-open">Tarde — abertura</label>
+              <input id="afternoon-open" type="time" value={form.config.afternoonOpen} onChange={(e) => setConfig('afternoonOpen', e.target.value)} />
+            </div>
+            <div className="admin-field">
+              <label htmlFor="afternoon-close">Tarde — fechamento</label>
+              <input id="afternoon-close" type="time" value={form.config.afternoonClose} onChange={(e) => setConfig('afternoonClose', e.target.value)} />
+            </div>
+            <div className="admin-field">
+              <label htmlFor="slot-interval">Intervalo entre slots (min)</label>
+              <input id="slot-interval" type="number" min={5} max={120} value={form.config.slotIntervalMin} onChange={(e) => setConfig('slotIntervalMin', Number(e.target.value))} />
+            </div>
+            <div className="admin-field">
+              <label htmlFor="lead-time">Antecedência mínima (min)</label>
+              <input id="lead-time" type="number" min={0} max={120} value={form.config.minLeadTimeMin} onChange={(e) => setConfig('minLeadTimeMin', Number(e.target.value))} />
+            </div>
+            <div className="admin-field">
+              <label htmlFor="inactivity">Inatividade do totem (s)</label>
+              <input id="inactivity" type="number" min={30} max={300} value={form.config.inactivityTimeout} onChange={(e) => setConfig('inactivityTimeout', Number(e.target.value))} />
+            </div>
+          </div>
+        </section>
 
-        {error && <div style={{ color: '#ff6b6b', background: 'rgba(255,107,107,.1)', border: '1px solid rgba(255,107,107,.2)', borderRadius: 8, padding: '10px 14px', fontSize: 13 }}>{error}</div>}
+        {error && <div className="admin-error" role="alert">{error}</div>}
 
-        <div style={{ display: 'flex', gap: 10 }}>
-          <button type="button" onClick={onBack} style={{ ...btnSecondary, flex: 1 }}>Cancelar</button>
-          <button type="submit" disabled={saving} style={{ ...btnPrimary, flex: 2, opacity: saving ? 0.6 : 1 }}>
+        <div style={{ display: 'flex', gap: 10, marginTop: 8 }}>
+          <button type="button" className="admin-btn admin-btn--ghost" style={{ flex: 1 }} onClick={onBack}>
+            Cancelar
+          </button>
+          <button type="submit" className="admin-btn admin-btn--primary" style={{ flex: 2 }} disabled={saving}>
             {saving ? 'Salvando...' : isEdit ? 'Salvar alterações' : 'Criar loja'}
           </button>
         </div>
@@ -174,33 +218,3 @@ export default function StoreFormPanel({ storeId, onBack, onSaved }: {
     </div>
   )
 }
-
-function Section({ title, children }: { title: string; children: React.ReactNode }) {
-  return (
-    <div style={{ background: '#1a1a1c', border: '1px solid rgba(255,255,255,.08)', borderRadius: 12, padding: 20 }}>
-      <div style={{ fontSize: 13, fontWeight: 700, color: 'rgba(255,255,255,.5)', textTransform: 'uppercase', letterSpacing: 1, marginBottom: 16 }}>{title}</div>
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>{children}</div>
-    </div>
-  )
-}
-
-function Row({ children }: { children: React.ReactNode }) {
-  return <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: 14 }}>{children}</div>
-}
-
-function Field({ label, hint, children }: { label: string; hint?: string; children: React.ReactNode }) {
-  return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
-      <label style={{ fontSize: 12, fontWeight: 600, color: 'rgba(255,255,255,.5)', textTransform: 'uppercase', letterSpacing: 0.8 }}>{label}</label>
-      {children}
-      {hint && <div style={{ fontSize: 11, color: 'rgba(255,255,255,.25)' }}>{hint}</div>}
-    </div>
-  )
-}
-
-const inputStyle: React.CSSProperties = {
-  padding: '10px 12px', borderRadius: 8, border: '1px solid rgba(255,255,255,.1)',
-  background: 'rgba(255,255,255,.05)', color: '#fff', fontSize: 13, outline: 'none', fontFamily: 'inherit', width: '100%', boxSizing: 'border-box',
-}
-const btnPrimary:   React.CSSProperties = { padding: '12px', borderRadius: 10, border: 'none', background: '#C0272D', color: '#fff', fontSize: 14, fontWeight: 700, cursor: 'pointer', fontFamily: 'inherit' }
-const btnSecondary: React.CSSProperties = { padding: '12px', borderRadius: 10, border: '1px solid rgba(255,255,255,.12)', background: 'transparent', color: 'rgba(255,255,255,.6)', fontSize: 14, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit' }

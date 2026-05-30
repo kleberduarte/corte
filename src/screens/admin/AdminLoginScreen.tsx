@@ -1,62 +1,86 @@
-import { useState } from 'react'
+import { useRef, useState } from 'react'
 import { loginAdmin } from '../../lib/adminAuth'
 import { ApiError } from '../../lib/api'
 
 export default function AdminLoginScreen({ onSuccess }: { onSuccess: () => void }) {
-  const [email, setEmail]       = useState('')
+  const emailRef = useRef<HTMLInputElement>(null)
+  const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
-  const [loading, setLoading]   = useState(false)
-  const [error, setError]       = useState<string | null>(null)
+  const [showPass, setShowPass] = useState(false)
+  const [loading, setLoading] = useState(false)
+  const [error, setError] = useState<string | null>(null)
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
-    setLoading(true); setError(null)
+    setLoading(true)
+    setError(null)
     try {
-      await loginAdmin(email, password)
+      await loginAdmin(email.trim(), password)
       onSuccess()
     } catch (err) {
-      setError(err instanceof ApiError ? err.message : 'Erro ao conectar')
+      if (err instanceof ApiError && err.status === 401) {
+        setError('E-mail ou senha incorretos')
+      } else {
+        setError(err instanceof ApiError ? err.message : 'Não foi possível conectar ao servidor')
+      }
+      emailRef.current?.focus()
     } finally {
       setLoading(false)
     }
   }
 
   return (
-    <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#0d0d0e', padding: 24 }}>
-      <div style={{ width: '100%', maxWidth: 380, background: '#1a1a1c', border: '1px solid rgba(255,255,255,.08)', borderRadius: 16, padding: 36 }}>
-        <div style={{ textAlign: 'center', marginBottom: 32 }}>
-          <div style={{ fontSize: 28, fontWeight: 700, color: '#fff', letterSpacing: 3, marginBottom: 6 }}>CORTE</div>
-          <div style={{ fontSize: 13, color: 'rgba(255,255,255,.4)' }}>Painel Administrativo</div>
+    <div className="admin-login">
+      <div className="admin-login__card">
+        <div className="admin-login__title">
+          <div className="admin-login__brand">CORTE</div>
+          <div className="admin-login__sub">Painel administrativo</div>
         </div>
-        <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
-          <input
-            type="email" placeholder="E-mail" value={email}
-            onChange={e => setEmail(e.target.value)} required
-            style={inputStyle}
-          />
-          <input
-            type="password" placeholder="Senha" value={password}
-            onChange={e => setPassword(e.target.value)} required
-            style={inputStyle}
-          />
-          {error && <div style={{ fontSize: 13, color: '#ff6b6b', background: 'rgba(255,107,107,.1)', border: '1px solid rgba(255,107,107,.2)', borderRadius: 8, padding: '10px 12px' }}>{error}</div>}
-          <button type="submit" disabled={loading} style={btnStyle(loading)}>
-            {loading ? 'Entrando...' : 'Entrar'}
+        <form className="admin-login__form" onSubmit={handleSubmit}>
+          <div className="admin-field">
+            <label htmlFor="admin-email">E-mail</label>
+            <input
+              ref={emailRef}
+              id="admin-email"
+              type="email"
+              autoComplete="email"
+              autoFocus
+              required
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+            />
+          </div>
+          <div className="admin-field">
+            <label htmlFor="admin-password">Senha</label>
+            <input
+              id="admin-password"
+              type={showPass ? 'text' : 'password'}
+              autoComplete="current-password"
+              required
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+            />
+          </div>
+          <button
+            type="button"
+            className="admin-login__toggle-pass"
+            onClick={() => setShowPass((v) => !v)}
+          >
+            {showPass ? 'Ocultar senha' : 'Mostrar senha'}
+          </button>
+          {error && <div className="admin-error" role="alert">{error}</div>}
+          <button type="submit" className="admin-btn admin-btn--primary" disabled={loading} style={{ marginTop: 4 }}>
+            {loading ? (
+              <>
+                <span className="admin-spinner" aria-hidden />
+                Entrando...
+              </>
+            ) : (
+              'Entrar'
+            )}
           </button>
         </form>
       </div>
     </div>
   )
 }
-
-const inputStyle: React.CSSProperties = {
-  padding: '12px 14px', borderRadius: 10, border: '1px solid rgba(255,255,255,.12)',
-  background: 'rgba(255,255,255,.05)', color: '#fff', fontSize: 14, outline: 'none',
-  fontFamily: 'inherit',
-}
-
-const btnStyle = (disabled: boolean): React.CSSProperties => ({
-  padding: '13px', borderRadius: 10, border: 'none', background: '#C0272D',
-  color: '#fff', fontSize: 15, fontWeight: 700, cursor: disabled ? 'not-allowed' : 'pointer',
-  opacity: disabled ? 0.6 : 1, marginTop: 4, fontFamily: 'inherit',
-})

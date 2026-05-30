@@ -5,7 +5,7 @@ import {
   toggleStoreSchema, createOperatorSchema, resetPasswordSchema,
 } from '../schemas/admin.schema'
 import {
-  loginAdmin, listStores, getStore, createStore, updateStore, toggleStore,
+  loginAdmin, getAdminMe, getAdminStats, listStores, getStore, createStore, updateStore, toggleStore,
   listOperators, createOperator, resetOperatorPassword, toggleOperator,
 } from '../services/admin.service'
 
@@ -24,6 +24,17 @@ export async function adminRoutes(app: FastifyInstance) {
   app.addHook('onRequest', async (req, reply) => {
     if (req.url?.endsWith('/login')) return
     await authenticateAdmin(req, reply)
+  })
+
+  // GET /admin/me — valida sessão e retorna dados do admin
+  app.get('/me', async (req: any, reply) => {
+    const adminId = (req.user as { sub: string }).sub
+    return reply.send(await getAdminMe(adminId))
+  })
+
+  // GET /admin/stats — métricas globais da plataforma
+  app.get('/stats', async (_req, reply) => {
+    return reply.send(await getAdminStats())
   })
 
   // ─── Lojas ──────────────────────────────────────────────────────────────────

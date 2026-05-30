@@ -282,6 +282,12 @@ function ModeBadge({ label }: { label: string }) {
 
 // ─── Root ────────────────────────────────────────────────────────────────────
 export default function App() {
+  const view = new URLSearchParams(window.location.search).get('view')
+  if (view === 'admin') return <AdminApp />
+  return <TotemApp view={view} />
+}
+
+function TotemApp({ view }: { view: string | null }) {
   const [store, setStore] = useState<StoreConfig | null>(null)
 
   useEffect(() => {
@@ -307,12 +313,7 @@ export default function App() {
     </div>
   )
 
-  const params = new URLSearchParams(window.location.search)
-  const view = params.get('view')
-  const trackingOrderId = params.get('id')
-
-  // Painel admin não precisa de contexto de loja
-  if (view === 'admin') return <AdminApp />
+  const trackingOrderId = new URLSearchParams(window.location.search).get('id')
 
   return (
     <StoreContext.Provider value={store}>
