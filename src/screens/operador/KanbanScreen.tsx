@@ -194,7 +194,11 @@ function KanbanCard({ order, primaryLabel, onPrimary, isGreen, clock }: {
         </div>
         {clock && <div className={`timer-badge ${timerClass}`}>{timerLabel}</div>}
       </div>
-      {order.items.map((item, idx) => (
+      {order.items.length === 0 ? (
+        <div style={{ fontSize: 13, fontWeight: 600, color: 'var(--t2)', marginBottom: 8, lineHeight: 1.4 }}>
+          Atendimento no balcão
+        </div>
+      ) : order.items.map((item, idx) => (
         <div key={item.product.id} style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: idx < order.items.length - 1 ? 6 : 8 }}>
           <img src={item.product.imageUrl} alt="" style={{ width: 44, height: 44, borderRadius: 9, objectFit: 'cover', flexShrink: 0 }} />
           <div style={{ flex: 1, minWidth: 0 }}>

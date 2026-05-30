@@ -10,6 +10,8 @@ import Topbar from './components/Topbar'
 import InactivityOverlay from './components/InactivityOverlay'
 import StepProgress from './components/StepProgress'
 import HomeScreen from './screens/cliente/HomeScreen'
+import PickupModeScreen, { type PickupMode } from './screens/cliente/PickupModeScreen'
+import FlowChoiceScreen from './screens/cliente/FlowChoiceScreen'
 import CategoriesScreen from './screens/cliente/CategoriesScreen'
 import CatalogScreen from './screens/cliente/CatalogScreen'
 import DetailScreen from './screens/cliente/DetailScreen'
@@ -18,14 +20,25 @@ import PhoneScreen from './screens/cliente/PhoneScreen'
 import PrintScreen from './screens/cliente/PrintScreen'
 import KanbanScreen from './screens/operador/KanbanScreen'
 
-type ClienteScreen = 'home' | 'categories' | 'catalog' | 'detail' | 'schedule' | 'phone' | 'print'
+type ClienteScreen = 'home' | 'pickup-mode' | 'flow-choice' | 'categories' | 'catalog' | 'detail' | 'schedule' | 'phone' | 'print'
 
 const INACTIVITY_MS = 90_000
 const COUNTDOWN_S   = 15
+const IMMEDIATE_SLOT = 'Imediata'
 
-const BACK_MAP: Record<ClienteScreen, ClienteScreen> = {
-  home: 'home', categories: 'home', catalog: 'categories',
-  detail: 'catalog', schedule: 'detail', phone: 'schedule', print: 'phone',
+function getBackScreen(screen: ClienteScreen, pickupMode: PickupMode, counterOnly: boolean): ClienteScreen {
+  const map: Record<ClienteScreen, ClienteScreen> = {
+    home: 'home',
+    'pickup-mode': 'home',
+    'flow-choice': 'pickup-mode',
+    categories: 'flow-choice',
+    catalog: 'categories',
+    detail: 'catalog',
+    schedule: 'detail',
+    phone: pickupMode === 'immediate' ? 'detail' : 'schedule',
+    print: counterOnly ? 'flow-choice' : 'phone',
+  }
+  return map[screen]
 }
 
 // ─── Hook de inatividade com countdown ───────────────────────────────────────
@@ -74,15 +87,19 @@ function ClienteView() {
   const [catalogFilter, setCatalogFilter] = useState('todos')
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null)
   const [selectedCut, setSelectedCut]     = useState<CutType | null>(null)
+  const [pickupMode, setPickupMode]       = useState<PickupMode>('scheduled')
+  const [counterOnly, setCounterOnly]     = useState(false)
   const [scheduleWeight, setScheduleWeight] = useState(1.5)
   const [scheduleSlot, setScheduleSlot]   = useState('')
 
-  const { items, setPrimaryItem, setItems, addItem, hasProduct, updateAllWeights, confirmOrder, currentOrder, reset } = useCartStore()
+  const { items, setPrimaryItem, setItems, addItem, hasProduct, updateAllWeights, confirmOrder, createCounterTicket, currentOrder, reset } = useCartStore()
   const { addOrder } = useKanbanStore()
 
   const handleReset = useCallback(() => {
     reset()
     setSelectedProduct(null)
+    setPickupMode('scheduled')
+    setCounterOnly(false)
     setScreen('home')
     setScreenKey((k) => k + 1)
   }, [reset])
@@ -106,7 +123,39 @@ function ClienteView() {
     } else {
       addItem(item)
     }
-    go('schedule')
+    if (pickupMode === 'immediate') {
+      setScheduleSlot(IMMEDIATE_SLOT)
+      go('phone')
+    } else {
+      go('schedule')
+    }
+  }
+
+  function handlePickupModeSelect(mode: PickupMode) {
+    setPickupMode(mode)
+    go('flow-choice')
+  }
+
+  function handleFlowChoice(choice: 'categories' | 'counter') {
+    if (choice === 'categories') {
+      setCounterOnly(false)
+      go('categories')
+      return
+    }
+    setCounterOnly(true)
+    const slot = pickupMode === 'immediate' ? IMMEDIATE_SLOT : 'Balcão'
+    const order = createCounterTicket(slot)
+    addOrder(order)
+    go('print')
+  }
+
+  function handleCartCheckout() {
+    if (pickupMode === 'immediate') {
+      setScheduleSlot(IMMEDIATE_SLOT)
+      go('phone')
+    } else {
+      go('schedule')
+    }
   }
 
   function handleAddCombo(p: Product) {
@@ -121,16 +170,24 @@ function ClienteView() {
 
   function handlePhone(phone: string) {
     if (items.length === 0) return
+    setCounterOnly(false)
     const order = confirmOrder(scheduleSlot, phone)
     addOrder(order)
     go('print')
   }
 
-  function handleDone() { reset(); setSelectedProduct(null); go('home') }
+  function handleDone() {
+    reset()
+    setSelectedProduct(null)
+    setCounterOnly(false)
+    go('home')
+  }
 
-  const showBack   = !(['home', 'categories'] as ClienteScreen[]).includes(screen)
+  const showBack   = screen !== 'home'
   const hideTopbar = screen === 'home' || screen === 'print'
-  const STEP_SCREENS: ClienteScreen[] = ['catalog', 'detail', 'schedule', 'phone', 'print']
+  const STEP_SCREENS: ClienteScreen[] = pickupMode === 'immediate'
+    ? ['catalog', 'detail', 'phone', 'print']
+    : ['catalog', 'detail', 'schedule', 'phone', 'print']
   const stepIndex  = STEP_SCREENS.indexOf(screen)
 
   return (
@@ -140,13 +197,31 @@ function ClienteView() {
           <Topbar hideStatus />
         </div>
       )}
-      {!hideTopbar && <Topbar showBack={showBack} onBack={() => go(BACK_MAP[screen])} />}
+      {!hideTopbar && <Topbar showBack={showBack} onBack={() => go(getBackScreen(screen, pickupMode, counterOnly))} />}
       {stepIndex >= 0 && <StepProgress current={stepIndex} total={STEP_SCREENS.length} />}
 
-      {screen === 'home'       && <HomeScreen key={screenKey} onStart={() => go('categories')} />}
-      {screen === 'categories' && <CategoriesScreen key={screenKey} onSelect={handleCategorySelect} />}
-      {screen === 'catalog'    && <CatalogScreen key={`catalog-${catalogFilter}-${screenKey}`} initialFilter={catalogFilter} onProduct={handleProductSelect} cartCount={items.length} onCart={() => go('schedule')} />}
-      {screen === 'detail'     && selectedProduct && <DetailScreen key={selectedProduct.id} product={selectedProduct} onSchedule={handleSchedule} />}
+      {screen === 'home'        && <HomeScreen key={screenKey} onStart={() => go('pickup-mode')} />}
+      {screen === 'pickup-mode' && <PickupModeScreen key={screenKey} onSelect={handlePickupModeSelect} />}
+      {screen === 'flow-choice' && <FlowChoiceScreen key={screenKey} onSelect={handleFlowChoice} />}
+      {screen === 'categories'  && <CategoriesScreen key={screenKey} onSelect={handleCategorySelect} />}
+      {screen === 'catalog'     && (
+        <CatalogScreen
+          key={`catalog-${catalogFilter}-${screenKey}`}
+          initialFilter={catalogFilter}
+          onProduct={handleProductSelect}
+          cartCount={items.length}
+          onCart={handleCartCheckout}
+          immediate={pickupMode === 'immediate'}
+        />
+      )}
+      {screen === 'detail' && selectedProduct && (
+        <DetailScreen
+          key={selectedProduct.id}
+          product={selectedProduct}
+          immediate={pickupMode === 'immediate'}
+          onSchedule={handleSchedule}
+        />
+      )}
       {screen === 'schedule'   && selectedProduct && selectedCut && (
         <ScheduleScreen
           key={`schedule-${screenKey}`}
@@ -159,7 +234,14 @@ function ClienteView() {
           onCustomizeCombo={handleCustomizeCombo}
         />
       )}
-      {screen === 'phone' && items.length > 0 && <PhoneScreen items={items} slotTime={scheduleSlot} onConfirm={handlePhone} />}
+      {screen === 'phone' && items.length > 0 && (
+        <PhoneScreen
+          items={items}
+          slotTime={scheduleSlot}
+          immediate={pickupMode === 'immediate'}
+          onConfirm={handlePhone}
+        />
+      )}
       {screen === 'print' && currentOrder       && <PrintScreen order={currentOrder} onDone={handleDone} />}
 
       {countdown !== null && (

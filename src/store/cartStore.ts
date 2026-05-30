@@ -28,6 +28,7 @@ type CartStore = {
   updateAllWeights: (weightKg: number) => void
   clearItems: () => void
   confirmOrder: (slotTime: string, customerPhone: string) => Order
+  createCounterTicket: (slotTime: string) => Order
   updateOrderStatus: (status: Order['status']) => void
   reset: () => void
 }
@@ -80,6 +81,20 @@ export const useCartStore = create<CartStore>((set, get) => ({
       createdAt: new Date(),
     }
     set({ currentOrder: order })
+    return order
+  },
+
+  createCounterTicket: (slotTime) => {
+    const order: Order = {
+      id: crypto.randomUUID(),
+      items: [],
+      pickupCode: generateCode(),
+      slotTime,
+      customerPhone: '',
+      status: 'aguardando',
+      createdAt: new Date(),
+    }
+    set({ items: [], currentOrder: order })
     return order
   },
 

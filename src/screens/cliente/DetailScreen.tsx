@@ -4,10 +4,11 @@ import { CATEGORY_LABELS } from '../../data/products'
 
 type Props = {
   product: Product
+  immediate?: boolean
   onSchedule: (cutType: CutType, weightKg: number) => void
 }
 
-export default function DetailScreen({ product: p, onSchedule }: Props) {
+export default function DetailScreen({ product: p, immediate = false, onSchedule }: Props) {
   const [selectedCut, setSelectedCut] = useState<CutType>(p.cutTypes[0])
   const [weight, setWeight] = useState(1.5)
 
@@ -108,7 +109,7 @@ export default function DetailScreen({ product: p, onSchedule }: Props) {
 
         {/* CTA */}
         <button className="btn-primary" onClick={() => onSchedule(selectedCut, weight)}>
-          📅 Agendar este corte
+          {immediate ? '⚡ Confirmar retirada imediata' : '📅 Agendar este corte'}
         </button>
       </div>
     </div>

@@ -6,9 +6,10 @@ type Props = {
   onProduct: (p: Product) => void
   cartCount: number
   onCart: () => void
+  immediate?: boolean
 }
 
-export default function CatalogScreen({ initialFilter = 'todos', onProduct, cartCount, onCart }: Props) {
+export default function CatalogScreen({ initialFilter = 'todos', onProduct, cartCount, onCart, immediate = false }: Props) {
   const [filter, setFilter] = useState(initialFilter)
   const [added, setAdded]   = useState<string | null>(null)
 
@@ -56,7 +57,7 @@ export default function CatalogScreen({ initialFilter = 'todos', onProduct, cart
         <div className="fab" onClick={onCart} style={{ animation: 'fabIn .35s cubic-bezier(.34,1.2,.64,1) both' }}>
           <div style={{ display: 'flex', alignItems: 'center' }}>
             <div className="fab-cnt">{cartCount}</div>
-            <span className="fab-label">Agendar corte{cartCount > 1 ? 's' : ''}</span>
+            <span className="fab-label">{immediate ? 'Finalizar pedido' : `Agendar corte${cartCount > 1 ? 's' : ''}`}</span>
           </div>
           <span className="fab-hint">🛒 Pagar no caixa</span>
         </div>

@@ -7,12 +7,22 @@ type Props = {
   onDone: () => void
 }
 
+function pickupLabel(slotTime: string) {
+  if (slotTime === 'Imediata') return 'Retirada imediata'
+  if (slotTime === 'Balcão') return 'Atendimento no balcão'
+  return `Hoje · ${slotTime}`
+}
+
+const COUNTER_LINE = 'Atendimento presencial no balcão'
+
 // Conteúdo do recibo como HTML puro — enviado para window.print()
 function buildReceiptHtml(order: Order, storeName: string): string {
   const dateStr = new Date().toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit', year: 'numeric' })
   const timeStr = new Date().toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })
 
-  const itemsHtml = order.items.map((item, idx) => `
+  const itemsHtml = order.items.length === 0
+    ? `<div class="section"><div><b>Pedido:</b> ${COUNTER_LINE}</div></div>`
+    : order.items.map((item, idx) => `
     <div class="section">
       ${order.items.length > 1 ? `<div class="label">Item ${idx + 1}</div>` : ''}
       <div><b>Corte:</b> ${item.product.name}</div>
@@ -58,13 +68,13 @@ function buildReceiptHtml(order: Order, storeName: string): string {
   <div class="center bold" style="font-size:14px">CORTE · Açougue Inteligente</div>
   <div class="center small">${storeName}</div>
   <div class="dashed"></div>
-  <div class="center bold" style="font-size:13px">PEDIDO AGENDADO</div>
+  <div class="center bold" style="font-size:13px">${order.items.length === 0 ? 'SENHA DE BALCÃO' : order.slotTime === 'Imediata' ? 'PEDIDO IMEDIATO' : 'PEDIDO AGENDADO'}</div>
   <div class="dashed"></div>
 
   ${itemsHtml}
 
   <div class="dashed"></div>
-  <div><b>Retirada:</b> Hoje · ${order.slotTime}</div>
+  <div><b>Retirada:</b> ${pickupLabel(order.slotTime)}</div>
   ${order.customerPhone ? `<div><b>WhatsApp:</b> ${order.customerPhone}</div>` : ''}
   <div class="dashed"></div>
 
@@ -128,9 +138,13 @@ export default function PrintScreen({ order, onDone }: Props) {
           Pedido finalizado!
         </div>
         <div style={{ fontSize: 14, color: 'var(--t2)', lineHeight: 1.55, marginBottom: 32, maxWidth: 300 }}>
-          {order.customerPhone
-            ? 'Informações enviadas para o WhatsApp. Comprovante impresso com sucesso.'
-            : 'Comprovante impresso com sucesso. Dirija-se ao açougue no horário agendado.'}
+          {order.items.length === 0
+            ? 'Comprovante impresso com sucesso. Apresente a senha no balcão do açougue.'
+            : order.customerPhone
+              ? 'Informações enviadas para o WhatsApp. Comprovante impresso com sucesso.'
+              : order.slotTime === 'Imediata'
+                ? 'Comprovante impresso com sucesso. Dirija-se ao balcão do açougue.'
+                : 'Comprovante impresso com sucesso. Dirija-se ao açougue no horário agendado.'}
         </div>
         <div style={{ background: 'var(--s2)', border: '1px solid var(--border2)', borderRadius: 'var(--r)', padding: '14px 20px', marginBottom: 28, width: '100%' }}>
           <div style={{ fontSize: 10.5, fontWeight: 700, textTransform: 'uppercase', letterSpacing: 1.2, color: 'var(--t3)', marginBottom: 8 }}>
@@ -163,16 +177,20 @@ export default function PrintScreen({ order, onDone }: Props) {
           <div style={{ textAlign: 'center', fontWeight: 700 }}>CORTE · Açougue Inteligente</div>
           <div style={{ textAlign: 'center', fontSize: 10, marginBottom: 4 }}>{store.name}</div>
           <div style={{ borderTop: '1px dashed #999', margin: '8px 0' }} />
-          <div style={{ textAlign: 'center', fontWeight: 700, fontSize: 15, margin: '6px 0' }}>PEDIDO AGENDADO</div>
+          <div style={{ textAlign: 'center', fontWeight: 700, fontSize: 15, margin: '6px 0' }}>
+            {order.items.length === 0 ? 'SENHA DE BALCÃO' : order.slotTime === 'Imediata' ? 'PEDIDO IMEDIATO' : 'PEDIDO AGENDADO'}
+          </div>
           <div style={{ borderTop: '1px dashed #999', margin: '8px 0' }} />
-          {order.items.map((item, idx) => (
+          {order.items.length === 0 ? (
+            <div><strong>Pedido:</strong> {COUNTER_LINE}</div>
+          ) : order.items.map((item, idx) => (
             <div key={item.product.id} style={{ marginBottom: idx < order.items.length - 1 ? 6 : 0 }}>
               <div><strong>{order.items.length > 1 ? `Item ${idx + 1}:` : 'Corte:'}</strong> {item.product.name}</div>
               <div><strong>Tipo:</strong> {item.cutType.name}</div>
               <div><strong>Peso:</strong> ~{item.weightKg}kg</div>
             </div>
           ))}
-          <div><strong>Retirada:</strong> Hoje · {order.slotTime}</div>
+          <div><strong>Retirada:</strong> {pickupLabel(order.slotTime)}</div>
           <div style={{ borderTop: '1px dashed #999', margin: '10px 0' }} />
           <div style={{ textAlign: 'center', fontWeight: 700, fontSize: 18, letterSpacing: 3, margin: '8px 0' }}>
             {order.pickupCode}
