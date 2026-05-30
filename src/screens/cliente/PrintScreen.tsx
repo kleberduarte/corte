@@ -97,7 +97,7 @@ function buildReceiptHtml(order: Order, storeName: string, qrDataUrl: string): s
 }
 
 async function printReceipt(order: Order, storeName: string) {
-  const trackingUrl = getOrderTrackingUrl(order.id)
+  const trackingUrl = getOrderTrackingUrl(order.pickupCode)
   const qrDataUrl = await generateQrDataUrl(trackingUrl, 120)
   const win = window.open('', '_blank', 'width=400,height=600')
   if (!win) return
@@ -117,8 +117,8 @@ export default function PrintScreen({ order, onDone }: Props) {
   const [qrDataUrl, setQrDataUrl] = useState<string | null>(null)
 
   useEffect(() => {
-    generateQrDataUrl(getOrderTrackingUrl(order.id), 140).then(setQrDataUrl)
-  }, [order.id])
+    generateQrDataUrl(getOrderTrackingUrl(order.pickupCode), 140).then(setQrDataUrl)
+  }, [order.pickupCode])
 
   useEffect(() => {
     const t = setTimeout(() => setStage('done'), 3200)

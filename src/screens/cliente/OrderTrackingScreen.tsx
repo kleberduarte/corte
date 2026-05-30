@@ -51,7 +51,11 @@ export default function OrderTrackingScreen({ orderId }: Props) {
     }
   }, [syncFromStorage])
 
-  const order = useMemo(() => orders.find((o) => o.id === orderId) ?? null, [orders, orderId])
+  const order = useMemo(() => {
+    const needle = orderId.trim()
+    const code = needle.toUpperCase()
+    return orders.find((o) => o.id === needle || o.pickupCode.toUpperCase() === code) ?? null
+  }, [orders, orderId])
   const activeIndex = order ? STATUS_INDEX[order.status] : -1
   const currentStep = order ? STEPS[activeIndex] : null
 
