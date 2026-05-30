@@ -3,7 +3,7 @@ import { z } from 'zod'
 export const createOrderSchema = z.object({
   customerPhone: z.string().optional(),
   pickupMode: z.enum(['SCHEDULED', 'IMMEDIATE']),
-  scheduledAt: z.string().datetime().optional(),
+  scheduledAt: z.string().optional(),
   notes: z.string().max(500).optional(),
   items: z.array(
     z.object({
