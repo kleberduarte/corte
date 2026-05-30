@@ -8,6 +8,7 @@ export type StoreHours = {
 export type StoreConfig = {
   id: string
   name: string
+  active?: boolean
   theme: {
     primaryColor: string
     primaryDark:  string

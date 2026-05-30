@@ -23,9 +23,10 @@ export async function totemRoutes(app: FastifyInstance) {
 
       const cfg = store.config
       return reply.send({
-        id:   store.slug,
-        name: store.name,
-        chain: store.chain,
+        id:     store.slug,
+        name:   store.name,
+        active: store.active,
+        chain:  store.chain,
         theme: {
           primaryColor: cfg?.primaryColor  ?? '#C0272D',
           primaryDark:  cfg?.primaryDark   ?? '#7A1015',

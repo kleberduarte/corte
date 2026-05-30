@@ -6,6 +6,19 @@ import bcrypt from 'bcryptjs'
 
 const prisma = new PrismaClient()
 
+async function seedAdmin() {
+  await prisma.admin.upsert({
+    where: { email: 'admin@corte.com.br' },
+    update: {},
+    create: {
+      name: 'Admin',
+      email: 'admin@corte.com.br',
+      passwordHash: await bcrypt.hash('corte@admin123', 10),
+    },
+  })
+  console.log('✓ Admin criado: admin@corte.com.br / corte@admin123')
+}
+
 // Produtos espelhados do frontend src/data/products.ts
 // O id aqui é o mesmo usado no frontend — garante que orders do totem referenciem o produto correto
 const PRODUCTS: { id: string; name: string; category: Category; unit: Unit; price: number }[] = [
@@ -41,6 +54,7 @@ const PRODUCTS: { id: string; name: string; category: Category; unit: Unit; pric
 
 async function main() {
   console.log('Seeding...')
+  await seedAdmin()
 
   // Loja de desenvolvimento — Violeta
   const store = await prisma.store.upsert({

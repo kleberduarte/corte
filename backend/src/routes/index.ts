@@ -1,5 +1,6 @@
 import { FastifyInstance } from 'fastify'
 import { authRoutes } from './auth.routes'
+import { adminRoutes } from './admin.routes'
 import { orderRoutes } from './order.routes'
 import { productRoutes } from './product.routes'
 import { totemRoutes } from './totem.routes'
@@ -12,6 +13,9 @@ export async function registerRoutes(app: FastifyInstance) {
 
   // Rotas autenticadas (operadores)
   app.register(authRoutes, { prefix: '/auth' })
+
+  // Rotas admin (gestão da plataforma)
+  app.register(adminRoutes, { prefix: '/admin' })
   app.register(orderRoutes, { prefix: '/orders' })
   app.register(productRoutes, { prefix: '/products' })
 

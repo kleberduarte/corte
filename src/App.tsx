@@ -20,6 +20,7 @@ import PhoneScreen from './screens/cliente/PhoneScreen'
 import PrintScreen from './screens/cliente/PrintScreen'
 import OrderTrackingScreen from './screens/cliente/OrderTrackingScreen'
 import KanbanScreen from './screens/operador/KanbanScreen'
+import AdminApp from './screens/admin/AdminApp'
 
 type ClienteScreen = 'home' | 'pickup-mode' | 'flow-choice' | 'categories' | 'catalog' | 'detail' | 'schedule' | 'phone' | 'print'
 
@@ -296,9 +297,22 @@ export default function App() {
     </div>
   )
 
+  if (store.active === false) return (
+    <div style={{ height: '100vh', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', background: '#0d0d0e', padding: 32, textAlign: 'center' }}>
+      <div style={{ fontSize: 48, marginBottom: 20 }}>🔪</div>
+      <div style={{ fontSize: 22, fontWeight: 700, color: '#fff', marginBottom: 10 }}>{store.name}</div>
+      <div style={{ fontSize: 16, color: 'rgba(255,255,255,.5)', maxWidth: 340, lineHeight: 1.6 }}>
+        Este serviço está temporariamente indisponível.<br />Por favor, procure um funcionário do açougue.
+      </div>
+    </div>
+  )
+
   const params = new URLSearchParams(window.location.search)
   const view = params.get('view')
   const trackingOrderId = params.get('id')
+
+  // Painel admin não precisa de contexto de loja
+  if (view === 'admin') return <AdminApp />
 
   return (
     <StoreContext.Provider value={store}>
