@@ -38,18 +38,18 @@ function formatItems(order: Order) {
 
 export default function OrderTrackingScreen({ orderId }: Props) {
   const store = useStore()
-  const { orders, syncFromStorage } = useKanbanStore()
+  const { orders, fetchOrders } = useKanbanStore()
   const [now, setNow] = useState(() => new Date())
 
   useEffect(() => {
-    syncFromStorage()
-    const sync = setInterval(syncFromStorage, 2500)
+    fetchOrders()
+    const sync = setInterval(fetchOrders, 2500)
     const clock = setInterval(() => setNow(new Date()), 1000)
     return () => {
       clearInterval(sync)
       clearInterval(clock)
     }
-  }, [syncFromStorage])
+  }, [fetchOrders])
 
   const order = useMemo(() => {
     const needle = orderId.trim()

@@ -45,12 +45,13 @@ export const api = {
 }
 
 export class ApiError extends Error {
-  constructor(
-    public readonly status: number,
-    message: string,
-    public readonly code?: string,
-  ) {
+  readonly status: number
+  readonly code?: string
+
+  constructor(status: number, message: string, code?: string) {
     super(message)
     this.name = 'ApiError'
+    this.status = status
+    this.code = code
   }
 }

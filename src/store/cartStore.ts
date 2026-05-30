@@ -82,7 +82,7 @@ export const useCartStore = create<CartStore>((set, get) => ({
     if (items.length === 0) throw new Error('No items in cart')
 
     let pickupCode = generateCode()
-    let orderId = crypto.randomUUID()
+    let orderId: string = crypto.randomUUID()
 
     try {
       const apiOrder = await api.post<ApiOrder>(`/totem/${storeSlug}/orders`, {
@@ -119,7 +119,7 @@ export const useCartStore = create<CartStore>((set, get) => ({
 
   createCounterTicket: async (storeSlug, slotTime) => {
     let pickupCode = generateCode()
-    let orderId = crypto.randomUUID()
+    let orderId: string = crypto.randomUUID()
 
     try {
       const apiOrder = await api.post<ApiOrder>(`/totem/${storeSlug}/orders`, {
