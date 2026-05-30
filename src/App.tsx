@@ -18,6 +18,7 @@ import DetailScreen from './screens/cliente/DetailScreen'
 import ScheduleScreen from './screens/cliente/ScheduleScreen'
 import PhoneScreen from './screens/cliente/PhoneScreen'
 import PrintScreen from './screens/cliente/PrintScreen'
+import OrderTrackingScreen from './screens/cliente/OrderTrackingScreen'
 import KanbanScreen from './screens/operador/KanbanScreen'
 
 type ClienteScreen = 'home' | 'pickup-mode' | 'flow-choice' | 'categories' | 'catalog' | 'detail' | 'schedule' | 'phone' | 'print'
@@ -300,11 +301,19 @@ export default function App() {
     </div>
   )
 
-  const view = new URLSearchParams(window.location.search).get('view')
+  const params = new URLSearchParams(window.location.search)
+  const view = params.get('view')
+  const trackingOrderId = params.get('id')
 
   return (
     <StoreContext.Provider value={store}>
-      {view === 'operador' ? <OperadorView /> : <ClienteView />}
+      {view === 'operador' ? (
+        <OperadorView />
+      ) : view === 'pedido' && trackingOrderId ? (
+        <OrderTrackingScreen orderId={trackingOrderId} />
+      ) : (
+        <ClienteView />
+      )}
     </StoreContext.Provider>
   )
 }

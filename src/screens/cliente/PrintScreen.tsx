@@ -1,6 +1,8 @@
 import { useEffect, useState } from 'react'
 import type { Order } from '../../store/cartStore'
 import { useStore } from '../../data/config'
+import { getOrderTrackingUrl } from '../../utils/orderTrackingUrl'
+import { generateQrDataUrl } from '../../utils/qrCode'
 
 type Props = {
   order: Order
@@ -15,8 +17,7 @@ function pickupLabel(slotTime: string) {
 
 const COUNTER_LINE = 'Atendimento presencial no balcão'
 
-// Conteúdo do recibo como HTML puro — enviado para window.print()
-function buildReceiptHtml(order: Order, storeName: string): string {
+function buildReceiptHtml(order: Order, storeName: string, qrDataUrl: string): string {
   const dateStr = new Date().toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit', year: 'numeric' })
   const timeStr = new Date().toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })
 
@@ -58,6 +59,8 @@ function buildReceiptHtml(order: Order, storeName: string): string {
     .section { margin: 4px 0; }
     .label   { font-weight: bold; font-size: 10px; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 2px; }
     .code-box { border: 1px solid #000; padding: 6px; margin: 8px 0; text-align: center; }
+    .qr-box { text-align: center; margin: 8px 0; }
+    .qr-box img { width: 96px; height: 96px; }
     @media print {
       body { width: 80mm; }
       @page { margin: 0; size: 80mm auto; }
@@ -82,19 +85,25 @@ function buildReceiptHtml(order: Order, storeName: string): string {
   <div class="code-box large">${order.pickupCode}</div>
 
   <div class="dashed"></div>
+  <div class="center small">Acompanhe seu pedido</div>
+  <div class="qr-box"><img src="${qrDataUrl}" alt="QR Code"/></div>
+  <div class="center xsmall">Escaneie para ver o andamento</div>
+
+  <div class="dashed"></div>
   <div class="center small">Apresente este comprovante no balcão</div>
   <div class="center xsmall">${dateStr} · ${timeStr}</div>
 </body>
 </html>`
 }
 
-function printReceipt(order: Order, storeName: string) {
+async function printReceipt(order: Order, storeName: string) {
+  const trackingUrl = getOrderTrackingUrl(order.id)
+  const qrDataUrl = await generateQrDataUrl(trackingUrl, 120)
   const win = window.open('', '_blank', 'width=400,height=600')
   if (!win) return
-  win.document.write(buildReceiptHtml(order, storeName))
+  win.document.write(buildReceiptHtml(order, storeName, qrDataUrl))
   win.document.close()
   win.focus()
-  // Aguarda assets carregarem antes de imprimir
   win.onload = () => {
     win.print()
     win.close()
@@ -105,6 +114,11 @@ export default function PrintScreen({ order, onDone }: Props) {
   const store = useStore()
   const [stage, setStage] = useState<'printing' | 'done'>('printing')
   const [countdown, setCountdown] = useState(8)
+  const [qrDataUrl, setQrDataUrl] = useState<string | null>(null)
+
+  useEffect(() => {
+    generateQrDataUrl(getOrderTrackingUrl(order.id), 140).then(setQrDataUrl)
+  }, [order.id])
 
   useEffect(() => {
     const t = setTimeout(() => setStage('done'), 3200)
@@ -113,7 +127,6 @@ export default function PrintScreen({ order, onDone }: Props) {
 
   useEffect(() => {
     if (stage !== 'done') return
-    // Dispara impressão real ao mostrar tela de confirmação
     printReceipt(order, store.name)
 
     const interval = setInterval(() => {
@@ -137,7 +150,7 @@ export default function PrintScreen({ order, onDone }: Props) {
         <div style={{ fontFamily: 'var(--font-serif)', fontSize: 28, fontWeight: 700, color: 'var(--accent)', marginBottom: 8 }}>
           Pedido finalizado!
         </div>
-        <div style={{ fontSize: 14, color: 'var(--t2)', lineHeight: 1.55, marginBottom: 32, maxWidth: 300 }}>
+        <div style={{ fontSize: 14, color: 'var(--t2)', lineHeight: 1.55, marginBottom: 24, maxWidth: 300 }}>
           {order.items.length === 0
             ? 'Comprovante impresso com sucesso. Apresente a senha no balcão do açougue.'
             : order.customerPhone
@@ -146,7 +159,7 @@ export default function PrintScreen({ order, onDone }: Props) {
                 ? 'Comprovante impresso com sucesso. Dirija-se ao balcão do açougue.'
                 : 'Comprovante impresso com sucesso. Dirija-se ao açougue no horário agendado.'}
         </div>
-        <div style={{ background: 'var(--s2)', border: '1px solid var(--border2)', borderRadius: 'var(--r)', padding: '14px 20px', marginBottom: 28, width: '100%' }}>
+        <div style={{ background: 'var(--s2)', border: '1px solid var(--border2)', borderRadius: 'var(--r)', padding: '14px 20px', marginBottom: 20, width: '100%' }}>
           <div style={{ fontSize: 10.5, fontWeight: 700, textTransform: 'uppercase', letterSpacing: 1.2, color: 'var(--t3)', marginBottom: 8 }}>
             Código de retirada
           </div>
@@ -154,6 +167,17 @@ export default function PrintScreen({ order, onDone }: Props) {
             {order.pickupCode}
           </div>
         </div>
+        {qrDataUrl && (
+          <div style={{ background: 'var(--s2)', border: '1px solid var(--border2)', borderRadius: 'var(--r)', padding: '16px 20px', marginBottom: 28, width: '100%' }}>
+            <div style={{ fontSize: 10.5, fontWeight: 700, textTransform: 'uppercase', letterSpacing: 1.2, color: 'var(--t3)', marginBottom: 12 }}>
+              Acompanhe seu pedido
+            </div>
+            <div style={{ background: '#fff', borderRadius: 12, width: 140, height: 140, margin: '0 auto 10px', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 8 }}>
+              <img src={qrDataUrl} alt="QR Code para acompanhar pedido" width={124} height={124} style={{ display: 'block' }} />
+            </div>
+            <div style={{ fontSize: 12, color: 'var(--t3)' }}>Escaneie para ver o andamento em tempo real</div>
+          </div>
+        )}
         <button className="btn-primary" onClick={onDone} style={{ maxWidth: 320 }}>
           Voltar ao início ({countdown}s)
         </button>
@@ -195,6 +219,18 @@ export default function PrintScreen({ order, onDone }: Props) {
           <div style={{ textAlign: 'center', fontWeight: 700, fontSize: 18, letterSpacing: 3, margin: '8px 0' }}>
             {order.pickupCode}
           </div>
+          <div style={{ borderTop: '1px dashed #999', margin: '10px 0' }} />
+          {qrDataUrl ? (
+            <>
+              <div style={{ textAlign: 'center', fontSize: 10, marginBottom: 6 }}>Acompanhe seu pedido</div>
+              <div style={{ textAlign: 'center', marginBottom: 6 }}>
+                <img src={qrDataUrl} alt="" width={72} height={72} style={{ display: 'inline-block' }} />
+              </div>
+              <div style={{ textAlign: 'center', fontSize: 9, color: '#666' }}>Escaneie para ver o andamento</div>
+            </>
+          ) : (
+            <div style={{ textAlign: 'center', fontSize: 10, color: '#666' }}>Gerando QR Code...</div>
+          )}
           <div style={{ borderTop: '1px dashed #999', margin: '10px 0' }} />
           <div style={{ textAlign: 'center', fontSize: 10 }}>Apresente este comprovante</div>
           <div style={{ textAlign: 'center', fontSize: 10 }}>no balcão do açougue</div>
