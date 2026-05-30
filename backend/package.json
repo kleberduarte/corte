@@ -1,0 +1,34 @@
+{
+  "name": "cortes-app-backend",
+  "version": "1.0.0",
+  "description": "Backend multi-tenant para o sistema de pedidos de cortes",
+  "main": "dist/server.js",
+  "scripts": {
+    "dev": "tsx watch src/server.ts",
+    "build": "tsc",
+    "start": "node dist/server.js",
+    "db:migrate": "prisma migrate deploy",
+    "db:migrate:dev": "prisma migrate dev",
+    "db:generate": "prisma generate",
+    "db:studio": "prisma studio",
+    "db:seed": "tsx prisma/seed.ts"
+  },
+  "dependencies": {
+    "@fastify/cors": "^10.0.2",
+    "@fastify/helmet": "^13.0.1",
+    "@fastify/jwt": "^10.1.0",
+    "@fastify/rate-limit": "^10.2.1",
+    "@prisma/client": "^5.14.0",
+    "bcryptjs": "^2.4.3",
+    "fastify": "^5.8.5",
+    "zod": "^3.23.8"
+  },
+  "devDependencies": {
+    "@types/bcryptjs": "^2.4.6",
+    "@types/node": "^20.14.2",
+    "pino-pretty": "^13.1.3",
+    "prisma": "^5.14.0",
+    "tsx": "^4.15.4",
+    "typescript": "^5.4.5"
+  }
+}

@@ -2,6 +2,8 @@ import { useEffect, useRef, useState } from 'react'
 import { useKanbanStore } from '../../store/kanbanStore'
 import type { Order } from '../../store/cartStore'
 import { useStore } from '../../data/config'
+import { isOperatorLoggedIn, logoutOperator } from '../../lib/auth'
+import LoginScreen from './LoginScreen'
 
 function beep() {
   try {
@@ -17,9 +19,10 @@ function beep() {
 }
 
 export default function KanbanScreen() {
-  const { orders, moveOrder, resetOrders } = useKanbanStore()
+  const { orders, moveOrder, resetOrders, startPolling } = useKanbanStore()
   const store = useStore()
   const [clock, setClock] = useState(new Date())
+  const [loggedIn, setLoggedIn] = useState(isOperatorLoggedIn)
   const prevCount = useRef(0)
 
   useEffect(() => {
@@ -31,6 +34,16 @@ export default function KanbanScreen() {
     const t = setInterval(() => setClock(new Date()), 1000)
     return () => clearInterval(t)
   }, [])
+
+  // Inicia polling quando logado — atualiza pedidos a cada 10 segundos
+  useEffect(() => {
+    if (!loggedIn) return
+    return startPolling(10_000)
+  }, [loggedIn, startPolling])
+
+  if (!loggedIn) {
+    return <LoginScreen onSuccess={() => setLoggedIn(true)} />
+  }
 
   const waiting = orders.filter((o) => o.status === 'aguardando')
   const inProg = orders.filter((o) => o.status === 'em_preparo')
@@ -66,11 +79,14 @@ export default function KanbanScreen() {
           )}
         </div>
         <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-          <div style={{ width: 32, height: 32, borderRadius: 10, background: 'linear-gradient(135deg, var(--primary-dark), var(--primary))', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 12, fontWeight: 700, color: 'white' }}>JC</div>
-          <div>
-            <div style={{ fontSize: 12, fontWeight: 600, color: 'var(--t1)' }}>João Carlos</div>
-            <div style={{ fontSize: 10, color: 'var(--t3)' }}>Açougueiro · Turno A</div>
-          </div>
+          <div style={{ width: 32, height: 32, borderRadius: 10, background: 'linear-gradient(135deg, var(--primary-dark), var(--primary))', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 14, color: 'white' }}>👤</div>
+          <button
+            onClick={() => { logoutOperator(); setLoggedIn(false) }}
+            style={{ fontSize: 11, color: 'var(--t3)', background: 'none', border: 'none', cursor: 'pointer', padding: '4px 6px', borderRadius: 6 }}
+            title="Sair"
+          >
+            Sair
+          </button>
         </div>
       </div>
 

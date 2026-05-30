@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState, useCallback } from 'react'
 import { THEMES, DEFAULT_THEME, applyTheme } from './data/theme'
-import { fetchActiveStore, StoreContext } from './data/config'
+import { fetchActiveStore, StoreContext, useStore } from './data/config'
 import type { StoreConfig } from './data/config'
 import { useCartStore } from './store/cartStore'
 import { useKanbanStore } from './store/kanbanStore'
@@ -83,6 +83,7 @@ function useInactivity(onReset: () => void) {
 
 // ─── View do Cliente ─────────────────────────────────────────────────────────
 function ClienteView() {
+  const store = useStore()
   const [screen, setScreen]               = useState<ClienteScreen>('home')
   const [screenKey, setScreenKey]         = useState(0)
   const [catalogFilter, setCatalogFilter] = useState('todos')
@@ -137,7 +138,7 @@ function ClienteView() {
     go('flow-choice')
   }
 
-  function handleFlowChoice(choice: 'categories' | 'counter') {
+  async function handleFlowChoice(choice: 'categories' | 'counter') {
     if (choice === 'categories') {
       setCounterOnly(false)
       go('categories')
@@ -145,7 +146,7 @@ function ClienteView() {
     }
     setCounterOnly(true)
     const slot = pickupMode === 'immediate' ? IMMEDIATE_SLOT : 'Balcão'
-    const order = createCounterTicket(slot)
+    const order = await createCounterTicket(store.id, slot)
     addOrder(order)
     go('print')
   }
@@ -169,10 +170,10 @@ function ClienteView() {
     setScheduleSlot(slot); setScheduleWeight(weight); updateAllWeights(weight); go('phone')
   }
 
-  function handlePhone(phone: string) {
+  async function handlePhone(phone: string) {
     if (items.length === 0) return
     setCounterOnly(false)
-    const order = confirmOrder(scheduleSlot, phone)
+    const order = await confirmOrder(store.id, scheduleSlot, phone)
     addOrder(order)
     go('print')
   }

@@ -1,0 +1,237 @@
+// =============================================================================
+// CORTES APP - Schema Multi-Tenant
+//
+// ISOLAMENTO DE DADOS:
+//   - Cada loja (Store) é um tenant independente
+//   - Toda tabela com dados operacionais possui storeId obrigatório
+//   - Repositories sempre filtram por storeId — nunca consultar sem esse filtro
+//   - RLS (Row Level Security) está configurado via migration manual (ver /prisma/rls.sql)
+//
+// INTEGRAÇÃO DE PREÇOS:
+//   - StoreProduct armazena o preço específico de cada produto por loja
+//   - StoreIntegration armazena as credenciais da API de preços de cada rede
+//   - PricingService consome StoreIntegration para sincronizar preços automaticamente
+// =============================================================================
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ---------------------------------------------------------------------------
+// TENANT: Loja / Supermercado
+// ---------------------------------------------------------------------------
+
+model Store {
+  id        String   @id @default(cuid())
+  name      String
+  chain     Chain
+  slug      String   @unique  // ex: "pao-de-acucar-moema" — usado na URL do totem
+  timezone  String   @default("America/Sao_Paulo")
+  active    Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  config      StoreConfig?
+  integration StoreIntegration?
+  operators   Operator[]
+  orders      Order[]
+  products    StoreProduct[]
+
+  @@map("stores")
+}
+
+// Redes de supermercado suportadas
+enum Chain {
+  PAO_DE_ACUCAR
+  EXTRA
+  VIOLETA
+  CARREFOUR
+  OUTROS
+}
+
+// Configurações operacionais da loja (horários, slots, tema visual)
+model StoreConfig {
+  id                String  @id @default(cuid())
+  storeId           String  @unique
+  openingTime       String  // "08:00"
+  closingTime       String  // "22:00"
+  slotIntervalMin   Int     @default(15)
+  maxOrdersPerSlot  Int     @default(5)
+  inactivityTimeout Int     @default(90)   // segundos
+  primaryColor      String  @default("#6B21A8")
+  logoUrl           String?
+
+  store Store @relation(fields: [storeId], references: [id], onDelete: Cascade)
+
+  @@map("store_configs")
+}
+
+// Credenciais e configuração para sincronização de preços com o sistema da rede
+model StoreIntegration {
+  id           String          @id @default(cuid())
+  storeId      String          @unique
+  type         IntegrationType
+  apiBaseUrl   String
+  apiKey       String          // armazenada criptografada
+  syncEnabled  Boolean         @default(false)
+  syncInterval Int             @default(60) // minutos entre sincronizações
+  lastSyncAt   DateTime?
+  lastSyncOk   Boolean?
+
+  store Store @relation(fields: [storeId], references: [id], onDelete: Cascade)
+
+  @@map("store_integrations")
+}
+
+enum IntegrationType {
+  LINX
+  TOTVS
+  SAP
+  GENERIC_REST
+  MANUAL
+}
+
+// ---------------------------------------------------------------------------
+// OPERADORES (funcionários do açougue)
+// ---------------------------------------------------------------------------
+
+model Operator {
+  id           String   @id @default(cuid())
+  storeId      String                          // isolamento: operador pertence a 1 loja
+  name         String
+  email        String
+  passwordHash String
+  role         OperatorRole @default(OPERATOR)
+  active       Boolean      @default(true)
+  createdAt    DateTime     @default(now())
+  updatedAt    DateTime     @updatedAt
+
+  store Store @relation(fields: [storeId], references: [id], onDelete: Cascade)
+
+  @@unique([storeId, email])                  // email único por loja (não global)
+  @@index([storeId])
+  @@map("operators")
+}
+
+enum OperatorRole {
+  OPERATOR  // atende pedidos
+  MANAGER   // configura a loja, vê relatórios
+}
+
+// ---------------------------------------------------------------------------
+// CATÁLOGO DE PRODUTOS (global + preço por loja)
+// ---------------------------------------------------------------------------
+
+// Produto base — compartilhado entre todas as lojas (nome, categoria, unidade)
+model Product {
+  id          String      @id @default(cuid())
+  name        String
+  category    Category
+  unit        Unit
+  description String?
+  imageUrl    String?
+  active      Boolean     @default(true)
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+
+  storeProducts StoreProduct[]
+  orderItems    OrderItem[]
+
+  @@map("products")
+}
+
+enum Category {
+  BOVINO
+  SUINO
+  FRANGO
+  LINGUICA
+  PEIXE
+  FRUTOS_DO_MAR
+  ESPECIAL
+  OUTROS
+}
+
+enum Unit {
+  KG
+  UNIDADE
+  BANDEJA
+}
+
+// Preço e disponibilidade do produto específico por loja
+model StoreProduct {
+  id          String   @id @default(cuid())
+  storeId     String
+  productId   String
+  price       Decimal  @db.Decimal(10, 2)   // preço atual desta loja
+  available   Boolean  @default(true)
+  updatedAt   DateTime @updatedAt
+
+  store   Store   @relation(fields: [storeId], references: [id], onDelete: Cascade)
+  product Product @relation(fields: [productId], references: [id])
+
+  @@unique([storeId, productId])
+  @@index([storeId])
+  @@map("store_products")
+}
+
+// ---------------------------------------------------------------------------
+// PEDIDOS
+// ---------------------------------------------------------------------------
+
+model Order {
+  id             String      @id @default(cuid())
+  storeId        String                           // isolamento obrigatório
+  orderNumber    Int                              // número sequencial por loja (ex: #042)
+  pickupCode     String                           // código legível exibido no comprovante (ex: A-4821)
+  customerPhone  String?
+  pickupMode     PickupMode
+  scheduledAt    DateTime?                        // null para retirada imediata
+  status         OrderStatus @default(PENDING)
+  totalAmount    Decimal     @db.Decimal(10, 2)
+  notes          String?
+  createdAt      DateTime    @default(now())
+  updatedAt      DateTime    @updatedAt
+
+  store Store       @relation(fields: [storeId], references: [id], onDelete: Cascade)
+  items OrderItem[]
+
+  @@unique([storeId, orderNumber])
+  @@index([storeId, status])
+  @@index([storeId, scheduledAt])
+  @@map("orders")
+}
+
+enum PickupMode {
+  SCHEDULED   // agendado
+  IMMEDIATE   // retirada imediata no balcão
+}
+
+enum OrderStatus {
+  PENDING     // aguardando preparo
+  PREPARING   // em preparo
+  READY       // pronto para retirada
+  DELIVERED   // entregue
+  CANCELLED   // cancelado
+}
+
+model OrderItem {
+  id          String   @id @default(cuid())
+  orderId     String
+  productId   String
+  productName String                         // snapshot do nome no momento do pedido
+  cutType     String?                        // tipo de corte escolhido
+  quantity    Decimal  @db.Decimal(8, 3)     // kg ou unidades
+  unitPrice   Decimal  @db.Decimal(10, 2)    // snapshot do preço no momento do pedido
+  totalPrice  Decimal  @db.Decimal(10, 2)
+
+  order   Order   @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  product Product @relation(fields: [productId], references: [id])
+
+  @@index([orderId])
+  @@map("order_items")
+}

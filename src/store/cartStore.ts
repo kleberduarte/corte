@@ -1,5 +1,6 @@
 import { create } from 'zustand'
 import type { Product, CutType } from '../data/products'
+import { api } from '../lib/api'
 
 export type CartItem = {
   product: Product
@@ -18,6 +19,14 @@ export type Order = {
   createdAt: Date
 }
 
+// Resposta da API ao criar pedido
+type ApiOrder = {
+  id: string
+  pickupCode: string
+  orderNumber: number
+  status: string
+}
+
 type CartStore = {
   items: CartItem[]
   currentOrder: Order | null
@@ -27,8 +36,8 @@ type CartStore = {
   hasProduct: (productId: string) => boolean
   updateAllWeights: (weightKg: number) => void
   clearItems: () => void
-  confirmOrder: (slotTime: string, customerPhone: string) => Order
-  createCounterTicket: (slotTime: string) => Order
+  confirmOrder: (storeSlug: string, slotTime: string, customerPhone: string) => Promise<Order>
+  createCounterTicket: (storeSlug: string, slotTime: string) => Promise<Order>
   updateOrderStatus: (status: Order['status']) => void
   reset: () => void
 }
@@ -68,13 +77,37 @@ export const useCartStore = create<CartStore>((set, get) => ({
 
   clearItems: () => set({ items: [] }),
 
-  confirmOrder: (slotTime, customerPhone) => {
+  confirmOrder: async (storeSlug, slotTime, customerPhone) => {
     const { items } = get()
     if (items.length === 0) throw new Error('No items in cart')
+
+    let pickupCode = generateCode()
+    let orderId = crypto.randomUUID()
+
+    try {
+      const apiOrder = await api.post<ApiOrder>(`/totem/${storeSlug}/orders`, {
+        pickupMode: slotTime === 'Imediata' ? 'IMMEDIATE' : 'SCHEDULED',
+        scheduledAt: slotTime !== 'Imediata' && slotTime !== 'Balcão'
+          ? new Date(`${new Date().toISOString().split('T')[0]}T${slotTime}:00`).toISOString()
+          : undefined,
+        customerPhone: customerPhone || undefined,
+        items: items.map((i) => ({
+          productId: i.product.id,
+          cutType: i.cutType.name,
+          quantity: i.weightKg,
+        })),
+      })
+      pickupCode = apiOrder.pickupCode
+      orderId = apiOrder.id
+    } catch {
+      // Fallback offline: continua com dados locais se a API estiver indisponível
+      console.warn('[cartStore] API indisponível — pedido criado localmente')
+    }
+
     const order: Order = {
-      id: crypto.randomUUID(),
+      id: orderId,
       items: [...items],
-      pickupCode: generateCode(),
+      pickupCode,
       slotTime,
       customerPhone,
       status: 'aguardando',
@@ -84,11 +117,25 @@ export const useCartStore = create<CartStore>((set, get) => ({
     return order
   },
 
-  createCounterTicket: (slotTime) => {
+  createCounterTicket: async (storeSlug, slotTime) => {
+    let pickupCode = generateCode()
+    let orderId = crypto.randomUUID()
+
+    try {
+      const apiOrder = await api.post<ApiOrder>(`/totem/${storeSlug}/orders`, {
+        pickupMode: 'IMMEDIATE',
+        items: [],
+      })
+      pickupCode = apiOrder.pickupCode
+      orderId = apiOrder.id
+    } catch {
+      console.warn('[cartStore] API indisponível — senha de balcão criada localmente')
+    }
+
     const order: Order = {
-      id: crypto.randomUUID(),
+      id: orderId,
       items: [],
-      pickupCode: generateCode(),
+      pickupCode,
       slotTime,
       customerPhone: '',
       status: 'aguardando',
