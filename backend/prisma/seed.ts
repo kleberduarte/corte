@@ -48,7 +48,7 @@ async function main() {
     update: {},
     create: {
       name: 'Violeta Teste',
-      chain: Chain.VIOLETA,
+      chain: Chain.CORTE_SUPERMERCADO,
       slug: 'violeta-teste',
       config: {
         create: {
