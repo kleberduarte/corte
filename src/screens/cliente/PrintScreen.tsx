@@ -95,32 +95,8 @@ function buildReceiptInnerHtml(order: Order, storeName: string, qrDataUrl: strin
   `
 }
 
-const PRINT_SERVER = 'http://localhost:3334'
-
 async function printReceipt(order: Order, storeName: string) {
   const qrDataUrl = await generateQrDataUrl(getOrderTrackingUrl(order.pickupCode), 120)
-
-  // Tenta impressão silenciosa pelo servidor local do totem (print-server)
-  try {
-    const res = await fetch(`${PRINT_SERVER}/print`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        storeName,
-        pickupCode: order.pickupCode,
-        slotTime: order.slotTime,
-        customerPhone: order.customerPhone,
-        qrDataUrl,
-        items: order.items.map((i) => ({
-          productName: i.product.name,
-          cutType: i.cutType.name,
-          weightKg: i.weightKg,
-          estimatedPrice: i.estimatedPrice,
-        })),
-      }),
-    })
-    if (res.ok) return
-  } catch { /* print-server não disponível — usa fallback */ }
 
   ensurePrintStyle()
 
