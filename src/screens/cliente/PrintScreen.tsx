@@ -1,7 +1,6 @@
 import { useEffect, useState } from 'react'
 import type { Order } from '../../store/cartStore'
 import { useStore } from '../../data/config'
-import { api } from '../../lib/api'
 import { getOrderTrackingUrl } from '../../utils/orderTrackingUrl'
 import { generateQrDataUrl } from '../../utils/qrCode'
 
