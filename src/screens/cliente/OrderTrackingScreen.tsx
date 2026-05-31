@@ -28,9 +28,9 @@ const STATUS_INDEX: Record<string, number> = {
 }
 
 function pickupLabel(order: TrackingOrder) {
-  if (order.pickupMode === 'IMMEDIATE') return 'Escolher e Aguardar'
-  if (!order.scheduledAt) return 'Balcão'
-  return `Hoje · ${new Date(order.scheduledAt).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}`
+  if (order.pickupMode === 'IMMEDIATE') return 'Escolher e Aguardar no balcão'
+  if (!order.scheduledAt) return 'Atendimento no balcão'
+  return `Agendado · ${new Date(order.scheduledAt).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}`
 }
 
 export default function OrderTrackingScreen({ orderId }: Props) {
@@ -107,7 +107,7 @@ export default function OrderTrackingScreen({ orderId }: Props) {
                 ? `${order!.items[0].productName} · ${order!.items[0].cutType ?? ''} · ~${order!.items[0].quantity}kg`
                 : `${order!.items.length} itens no pedido`}
           </div>
-          <div className="tracking-meta">Retirada: {pickupLabel(order!)}</div>
+          <div className="tracking-meta">{pickupLabel(order!)}</div>
         </section>
 
         <section className={`tracking-status-banner status-${order!.status}`}>
