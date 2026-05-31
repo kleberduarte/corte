@@ -1,5 +1,5 @@
 import PDFDocument from 'pdfkit'
-import printer from 'pdf-to-printer'
+import { print as printPdf } from 'pdf-to-printer'
 import { writeFileSync, unlinkSync } from 'fs'
 import { tmpdir } from 'os'
 import { join } from 'path'
@@ -95,7 +95,7 @@ export async function printReceipt(data: ReceiptData, printerName?: string): Pro
   const tmpPath = join(tmpdir(), `corte-receipt-${Date.now()}.pdf`)
   writeFileSync(tmpPath, pdfBuffer)
   try {
-    await printer.print(tmpPath, printerName ? { printer: printerName } : {})
+    await printPdf(tmpPath, printerName ? { printer: printerName } : {})
   } finally {
     try { unlinkSync(tmpPath) } catch { /* já removido */ }
   }

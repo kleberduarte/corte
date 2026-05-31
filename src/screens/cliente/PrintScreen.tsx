@@ -111,8 +111,8 @@ async function printReceipt(order: Order, storeSlug: string, storeName: string) 
       })),
     })
     return
-  } catch {
-    // fallback: window.print() para ambientes sem impressora física (dev/web)
+  } catch (err) {
+    console.warn('[print] backend indisponível, usando window.print():', err)
   }
 
   const qrDataUrl = await generateQrDataUrl(getOrderTrackingUrl(order.pickupCode), 120)
