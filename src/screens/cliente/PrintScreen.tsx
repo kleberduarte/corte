@@ -95,36 +95,32 @@ function buildReceiptInnerHtml(order: Order, storeName: string, qrDataUrl: strin
   `
 }
 
-const PRINT_API_URL = import.meta.env.VITE_PRINT_API_URL as string | undefined
+const PRINT_SERVER = 'http://localhost:3334'
 
-async function printReceipt(order: Order, storeSlug: string, storeName: string) {
+async function printReceipt(order: Order, storeName: string) {
   const qrDataUrl = await generateQrDataUrl(getOrderTrackingUrl(order.pickupCode), 120)
 
-  // Tenta impressão silenciosa pelo backend local do totem
-  if (PRINT_API_URL) {
-    try {
-      const res = await fetch(`${PRINT_API_URL}/totem/${storeSlug}/print`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          pickupCode: order.pickupCode,
-          slotTime: order.slotTime,
-          customerPhone: order.customerPhone,
-          qrDataUrl,
-          items: order.items.map((i) => ({
-            productName: i.product.name,
-            cutType: i.cutType.name,
-            weightKg: i.weightKg,
-            estimatedPrice: i.estimatedPrice,
-          })),
-        }),
-      })
-      if (res.ok) return
-      console.warn('[print] backend retornou', res.status)
-    } catch (err) {
-      console.warn('[print] backend local indisponível, usando window.print():', err)
-    }
-  }
+  // Tenta impressão silenciosa pelo servidor local do totem (print-server)
+  try {
+    const res = await fetch(`${PRINT_SERVER}/print`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        storeName,
+        pickupCode: order.pickupCode,
+        slotTime: order.slotTime,
+        customerPhone: order.customerPhone,
+        qrDataUrl,
+        items: order.items.map((i) => ({
+          productName: i.product.name,
+          cutType: i.cutType.name,
+          weightKg: i.weightKg,
+          estimatedPrice: i.estimatedPrice,
+        })),
+      }),
+    })
+    if (res.ok) return
+  } catch { /* print-server não disponível — usa fallback */ }
 
   ensurePrintStyle()
 
@@ -157,7 +153,7 @@ export default function PrintScreen({ order, onDone }: Props) {
 
   useEffect(() => {
     if (stage !== 'done') return
-    printReceipt(order, store.id, store.name)
+    printReceipt(order, store.name)
 
     const interval = setInterval(() => {
       setCountdown((c) => {

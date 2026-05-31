@@ -45,6 +45,10 @@ goto :eof
 :: ═══════════════════════════════════════════════════════════════════
 :dev
 call :setup
+call :instalar_print_server
+echo [print-server] Iniciando servidor de impressao em http://localhost:3334 ...
+start /min "CORTE Print" cmd /k "cd /d %~dp0print-server && node server.mjs"
+timeout /t 1 /nobreak >nul
 echo [dev] Iniciando API em http://localhost:3333 ...
 start /min "CORTE API" cmd /k "cd /d %~dp0backend && npm run dev"
 timeout /t 3 /nobreak >nul
@@ -56,10 +60,25 @@ echo.
 goto fim
 
 :: ═══════════════════════════════════════════════════════════════════
-::  Rotina compartilhada: build + API + serve dist
+::  Instala dependencias do print-server se necessario
+:: ═══════════════════════════════════════════════════════════════════
+:instalar_print_server
+if not exist "%~dp0print-server\node_modules" (
+  echo [print-server] Instalando dependencias...
+  cd /d "%~dp0print-server" && npm install --silent && cd /d "%~dp0"
+)
+goto :eof
+
+:: ═══════════════════════════════════════════════════════════════════
+::  Rotina compartilhada: build + API + serve dist + print-server
 :: ═══════════════════════════════════════════════════════════════════
 :iniciar_producao
 call :setup
+call :instalar_print_server
+
+echo [print-server] Iniciando servidor de impressao em http://localhost:3334 ...
+start /min "CORTE Print" cmd /k "cd /d %~dp0print-server && node server.mjs"
+timeout /t 1 /nobreak >nul
 
 echo [build] Gerando build de producao...
 call npm run build
@@ -115,5 +134,5 @@ goto fim
 :: ═══════════════════════════════════════════════════════════════════
 :fim
 echo.
-echo Para encerrar, feche as janelas "CORTE API" e "CORTE Frontend".
+echo Para encerrar, feche as janelas "CORTE API", "CORTE Frontend" e "CORTE Print".
 echo.

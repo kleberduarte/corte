@@ -1,0 +1,9 @@
+{
+  "name": "corte-print-server",
+  "version": "1.0.0",
+  "type": "module",
+  "dependencies": {
+    "pdf-to-printer": "^5.8.0",
+    "pdfkit": "^0.18.0"
+  }
+}
