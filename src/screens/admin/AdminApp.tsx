@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { validateAdminSession } from '../../lib/adminAuth'
 import { AdminUiProvider } from './adminUi'
+import { PanelLoginLoading } from '../../components/PanelLoginScreen'
 import AdminLoginScreen from './AdminLoginScreen'
 import AdminDashboard from './AdminDashboard'
 import './admin.css'
@@ -30,14 +31,7 @@ export default function AdminApp() {
 
   return (
     <AdminUiProvider>
-      {auth === 'checking' && (
-        <div className="admin-login">
-          <div className="admin-loading-block" style={{ justifyContent: 'center' }}>
-            <span className="admin-spinner" aria-hidden />
-            Verificando sessão...
-          </div>
-        </div>
-      )}
+      {auth === 'checking' && <PanelLoginLoading message="Verificando sessão..." />}
       {auth === 'guest' && <AdminLoginScreen onSuccess={handleLoginSuccess} />}
       {auth === 'authenticated' && <AdminDashboard onLogout={handleLogout} />}
     </AdminUiProvider>
