@@ -7,7 +7,7 @@ export async function corsPlugin(app: FastifyInstance) {
 
   await app.register(cors, {
     origin: origins,
-    methods: ['GET', 'POST', 'PATCH', 'DELETE'],
+    methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE'],
     allowedHeaders: ['Content-Type', 'Authorization'],
   })
 }
