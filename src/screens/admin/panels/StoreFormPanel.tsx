@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { api, ApiError } from '../../../lib/api'
 import { getAdminToken } from '../../../lib/adminAuth'
+import { tenantLogoPath, tenantLogoUrl } from '../../../lib/publicUrl'
 import { CHAIN_OPTIONS } from '../constants'
 import { useAdminUi } from '../adminUi'
 
@@ -61,8 +62,20 @@ export default function StoreFormPanel({ storeId, onBack, onSaved }: {
 
   function autoSlug(name: string) {
     if (isEdit) return
-    setField('slug', name.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, ''))
+    const slug = name.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '')
+    setField('slug', slug)
   }
+
+  function applyDefaultLogoUrl() {
+    if (!form.slug) {
+      toast('Defina o slug da loja antes', 'error')
+      return
+    }
+    setConfig('logoUrl', tenantLogoUrl(form.slug))
+  }
+
+  const suggestedLogoUrl = form.slug ? tenantLogoUrl(form.slug) : ''
+  const logoFilePath = form.slug ? `public${tenantLogoPath(form.slug)}` : 'public/assets/tenants/{slug}/logo.png'
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
@@ -154,13 +167,34 @@ export default function StoreFormPanel({ storeId, onBack, onSaved }: {
             ))}
             <div className="admin-field" style={{ gridColumn: '1 / -1' }}>
               <label htmlFor="store-logo">URL da logo</label>
-              <input
-                id="store-logo"
-                placeholder="https://..."
-                value={form.config.logoUrl}
-                onChange={(e) => setConfig('logoUrl', e.target.value)}
-              />
-              <p className="admin-field__hint">Link público da imagem (PNG ou SVG)</p>
+              <div className="admin-logo-url-row">
+                <input
+                  id="store-logo"
+                  placeholder={suggestedLogoUrl || 'https://app.seudominio.com.br/assets/tenants/slug/logo.png'}
+                  value={form.config.logoUrl}
+                  onChange={(e) => setConfig('logoUrl', e.target.value)}
+                />
+                <button
+                  type="button"
+                  className="admin-btn admin-btn--secondary admin-btn--sm"
+                  disabled={!form.slug}
+                  onClick={applyDefaultLogoUrl}
+                >
+                  Usar URL padrão
+                </button>
+              </div>
+              <p className="admin-field__hint">
+                1. Coloque o arquivo em <code>{logoFilePath}</code> (PNG ou SVG, fundo transparente).
+                {' '}2. Clique em Usar URL padrão ou cole a URL HTTPS pública.
+                {import.meta.env.VITE_PUBLIC_URL && (
+                  <> Em produção: <code>{import.meta.env.VITE_PUBLIC_URL}</code>.</>
+                )}
+              </p>
+              {suggestedLogoUrl && (
+                <p className="admin-field__hint">
+                  URL sugerida: <code>{suggestedLogoUrl}</code>
+                </p>
+              )}
               {form.config.logoUrl && (
                 <div className="admin-preview-logo">
                   <img src={form.config.logoUrl} alt="Prévia da logo" onError={(e) => { (e.target as HTMLImageElement).style.display = 'none' }} />

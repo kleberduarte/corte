@@ -546,6 +546,17 @@ body.mode-admin textarea {
   gap: 14px;
 }
 
+.admin-logo-url-row {
+  display: flex;
+  gap: 8px;
+  align-items: stretch;
+}
+
+.admin-logo-url-row input {
+  flex: 1;
+  min-width: 0;
+}
+
 .admin-preview-logo {
   margin-top: 8px;
   height: 48px;
