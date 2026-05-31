@@ -46,6 +46,7 @@ goto :eof
 :dev
 call :setup
 call :instalar_print_server
+call :localiza_chrome
 echo [print-server] Iniciando servidor de impressao em http://localhost:3334 ...
 start /min "CORTE Print" cmd /k "cd /d %~dp0print-server && node server.mjs"
 timeout /t 1 /nobreak >nul
@@ -53,10 +54,16 @@ echo [dev] Iniciando API em http://localhost:3333 ...
 start /min "CORTE API" cmd /k "cd /d %~dp0backend && npm run dev"
 timeout /t 3 /nobreak >nul
 echo [dev] Iniciando frontend em http://localhost:5173 ...
-start "CORTE Frontend" cmd /k "cd /d %~dp0 && npm run dev"
-echo.
-echo Admin: http://localhost:5173/?view=admin
-echo.
+start /min "CORTE Frontend" cmd /k "cd /d %~dp0 && npm run dev"
+
+echo [aguarda] Esperando frontend ficar pronto...
+:aguarda_dev
+timeout /t 2 /nobreak >nul
+powershell -Command "try{Invoke-WebRequest -Uri 'http://localhost:5173' -UseBasicParsing -TimeoutSec 1|Out-Null;exit 0}catch{exit 1}" >nul 2>&1
+if %errorlevel% NEQ 0 goto aguarda_dev
+
+echo [chrome] Abrindo totem em modo dev...
+start "" "%CHROME%" --kiosk --kiosk-printing --disable-infobars --noerrdialogs --no-first-run --disable-pinch --overscroll-history-navigation=0 --disable-features=TranslateUI http://localhost:5173/
 goto fim
 
 :: ═══════════════════════════════════════════════════════════════════
