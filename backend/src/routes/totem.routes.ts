@@ -6,6 +6,7 @@ import { FastifyInstance } from 'fastify'
 import { z } from 'zod'
 import { createOrderSchema } from '../schemas/order.schema'
 import { placeOrder } from '../services/order.service'
+import { printReceipt } from '../services/print.service'
 import { findStoreBySlug } from '../repositories/store.repository'
 import { findProductsByStore } from '../repositories/product.repository'
 import { NotFoundError } from '../errors/AppError'
@@ -112,6 +113,38 @@ export async function totemRoutes(app: FastifyInstance) {
           totalPrice: Number(i.totalPrice),
         })),
       })
+    },
+  )
+
+  // POST /totem/:storeSlug/print — impressão silenciosa pelo backend (sem diálogo no totem)
+  const printSchema = z.object({
+    pickupCode: z.string(),
+    slotTime: z.string(),
+    customerPhone: z.string().optional(),
+    printerName: z.string().optional(),
+    items: z.array(z.object({
+      productName: z.string(),
+      cutType: z.string(),
+      weightKg: z.number(),
+      estimatedPrice: z.number(),
+    })),
+  })
+
+  app.post<{ Params: { storeSlug: string } }>(
+    '/:storeSlug/print',
+    { config: { rateLimit: { max: 20, timeWindow: '1 minute' } } },
+    async (req, reply) => {
+      const store = await findStoreBySlug(req.params.storeSlug)
+      if (!store || !store.active) throw new NotFoundError('Loja')
+
+      const body = printSchema.parse(req.body)
+
+      await printReceipt(
+        { storeName: store.name, ...body },
+        body.printerName ?? process.env.PRINTER_NAME,
+      )
+
+      return reply.status(204).send()
     },
   )
 }

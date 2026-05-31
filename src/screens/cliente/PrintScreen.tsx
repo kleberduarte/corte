@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import type { Order } from '../../store/cartStore'
 import { useStore } from '../../data/config'
+import { api } from '../../lib/api'
 import { getOrderTrackingUrl } from '../../utils/orderTrackingUrl'
 import { generateQrDataUrl } from '../../utils/qrCode'
 
@@ -95,10 +96,26 @@ function buildReceiptInnerHtml(order: Order, storeName: string, qrDataUrl: strin
   `
 }
 
-async function printReceipt(order: Order, storeName: string) {
-  const trackingUrl = getOrderTrackingUrl(order.pickupCode)
-  const qrDataUrl = await generateQrDataUrl(trackingUrl, 120)
+async function printReceipt(order: Order, storeSlug: string, storeName: string) {
+  // Tenta impressão silenciosa pelo backend (totem com impressora física)
+  try {
+    await api.post(`/totem/${storeSlug}/print`, {
+      pickupCode: order.pickupCode,
+      slotTime: order.slotTime,
+      customerPhone: order.customerPhone,
+      items: order.items.map((i) => ({
+        productName: i.product.name,
+        cutType: i.cutType.name,
+        weightKg: i.weightKg,
+        estimatedPrice: i.estimatedPrice,
+      })),
+    })
+    return
+  } catch {
+    // fallback: window.print() para ambientes sem impressora física (dev/web)
+  }
 
+  const qrDataUrl = await generateQrDataUrl(getOrderTrackingUrl(order.pickupCode), 120)
   ensurePrintStyle()
 
   let div = document.getElementById(PRINT_DIV_ID)
@@ -130,7 +147,7 @@ export default function PrintScreen({ order, onDone }: Props) {
 
   useEffect(() => {
     if (stage !== 'done') return
-    printReceipt(order, store.name)
+    printReceipt(order, store.id, store.name)
 
     const interval = setInterval(() => {
       setCountdown((c) => {
