@@ -96,26 +96,37 @@ function buildReceiptInnerHtml(order: Order, storeName: string, qrDataUrl: strin
   `
 }
 
+const PRINT_API_URL = import.meta.env.VITE_PRINT_API_URL as string | undefined
+
 async function printReceipt(order: Order, storeSlug: string, storeName: string) {
-  // Tenta impressão silenciosa pelo backend (totem com impressora física)
-  try {
-    await api.post(`/totem/${storeSlug}/print`, {
-      pickupCode: order.pickupCode,
-      slotTime: order.slotTime,
-      customerPhone: order.customerPhone,
-      items: order.items.map((i) => ({
-        productName: i.product.name,
-        cutType: i.cutType.name,
-        weightKg: i.weightKg,
-        estimatedPrice: i.estimatedPrice,
-      })),
-    })
-    return
-  } catch (err) {
-    console.warn('[print] backend indisponível, usando window.print():', err)
+  const qrDataUrl = await generateQrDataUrl(getOrderTrackingUrl(order.pickupCode), 120)
+
+  // Tenta impressão silenciosa pelo backend local do totem
+  if (PRINT_API_URL) {
+    try {
+      const res = await fetch(`${PRINT_API_URL}/totem/${storeSlug}/print`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          pickupCode: order.pickupCode,
+          slotTime: order.slotTime,
+          customerPhone: order.customerPhone,
+          qrDataUrl,
+          items: order.items.map((i) => ({
+            productName: i.product.name,
+            cutType: i.cutType.name,
+            weightKg: i.weightKg,
+            estimatedPrice: i.estimatedPrice,
+          })),
+        }),
+      })
+      if (res.ok) return
+      console.warn('[print] backend retornou', res.status)
+    } catch (err) {
+      console.warn('[print] backend local indisponível, usando window.print():', err)
+    }
   }
 
-  const qrDataUrl = await generateQrDataUrl(getOrderTrackingUrl(order.pickupCode), 120)
   ensurePrintStyle()
 
   let div = document.getElementById(PRINT_DIV_ID)

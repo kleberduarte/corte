@@ -121,6 +121,7 @@ export async function totemRoutes(app: FastifyInstance) {
     pickupCode: z.string(),
     slotTime: z.string(),
     customerPhone: z.string().optional(),
+    qrDataUrl: z.string().optional(),
     printerName: z.string().optional(),
     items: z.array(z.object({
       productName: z.string(),

@@ -1,5 +1,4 @@
 import PDFDocument from 'pdfkit'
-import { print as printPdf } from 'pdf-to-printer'
 import { writeFileSync, unlinkSync } from 'fs'
 import { tmpdir } from 'os'
 import { join } from 'path'
@@ -9,6 +8,7 @@ export type ReceiptData = {
   pickupCode: string
   slotTime: string
   customerPhone?: string
+  qrDataUrl?: string
   items: {
     productName: string
     cutType: string
@@ -31,7 +31,7 @@ function buildPdf(data: ReceiptData): Promise<Buffer> {
     doc.on('end', () => resolve(Buffer.concat(chunks)))
     doc.on('error', reject)
 
-    const W = 226.77 - 22.68 // largura útil
+    const W = 226.77 - 22.68
     const x = 11.34
     let y = 11.34
 
@@ -80,6 +80,22 @@ function buildPdf(data: ReceiptData): Promise<Buffer> {
     y = doc.y + 4
     dashed()
 
+    // QR Code — usa a imagem enviada pelo frontend (data URL base64)
+    if (data.qrDataUrl) {
+      try {
+        const base64 = data.qrDataUrl.replace(/^data:image\/\w+;base64,/, '')
+        const imgBuf = Buffer.from(base64, 'base64')
+        text('Acompanhe seu pedido', { size: 7, align: 'center' })
+        const qrSize = 72
+        doc.image(imgBuf, x + (W - qrSize) / 2, y, { width: qrSize, height: qrSize })
+        y += qrSize + 4
+        text('Escaneie para ver o andamento', { size: 7, align: 'center' })
+        dashed()
+      } catch {
+        // ignora se a imagem falhar
+      }
+    }
+
     text('Apresente este comprovante no balcão', { size: 7, align: 'center' })
     const now = new Date()
     const dateStr = now.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit', year: 'numeric' })
@@ -91,6 +107,12 @@ function buildPdf(data: ReceiptData): Promise<Buffer> {
 }
 
 export async function printReceipt(data: ReceiptData, printerName?: string): Promise<void> {
+  if (process.platform !== 'win32') {
+    throw new Error('Impressão pelo backend disponível apenas no Windows (totem local)')
+  }
+
+  const { print: printPdf } = await import('pdf-to-printer')
+
   const pdfBuffer = await buildPdf(data)
   const tmpPath = join(tmpdir(), `corte-receipt-${Date.now()}.pdf`)
   writeFileSync(tmpPath, pdfBuffer)
