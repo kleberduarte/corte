@@ -42,8 +42,12 @@ async function postPrint(url: string, payload: ReceiptPayload): Promise<boolean>
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(payload),
     })
-    return res.ok || res.status === 204
-  } catch {
+    if (res.ok || res.status === 204) return true
+    const err = await res.json().catch(() => null) as { error?: string } | null
+    console.error(`[print] ${url} → ${res.status}`, err?.error ?? res.statusText)
+    return false
+  } catch (err) {
+    console.error(`[print] ${url} → falha de rede`, err)
     return false
   }
 }
@@ -60,5 +64,5 @@ export async function printReceiptSilent(order: Order, storeName: string, storeS
     if (await postPrint(`${base}/totem/${encodeURIComponent(storeSlug)}/print`, payload)) return
   }
 
-  console.warn('[print] Servidor de impressão indisponível — verifique se o print-server está rodando na porta 3334')
+  console.warn('[print] Impressão não concluída — verifique o print-server (porta 3334) e a impressora')
 }

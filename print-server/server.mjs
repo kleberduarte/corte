@@ -4,35 +4,40 @@
  * gera o PDF com pdfkit e imprime silenciosamente via SumatraPDF.
  */
 import http from 'http'
-import { spawn } from 'child_process'
 import { createRequire } from 'module'
-import { fileURLToPath } from 'url'
-import { dirname, join } from 'path'
+import { join } from 'path'
 
 const require = createRequire(import.meta.url)
 const PDFDocument = require('pdfkit')
-const { writeFileSync, unlinkSync } = require('fs')
+const { print: printPdf } = require('pdf-to-printer')
+const { writeFileSync, unlinkSync, mkdirSync, copyFileSync } = require('fs')
 const { tmpdir } = require('os')
 
 const PORT = 3334
 const PRINTER_NAME = process.env.PRINTER_NAME
+const SAVE_PDF_DIR = process.env.SAVE_PDF_DIR
 
-// Localiza o SumatraPDF embutido no pdf-to-printer
-const pkgDir = dirname(require.resolve('pdf-to-printer/package.json'))
-const SUMATRA = join(pkgDir, 'vendor', 'SumatraPDF.exe')
+// ── Impressão silenciosa via pdf-to-printer (SumatraPDF embutido) ─────────────
 
-// ── Impressão silenciosa via SumatraPDF ───────────────────────────────────────
+async function deliverPdf(pdfPath, pickupCode) {
+  if (SAVE_PDF_DIR) {
+    mkdirSync(SAVE_PDF_DIR, { recursive: true })
+    const safeCode = String(pickupCode).replace(/[^\w-]/g, '')
+    const dest = join(SAVE_PDF_DIR, `receipt-${safeCode}-${Date.now()}.pdf`)
+    copyFileSync(pdfPath, dest)
+    console.log(`[print-server] PDF salvo (modo dev): ${dest}`)
+    return
+  }
 
-function printSilent(pdfPath) {
-  return new Promise((resolve, reject) => {
-    const args = PRINTER_NAME
-      ? ['-print-to', PRINTER_NAME, '-silent', '-exit-when-done', pdfPath]
-      : ['-print-to-default', '-silent', '-exit-when-done', pdfPath]
-
-    const proc = spawn(SUMATRA, args, { windowsHide: true, stdio: 'ignore' })
-    proc.on('close', code => code === 0 ? resolve() : reject(new Error(`SumatraPDF saiu com código ${code}`)))
-    proc.on('error', reject)
-  })
+  try {
+    await printPdf(pdfPath, PRINTER_NAME ? { printer: PRINTER_NAME } : {})
+    console.log(`[print-server] impresso: ${pickupCode}`)
+  } catch (err) {
+    const hint = PRINTER_NAME
+      ? `Falha ao imprimir em "${PRINTER_NAME}"`
+      : 'Nenhuma impressora padrão no Windows — defina PRINTER_NAME ou uma impressora padrão'
+    throw new Error(`${hint}: ${err.message}`)
+  }
 }
 
 // ── Geração do PDF ────────────────────────────────────────────────────────────
@@ -151,8 +156,7 @@ const server = http.createServer(async (req, res) => {
         writeFileSync(pdfPath, pdfBuffer)
         tmpFiles.push(pdfPath)
 
-        await printSilent(pdfPath)
-        console.log(`[print-server] impresso: ${data.pickupCode}`)
+        await deliverPdf(pdfPath, data.pickupCode)
 
         res.writeHead(204); res.end()
       } catch (err) {
@@ -171,6 +175,9 @@ const server = http.createServer(async (req, res) => {
 
 server.listen(PORT, '127.0.0.1', () => {
   console.log(`[print-server] ouvindo em http://localhost:${PORT}`)
-  console.log(`[print-server] SumatraPDF: ${SUMATRA}`)
-  console.log(`[print-server] impressora: ${PRINTER_NAME || '(padrão do Windows)'}`)
+  if (SAVE_PDF_DIR) {
+    console.log(`[print-server] modo dev: PDFs em ${SAVE_PDF_DIR}`)
+  } else {
+    console.log(`[print-server] impressora: ${PRINTER_NAME || '(padrão do Windows)'}`)
+  }
 })

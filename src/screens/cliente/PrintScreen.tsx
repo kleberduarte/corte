@@ -44,13 +44,14 @@ export default function PrintScreen({ order, onDone }: Props) {
     if (stage !== 'done') return
 
     const interval = setInterval(() => {
-      setCountdown((c) => {
-        if (c <= 1) { onDone(); return 0 }
-        return c - 1
-      })
+      setCountdown((c) => (c > 0 ? c - 1 : 0))
     }, 1000)
     return () => clearInterval(interval)
-  }, [stage, onDone])
+  }, [stage])
+
+  useEffect(() => {
+    if (stage === 'done' && countdown === 0) onDone()
+  }, [stage, countdown, onDone])
 
   const dateStr = new Date().toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit', year: 'numeric' })
   const timeStr = new Date().toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })

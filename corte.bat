@@ -47,8 +47,8 @@ goto :eof
 call :setup
 call :instalar_print_server
 call :localiza_chrome
-echo [print-server] Iniciando servidor de impressao em http://localhost:3334 ...
-start /min "CORTE Print" cmd /k "cd /d %~dp0print-server && node server.mjs"
+echo [print-server] Iniciando servidor de impressao em http://localhost:3334 (PDFs em print-server\receipts) ...
+start /min "CORTE Print" cmd /k "cd /d %~dp0print-server && set SAVE_PDF_DIR=%~dp0print-server\receipts && node server.mjs"
 timeout /t 1 /nobreak >nul
 echo [dev] Iniciando API em http://localhost:3333 ...
 start /min "CORTE API" cmd /k "cd /d %~dp0backend && npm run dev"
