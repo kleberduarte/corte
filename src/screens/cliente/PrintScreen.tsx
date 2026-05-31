@@ -1,8 +1,9 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import type { Order } from '../../store/cartStore'
 import { useStore } from '../../data/config'
 import { getOrderTrackingUrl } from '../../utils/orderTrackingUrl'
 import { generateQrDataUrl } from '../../utils/qrCode'
+import { printReceiptSilent } from '../../utils/silentPrint'
 
 type Props = {
   order: Order
@@ -17,110 +18,22 @@ function pickupLabel(slotTime: string) {
 
 const COUNTER_LINE = 'Atendimento presencial no balcão'
 
-const PRINT_DIV_ID = '__corte_receipt__'
-const PRINT_STYLE_ID = '__corte_receipt_style__'
-
-function ensurePrintStyle() {
-  if (document.getElementById(PRINT_STYLE_ID)) return
-  const style = document.createElement('style')
-  style.id = PRINT_STYLE_ID
-  style.textContent = `
-    #${PRINT_DIV_ID} { display: none; }
-    @media print {
-      body > *:not(#${PRINT_DIV_ID}) { display: none !important; }
-      #${PRINT_DIV_ID} {
-        display: block !important;
-        font-family: 'Courier New', monospace;
-        font-size: 12px;
-        line-height: 1.5;
-        color: #000;
-        background: #fff;
-        width: 80mm;
-        padding: 4mm 4mm 12mm;
-      }
-      #${PRINT_DIV_ID} .rp-center  { text-align: center; }
-      #${PRINT_DIV_ID} .rp-bold    { font-weight: bold; }
-      #${PRINT_DIV_ID} .rp-large   { font-size: 18px; font-weight: bold; letter-spacing: 4px; }
-      #${PRINT_DIV_ID} .rp-small   { font-size: 10px; }
-      #${PRINT_DIV_ID} .rp-xsmall  { font-size: 9px; color: #444; }
-      #${PRINT_DIV_ID} .rp-dashed  { border-top: 1px dashed #000; margin: 6px 0; }
-      #${PRINT_DIV_ID} .rp-section { margin: 4px 0; }
-      #${PRINT_DIV_ID} .rp-label   { font-weight: bold; font-size: 10px; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 2px; }
-      #${PRINT_DIV_ID} .rp-codebox { border: 1px solid #000; padding: 6px; margin: 8px 0; text-align: center; }
-      #${PRINT_DIV_ID} .rp-qrbox  { text-align: center; margin: 8px 0; }
-      #${PRINT_DIV_ID} .rp-qrbox img { width: 96px; height: 96px; }
-      @page { margin: 0; size: 80mm auto; }
-    }
-  `
-  document.head.appendChild(style)
-}
-
-function buildReceiptInnerHtml(order: Order, storeName: string, qrDataUrl: string): string {
-  const dateStr = new Date().toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit', year: 'numeric' })
-  const timeStr = new Date().toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })
-
-  const itemsHtml = order.items.length === 0
-    ? `<div class="rp-section"><div><b>Pedido:</b> ${COUNTER_LINE}</div></div>`
-    : order.items.map((item, idx) => `
-      <div class="rp-section">
-        ${order.items.length > 1 ? `<div class="rp-label">Item ${idx + 1}</div>` : ''}
-        <div><b>Corte:</b> ${item.product.name}</div>
-        <div><b>Tipo:</b> ${item.cutType.name}</div>
-        <div><b>Peso:</b> ~${item.weightKg}kg</div>
-        <div><b>Valor est.:</b> R$ ${item.estimatedPrice.toFixed(2).replace('.', ',')}</div>
-      </div>
-      ${idx < order.items.length - 1 ? '<div class="rp-dashed"></div>' : ''}
-    `).join('')
-
-  return `
-    <div class="rp-center rp-bold" style="font-size:14px">CORTE · Açougue Inteligente</div>
-    <div class="rp-center rp-small">${storeName}</div>
-    <div class="rp-dashed"></div>
-    <div class="rp-center rp-bold" style="font-size:13px">${order.items.length === 0 ? 'SENHA DE BALCÃO' : order.slotTime === 'Imediata' ? 'PEDIDO IMEDIATO' : 'PEDIDO AGENDADO'}</div>
-    <div class="rp-dashed"></div>
-    ${itemsHtml}
-    <div class="rp-dashed"></div>
-    <div><b>Retirada:</b> ${pickupLabel(order.slotTime)}</div>
-    ${order.customerPhone ? `<div><b>WhatsApp:</b> ${order.customerPhone}</div>` : ''}
-    <div class="rp-dashed"></div>
-    <div class="rp-center rp-small">Código de retirada</div>
-    <div class="rp-codebox rp-large">${order.pickupCode}</div>
-    <div class="rp-dashed"></div>
-    <div class="rp-center rp-small">Acompanhe seu pedido</div>
-    <div class="rp-qrbox"><img src="${qrDataUrl}" alt="QR Code"/></div>
-    <div class="rp-center rp-xsmall">Escaneie para ver o andamento</div>
-    <div class="rp-dashed"></div>
-    <div class="rp-center rp-small">Apresente este comprovante no balcão</div>
-    <div class="rp-center rp-xsmall">${dateStr} · ${timeStr}</div>
-  `
-}
-
-async function printReceipt(order: Order, storeName: string) {
-  const qrDataUrl = await generateQrDataUrl(getOrderTrackingUrl(order.pickupCode), 120)
-
-  ensurePrintStyle()
-
-  let div = document.getElementById(PRINT_DIV_ID)
-  if (!div) {
-    div = document.createElement('div')
-    div.id = PRINT_DIV_ID
-    document.body.appendChild(div)
-  }
-
-  div.innerHTML = buildReceiptInnerHtml(order, storeName, qrDataUrl)
-  window.print()
-  div.innerHTML = ''
-}
-
 export default function PrintScreen({ order, onDone }: Props) {
   const store = useStore()
   const [stage, setStage] = useState<'printing' | 'done'>('printing')
   const [countdown, setCountdown] = useState(8)
   const [qrDataUrl, setQrDataUrl] = useState<string | null>(null)
+  const printedRef = useRef(false)
 
   useEffect(() => {
     generateQrDataUrl(getOrderTrackingUrl(order.pickupCode), 140).then(setQrDataUrl)
   }, [order.pickupCode])
+
+  useEffect(() => {
+    if (printedRef.current) return
+    printedRef.current = true
+    printReceiptSilent(order, store.name, store.id)
+  }, [order, store.name, store.id])
 
   useEffect(() => {
     const t = setTimeout(() => setStage('done'), 3200)
@@ -129,7 +42,6 @@ export default function PrintScreen({ order, onDone }: Props) {
 
   useEffect(() => {
     if (stage !== 'done') return
-    printReceipt(order, store.name)
 
     const interval = setInterval(() => {
       setCountdown((c) => {
@@ -138,7 +50,7 @@ export default function PrintScreen({ order, onDone }: Props) {
       })
     }, 1000)
     return () => clearInterval(interval)
-  }, [stage, order, store.name, onDone])
+  }, [stage, onDone])
 
   const dateStr = new Date().toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit', year: 'numeric' })
   const timeStr = new Date().toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })
