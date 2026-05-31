@@ -7,7 +7,7 @@ export const adminLoginSchema = z.object({
 
 export const createStoreSchema = z.object({
   name:    z.string().min(2),
-  chain:   z.enum(['PAO_DE_ACUCAR', 'EXTRA', 'VIOLETA', 'CARREFOUR', 'CORTE_SUPERMERCADO', 'OUTROS']),
+  chain:   z.enum(['PAO_DE_ACUCAR', 'EXTRA', 'VIOLETA', 'CARREFOUR', 'ATACADAO', 'ASSAI', 'SUPERMERCADOS_MATEUS', 'BIG', 'PREZUNIC', 'MUNDIAL', 'SONDA', 'CONDOR', 'SUPER_MUFFATO', 'ZAFFARI', 'BOURBON', 'COOP', 'HIROTA', 'REDE_SMART', 'CORTE_SUPERMERCADO', 'OUTROS']),
   slug:    z.string().min(2).regex(/^[a-z0-9-]+$/, 'Slug deve conter apenas letras minúsculas, números e hífens'),
   timezone: z.string().default('America/Sao_Paulo'),
   config: z.object({

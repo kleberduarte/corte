@@ -47,10 +47,29 @@ model Store {
 
 // Redes de supermercado suportadas
 enum Chain {
+  // Grupo Pão de Açúcar (GPA)
   PAO_DE_ACUCAR
   EXTRA
-  VIOLETA
+  // Grupo Carrefour
   CARREFOUR
+  ATACADAO
+  // Grupo Mateus
+  SUPERMERCADOS_MATEUS
+  // Redes regionais
+  VIOLETA
+  ASSAI
+  BIG
+  PREZUNIC
+  MUNDIAL
+  SONDA
+  CONDOR
+  SUPER_MUFFATO
+  ZAFFARI
+  BOURBON
+  COOP
+  HIROTA
+  REDE_SMART
+  // Plataforma
   CORTE_SUPERMERCADO
   OUTROS
 }
