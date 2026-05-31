@@ -25,7 +25,7 @@ const CARDS: {
   {
     mode: 'immediate',
     badge: 'Pronto em minutos',
-    title: 'Retirada Imediata',
+    title: 'Escolher e Aguardar',
     subtitle: 'Seu corte preparado agora no balcão',
     hint: 'Dirija-se ao açougue ao finalizar',
     imageUrl: 'https://images.unsplash.com/photo-1607623814075-e51df1bdc82f?w=900&h=700&fit=crop&q=90',

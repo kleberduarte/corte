@@ -10,7 +10,7 @@ type Props = {
 }
 
 function pickupLabel(slotTime: string) {
-  if (slotTime === 'Imediata') return 'Retirada imediata'
+  if (slotTime === 'Imediata') return 'Escolher e Aguardar'
   if (slotTime === 'Balcão') return 'Atendimento no balcão'
   return `Hoje · ${slotTime}`
 }

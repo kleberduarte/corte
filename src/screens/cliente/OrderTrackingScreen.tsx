@@ -28,7 +28,7 @@ const STATUS_INDEX: Record<string, number> = {
 }
 
 function pickupLabel(order: TrackingOrder) {
-  if (order.pickupMode === 'IMMEDIATE') return 'Retirada imediata'
+  if (order.pickupMode === 'IMMEDIATE') return 'Escolher e Aguardar'
   if (!order.scheduledAt) return 'Balcão'
   return `Hoje · ${new Date(order.scheduledAt).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}`
 }
