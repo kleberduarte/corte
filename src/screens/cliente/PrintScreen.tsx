@@ -72,9 +72,7 @@ export default function PrintScreen({ order, onDone }: Props) {
             borderRadius: 'var(--r)', padding: '12px 16px', marginBottom: 16, maxWidth: 320,
             fontSize: 13, color: 'var(--t1)', lineHeight: 1.5,
           }}>
-            Não foi possível imprimir o comprovante. Anote o código abaixo ou procure um funcionário.
-            {' '}Inicie o totem pelo <strong>corte.bat</strong> (opção 2) e confira a janela <strong>CORTE Print</strong>.
-            {' '}Se a impressora não for a padrão do Windows, defina <code>PRINTER_NAME</code> em <code>print-server\.env</code>.
+            Não foi possível imprimir o comprovante. Anote o código abaixo ou procure um funcionário do açougue.
           </div>
         )}
         <div style={{ fontSize: 14, color: 'var(--t2)', lineHeight: 1.55, marginBottom: 24, maxWidth: 300 }}>

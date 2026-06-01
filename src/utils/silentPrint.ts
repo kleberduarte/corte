@@ -80,8 +80,11 @@ export async function printReceiptSilent(
     return true
   }
 
-  const browserOk = await printReceiptBrowser(payload)
-  if (browserOk) return true
+  // Em produção não abre o diálogo do Chrome (configuração de impressora) para o cliente do totem.
+  if (import.meta.env.DEV) {
+    const browserOk = await printReceiptBrowser(payload)
+    if (browserOk) return true
+  }
 
   console.warn(
     '[print] Impressão não concluída — use corte.bat (opção 2), verifique a janela CORTE Print (porta 3334) e a impressora em print-server\\.env',
