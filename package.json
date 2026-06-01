@@ -7,6 +7,7 @@
     "dev": "vite",
     "dev:api": "npm run dev --prefix backend",
     "build": "tsc -b && vite build",
+    "build:totem": "tsc -b && vite build --mode totem",
     "lint": "eslint .",
     "preview": "vite preview"
   },

@@ -5,7 +5,26 @@
  */
 import http from 'http'
 import { createRequire } from 'module'
-import { join } from 'path'
+import { join, dirname } from 'path'
+import { readFileSync, existsSync } from 'fs'
+import { fileURLToPath } from 'url'
+
+const __dirname = dirname(fileURLToPath(import.meta.url))
+const envPath = join(__dirname, '.env')
+if (existsSync(envPath)) {
+  for (const line of readFileSync(envPath, 'utf8').split(/\r?\n/)) {
+    const trimmed = line.trim()
+    if (!trimmed || trimmed.startsWith('#')) continue
+    const eq = trimmed.indexOf('=')
+    if (eq === -1) continue
+    const key = trimmed.slice(0, eq).trim()
+    let val = trimmed.slice(eq + 1).trim()
+    if ((val.startsWith('"') && val.endsWith('"')) || (val.startsWith("'") && val.endsWith("'"))) {
+      val = val.slice(1, -1)
+    }
+    if (!process.env[key]) process.env[key] = val
+  }
+}
 
 const require = createRequire(import.meta.url)
 const PDFDocument = require('pdfkit')
@@ -133,6 +152,12 @@ const server = http.createServer(async (req, res) => {
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type')
 
   if (req.method === 'OPTIONS') { res.writeHead(204); res.end(); return }
+
+  if (req.method === 'GET' && req.url === '/health') {
+    res.writeHead(200, { 'Content-Type': 'application/json' })
+    res.end(JSON.stringify({ ok: true, printer: PRINTER_NAME || 'default' }))
+    return
+  }
 
   if (req.method === 'POST' && req.url === '/print') {
     let body = ''

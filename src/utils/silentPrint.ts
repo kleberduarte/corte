@@ -3,9 +3,27 @@ import { getOrderTrackingUrl } from './orderTrackingUrl'
 import { generateQrDataUrl } from './qrCode'
 
 const PRINT_SERVER_URL = 'http://127.0.0.1:3334'
-const PRINT_API_BASE =
-  (import.meta.env.VITE_PRINT_API_URL as string | undefined)
-  ?? (import.meta.env.VITE_API_URL as string | undefined)
+/** Backend local no totem — impressão só funciona no Windows da máquina física. */
+const LOCAL_PRINT_API = 'http://127.0.0.1:3333'
+
+function isLocalHostUrl(url: string): boolean {
+  try {
+    const host = new URL(url).hostname
+    return host === 'localhost' || host === '127.0.0.1'
+  } catch {
+    return false
+  }
+}
+
+function resolvePrintApiBase(): string {
+  const explicit = import.meta.env.VITE_PRINT_API_URL as string | undefined
+  if (explicit && isLocalHostUrl(explicit)) return explicit.replace(/\/$/, '')
+
+  const fromApi = import.meta.env.VITE_API_URL as string | undefined
+  if (fromApi && isLocalHostUrl(fromApi)) return fromApi.replace(/\/$/, '')
+
+  return LOCAL_PRINT_API
+}
 
 type ReceiptPayload = {
   storeName: string
@@ -61,10 +79,8 @@ export async function printReceiptSilent(order: Order, storeName: string, storeS
 
   if (await postPrint(`${PRINT_SERVER_URL}/print`, payload)) return true
 
-  if (PRINT_API_BASE) {
-    const base = PRINT_API_BASE.replace(/\/$/, '')
-    if (await postPrint(`${base}/totem/${encodeURIComponent(storeSlug)}/print`, payload)) return true
-  }
+  const printApiBase = resolvePrintApiBase()
+  if (await postPrint(`${printApiBase}/totem/${encodeURIComponent(storeSlug)}/print`, payload)) return true
 
   console.warn('[print] Impressão não concluída — verifique o print-server (porta 3334) e a impressora')
   return false

@@ -48,8 +48,8 @@ call :setup
 call :instalar_print_server
 call :localiza_chrome
 echo [print-server] Iniciando servidor de impressao em http://localhost:3334 (PDFs em print-server\receipts) ...
-start /min "CORTE Print" cmd /k "cd /d %~dp0print-server && set SAVE_PDF_DIR=%~dp0print-server\receipts && node server.mjs"
-timeout /t 1 /nobreak >nul
+start /min "CORTE Print" cmd /k "cd /d %~dp0print-server & set SAVE_PDF_DIR=%~dp0print-server\receipts & node server.mjs"
+call :aguarda_print_server
 echo [dev] Iniciando API em http://localhost:3333 ...
 start /min "CORTE API" cmd /k "cd /d %~dp0backend && npm run dev"
 timeout /t 3 /nobreak >nul
@@ -72,8 +72,22 @@ goto fim
 :instalar_print_server
 if not exist "%~dp0print-server\node_modules" (
   echo [print-server] Instalando dependencias...
-  cd /d "%~dp0print-server" && npm install --silent && cd /d "%~dp0"
+  cd /d "%~dp0print-server"
+  call npm install --silent
+  cd /d "%~dp0"
 )
+if not exist "%~dp0print-server\.env" (
+  copy /Y "%~dp0print-server\.env.example" "%~dp0print-server\.env" >nul
+  echo [print-server] Criado print-server\.env — configure PRINTER_NAME se necessario.
+)
+goto :eof
+
+:aguarda_print_server
+echo [aguarda] Esperando print-server em http://localhost:3334 ...
+:aguarda_print_loop
+timeout /t 1 /nobreak >nul
+powershell -Command "try{Invoke-WebRequest -Uri 'http://127.0.0.1:3334/health' -UseBasicParsing -TimeoutSec 2|Out-Null;exit 0}catch{exit 1}" >nul 2>&1
+if %errorlevel% NEQ 0 goto aguarda_print_loop
 goto :eof
 
 :: ═══════════════════════════════════════════════════════════════════
@@ -82,13 +96,17 @@ goto :eof
 :iniciar_producao
 call :setup
 call :instalar_print_server
+findstr /C:"4173" "%~dp0backend\.env" >nul 2>&1
+if %errorlevel% NEQ 0 (
+  echo [aviso] Inclua http://localhost:4173 em CORS_ORIGINS no backend\.env para o fallback de impressao.
+)
 
 echo [print-server] Iniciando servidor de impressao em http://localhost:3334 ...
-start /min "CORTE Print" cmd /k "cd /d %~dp0print-server && node server.mjs"
-timeout /t 1 /nobreak >nul
+start /min "CORTE Print" cmd /k "cd /d %~dp0print-server & node server.mjs"
+call :aguarda_print_server
 
-echo [build] Gerando build de producao...
-call npm run build
+echo [build] Gerando build do totem (API local 127.0.0.1)...
+call npm run build:totem
 if errorlevel 1 ( echo ERRO no build. & pause & exit /b 1 )
 
 echo [api] Iniciando API em http://localhost:3333 ...
@@ -142,4 +160,5 @@ goto fim
 :fim
 echo.
 echo Para encerrar, feche as janelas "CORTE API", "CORTE Frontend" e "CORTE Print".
+echo Impressora: edite print-server\.env (PRINTER_NAME) se o comprovante nao sair.
 echo.

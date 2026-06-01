@@ -18,6 +18,11 @@ function pickupLabel(slotTime: string) {
 
 const COUNTER_LINE = 'Atendimento presencial no balcão'
 
+function isTotemLocalHost(): boolean {
+  const h = window.location.hostname
+  return h === 'localhost' || h === '127.0.0.1'
+}
+
 export default function PrintScreen({ order, onDone }: Props) {
   const store = useStore()
   const [stage, setStage] = useState<'printing' | 'done'>('printing')
@@ -73,7 +78,12 @@ export default function PrintScreen({ order, onDone }: Props) {
             fontSize: 13, color: 'var(--t1)', lineHeight: 1.5,
           }}>
             Não foi possível imprimir o comprovante. Anote o código abaixo ou procure um funcionário.
-            Verifique se o serviço de impressão (porta 3334) está em execução.
+            {!isTotemLocalHost() && (
+              <> O totem deve ser aberto via <strong>corte.bat</strong> (http://localhost:4173), não pela URL da internet.</>
+            )}
+            {isTotemLocalHost() && (
+              <> Verifique a janela <strong>CORTE Print</strong> (porta 3334) e o nome da impressora em <code>print-server\.env</code>.</>
+            )}
           </div>
         )}
         <div style={{ fontSize: 14, color: 'var(--t2)', lineHeight: 1.55, marginBottom: 24, maxWidth: 300 }}>

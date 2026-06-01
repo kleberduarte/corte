@@ -30,3 +30,4 @@ backend/dist
 
 # Print-server (PDFs gerados em dev)
 print-server/receipts/
+print-server/.env
