@@ -33,8 +33,8 @@ export default function PrintScreen({ order, onDone }: Props) {
   useEffect(() => {
     if (printedRef.current) return
     printedRef.current = true
-    printReceiptSilent(order, store.name).then(setPrintOk)
-  }, [order, store.name])
+    printReceiptSilent(order, store.name, store.id).then(setPrintOk)
+  }, [order, store.name, store.id])
 
   useEffect(() => {
     const t = setTimeout(() => setStage('done'), 3200)
@@ -73,8 +73,8 @@ export default function PrintScreen({ order, onDone }: Props) {
             fontSize: 13, color: 'var(--t1)', lineHeight: 1.5,
           }}>
             Não foi possível imprimir o comprovante. Anote o código abaixo ou procure um funcionário.
-            {' '}Confira se a impressora térmica está como <strong>padrão</strong> no Windows.
-            {' '}No atalho do Chrome, em Propriedades → Destino, adicione <strong>--kiosk-printing</strong> após <code>chrome.exe</code> para imprimir sem perguntar.
+            {' '}Inicie o totem pelo <strong>corte.bat</strong> (opção 2) e confira a janela <strong>CORTE Print</strong>.
+            {' '}Se a impressora não for a padrão do Windows, defina <code>PRINTER_NAME</code> em <code>print-server\.env</code>.
           </div>
         )}
         <div style={{ fontSize: 14, color: 'var(--t2)', lineHeight: 1.55, marginBottom: 24, maxWidth: 300 }}>
