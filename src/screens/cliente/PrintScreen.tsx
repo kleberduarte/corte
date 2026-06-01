@@ -1,8 +1,8 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import type { Order } from '../../store/cartStore'
 import { useStore } from '../../data/config'
 import { getOrderTrackingUrl } from '../../utils/orderTrackingUrl'
-import { generateQrDataUrl } from '../../utils/qrCode'
+import { generateQrDataUrl, generateQrObjectUrl } from '../../utils/qrCode'
 
 type Props = {
   order: Order
@@ -48,7 +48,14 @@ function ensurePrintStyle() {
       #${PRINT_DIV_ID} .rp-label   { font-weight: bold; font-size: 10px; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 2px; }
       #${PRINT_DIV_ID} .rp-codebox { border: 1px solid #000; padding: 6px; margin: 8px 0; text-align: center; }
       #${PRINT_DIV_ID} .rp-qrbox  { text-align: center; margin: 8px 0; }
-      #${PRINT_DIV_ID} .rp-qrbox img { width: 96px; height: 96px; }
+      #${PRINT_DIV_ID} .rp-qrbox img {
+        display: block !important;
+        width: 96px;
+        height: 96px;
+        margin: 0 auto;
+        -webkit-print-color-adjust: exact;
+        print-color-adjust: exact;
+      }
       @page { margin: 0; size: 80mm auto; }
     }
   `
@@ -95,9 +102,21 @@ function buildReceiptInnerHtml(order: Order, storeName: string, qrDataUrl: strin
   `
 }
 
-async function printReceipt(order: Order, storeName: string) {
-  const qrDataUrl = await generateQrDataUrl(getOrderTrackingUrl(order.pickupCode), 120)
+async function waitForImage(img: HTMLImageElement): Promise<void> {
+  if (typeof img.decode === 'function') {
+    try {
+      await img.decode()
+      return
+    } catch { /* fallback abaixo */ }
+  }
+  if (img.complete && img.naturalWidth > 0) return
+  await new Promise<void>((resolve, reject) => {
+    img.onload = () => resolve()
+    img.onerror = () => reject(new Error('Falha ao carregar QR Code para impressão'))
+  })
+}
 
+async function printReceipt(order: Order, storeName: string, qrSrc: string) {
   ensurePrintStyle()
 
   let div = document.getElementById(PRINT_DIV_ID)
@@ -107,9 +126,26 @@ async function printReceipt(order: Order, storeName: string) {
     document.body.appendChild(div)
   }
 
-  div.innerHTML = buildReceiptInnerHtml(order, storeName, qrDataUrl)
-  window.print()
-  div.innerHTML = ''
+  div.innerHTML = buildReceiptInnerHtml(order, storeName, qrSrc)
+  const img = div.querySelector<HTMLImageElement>('.rp-qrbox img')
+  if (img) await waitForImage(img)
+
+  await new Promise<void>((resolve) => requestAnimationFrame(() => requestAnimationFrame(() => resolve())))
+
+  await new Promise<void>((resolve) => {
+    let finished = false
+    const cleanup = () => {
+      if (finished) return
+      finished = true
+      window.removeEventListener('afterprint', cleanup)
+      div!.innerHTML = ''
+      if (qrSrc.startsWith('blob:')) URL.revokeObjectURL(qrSrc)
+      resolve()
+    }
+    window.addEventListener('afterprint', cleanup)
+    window.print()
+    setTimeout(cleanup, 2000)
+  })
 }
 
 export default function PrintScreen({ order, onDone }: Props) {
@@ -117,8 +153,10 @@ export default function PrintScreen({ order, onDone }: Props) {
   const [stage, setStage] = useState<'printing' | 'done'>('printing')
   const [countdown, setCountdown] = useState(8)
   const [qrDataUrl, setQrDataUrl] = useState<string | null>(null)
+  const printedRef = useRef(false)
 
   useEffect(() => {
+    setQrDataUrl(null)
     generateQrDataUrl(getOrderTrackingUrl(order.pickupCode), 140).then(setQrDataUrl)
   }, [order.pickupCode])
 
@@ -128,8 +166,18 @@ export default function PrintScreen({ order, onDone }: Props) {
   }, [])
 
   useEffect(() => {
-    if (stage !== 'done') return
-    printReceipt(order, store.name)
+    if (stage !== 'done' || printedRef.current) return
+    printedRef.current = true
+    let cancelled = false
+
+    void (async () => {
+      const qrForPrint = await generateQrObjectUrl(getOrderTrackingUrl(order.pickupCode), 120)
+      if (cancelled) {
+        URL.revokeObjectURL(qrForPrint)
+        return
+      }
+      await printReceipt(order, store.name, qrForPrint)
+    })()
 
     const interval = setInterval(() => {
       setCountdown((c) => {
@@ -137,7 +185,10 @@ export default function PrintScreen({ order, onDone }: Props) {
         return c - 1
       })
     }, 1000)
-    return () => clearInterval(interval)
+    return () => {
+      cancelled = true
+      clearInterval(interval)
+    }
   }, [stage, order, store.name, onDone])
 
   const dateStr = new Date().toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit', year: 'numeric' })
