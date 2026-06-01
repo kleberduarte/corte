@@ -4,7 +4,6 @@ import { useStore } from '../../data/config'
 import { getOrderTrackingUrl } from '../../utils/orderTrackingUrl'
 import { generateQrDataUrl } from '../../utils/qrCode'
 import { printReceiptSilent } from '../../utils/silentPrint'
-import { isTotemPrintCapable } from '../../utils/totemAccess'
 
 type Props = {
   order: Order
@@ -34,8 +33,8 @@ export default function PrintScreen({ order, onDone }: Props) {
   useEffect(() => {
     if (printedRef.current) return
     printedRef.current = true
-    printReceiptSilent(order, store.name, store.id).then(setPrintOk)
-  }, [order, store.name, store.id])
+    printReceiptSilent(order, store.name).then(setPrintOk)
+  }, [order, store.name])
 
   useEffect(() => {
     const t = setTimeout(() => setStage('done'), 3200)
@@ -74,11 +73,8 @@ export default function PrintScreen({ order, onDone }: Props) {
             fontSize: 13, color: 'var(--t1)', lineHeight: 1.5,
           }}>
             Não foi possível imprimir o comprovante. Anote o código abaixo ou procure um funcionário.
-            {!isTotemPrintCapable() ? (
-              <> Feche este Chrome. No PC do totem, execute <strong>corte.bat</strong> → opção <strong>2</strong>. A barra de endereço deve mostrar <strong>http://localhost:4173</strong> (não https nem domínio da internet).</>
-            ) : (
-              <> Verifique a janela <strong>CORTE Print</strong> (porta 3334) e o nome da impressora em <code>print-server\.env</code>.</>
-            )}
+            {' '}Confira se a impressora térmica está como <strong>padrão</strong> no Windows.
+            {' '}No atalho do Chrome, em Propriedades → Destino, adicione <strong>--kiosk-printing</strong> após <code>chrome.exe</code> para imprimir sem perguntar.
           </div>
         )}
         <div style={{ fontSize: 14, color: 'var(--t2)', lineHeight: 1.55, marginBottom: 24, maxWidth: 300 }}>

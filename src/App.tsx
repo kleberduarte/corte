@@ -7,7 +7,6 @@ import { useKanbanStore } from './store/kanbanStore'
 import type { Product, CutType } from './data/products'
 
 import Topbar from './components/Topbar'
-import TotemAccessBanner from './components/TotemAccessBanner'
 import InactivityOverlay from './components/InactivityOverlay'
 import StepProgress from './components/StepProgress'
 import HomeScreen from './screens/cliente/HomeScreen'
@@ -196,7 +195,6 @@ function ClienteView() {
 
   return (
     <div className="totem-shell">
-      <TotemAccessBanner />
       {screen === 'home' && (
         <div style={{ position: 'absolute', top: 0, left: 0, right: 0, zIndex: 30 }}>
           <Topbar hideStatus />
