@@ -146,12 +146,31 @@ function buildPdf(data, qrTmpPath) {
 
 // ── Servidor HTTP ─────────────────────────────────────────────────────────────
 
-const server = http.createServer(async (req, res) => {
-  res.setHeader('Access-Control-Allow-Origin', '*')
-  res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS')
+function applyCors(req, res) {
+  const origin = req.headers.origin
+  if (origin) {
+    res.setHeader('Access-Control-Allow-Origin', origin)
+    res.setHeader('Vary', 'Origin')
+  } else {
+    res.setHeader('Access-Control-Allow-Origin', '*')
+  }
+  res.setHeader('Access-Control-Allow-Methods', 'POST, GET, OPTIONS')
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type')
+  // Permite o app em HTTPS (Vercel/domínio) chamar o print-server em 127.0.0.1
+  res.setHeader('Access-Control-Allow-Private-Network', 'true')
+}
 
-  if (req.method === 'OPTIONS') { res.writeHead(204); res.end(); return }
+const server = http.createServer(async (req, res) => {
+  applyCors(req, res)
+
+  if (req.method === 'OPTIONS') {
+    if (req.headers['access-control-request-private-network'] === 'true') {
+      res.setHeader('Access-Control-Allow-Private-Network', 'true')
+    }
+    res.writeHead(204)
+    res.end()
+    return
+  }
 
   if (req.method === 'GET' && req.url === '/health') {
     res.writeHead(200, { 'Content-Type': 'application/json' })
