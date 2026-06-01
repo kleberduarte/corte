@@ -157,8 +157,8 @@ export default function PrintScreen({ order, onDone }: Props) {
 
   useEffect(() => {
     setQrDataUrl(null)
-    generateQrDataUrl(getOrderTrackingUrl(order.pickupCode), 140).then(setQrDataUrl)
-  }, [order.pickupCode])
+    generateQrDataUrl(getOrderTrackingUrl(order.pickupCode, store.id), 140).then(setQrDataUrl)
+  }, [order.pickupCode, store.id])
 
   useEffect(() => {
     const t = setTimeout(() => setStage('done'), 3200)
@@ -171,7 +171,7 @@ export default function PrintScreen({ order, onDone }: Props) {
     let cancelled = false
 
     void (async () => {
-      const qrForPrint = await generateQrObjectUrl(getOrderTrackingUrl(order.pickupCode), 120)
+      const qrForPrint = await generateQrObjectUrl(getOrderTrackingUrl(order.pickupCode, store.id), 120)
       if (cancelled) {
         URL.revokeObjectURL(qrForPrint)
         return
