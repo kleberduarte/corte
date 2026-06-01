@@ -23,6 +23,7 @@ export default function PrintScreen({ order, onDone }: Props) {
   const [stage, setStage] = useState<'printing' | 'done'>('printing')
   const [countdown, setCountdown] = useState(8)
   const [qrDataUrl, setQrDataUrl] = useState<string | null>(null)
+  const [printOk, setPrintOk] = useState<boolean | null>(null)
   const printedRef = useRef(false)
 
   useEffect(() => {
@@ -32,7 +33,7 @@ export default function PrintScreen({ order, onDone }: Props) {
   useEffect(() => {
     if (printedRef.current) return
     printedRef.current = true
-    printReceiptSilent(order, store.name, store.id)
+    printReceiptSilent(order, store.name, store.id).then(setPrintOk)
   }, [order, store.name, store.id])
 
   useEffect(() => {
@@ -65,14 +66,28 @@ export default function PrintScreen({ order, onDone }: Props) {
         <div style={{ fontFamily: 'var(--font-serif)', fontSize: 28, fontWeight: 700, color: 'var(--accent)', marginBottom: 8 }}>
           Pedido finalizado!
         </div>
+        {printOk === false && (
+          <div style={{
+            background: 'rgba(255,159,10,.12)', border: '1px solid rgba(255,159,10,.45)',
+            borderRadius: 'var(--r)', padding: '12px 16px', marginBottom: 16, maxWidth: 320,
+            fontSize: 13, color: 'var(--t1)', lineHeight: 1.5,
+          }}>
+            Não foi possível imprimir o comprovante. Anote o código abaixo ou procure um funcionário.
+            Verifique se o serviço de impressão (porta 3334) está em execução.
+          </div>
+        )}
         <div style={{ fontSize: 14, color: 'var(--t2)', lineHeight: 1.55, marginBottom: 24, maxWidth: 300 }}>
-          {order.items.length === 0
-            ? 'Comprovante impresso com sucesso. Apresente a senha no balcão do açougue.'
-            : order.customerPhone
-              ? 'Informações enviadas para o WhatsApp. Comprovante impresso com sucesso.'
-              : order.slotTime === 'Imediata'
-                ? 'Comprovante impresso com sucesso. Dirija-se ao balcão do açougue.'
-                : 'Comprovante impresso com sucesso. Dirija-se ao açougue no horário agendado.'}
+          {printOk === false
+            ? (order.customerPhone
+              ? 'Pedido registrado e informações enviadas ao WhatsApp.'
+              : 'Pedido registrado com sucesso.')
+            : order.items.length === 0
+              ? 'Comprovante impresso com sucesso. Apresente a senha no balcão do açougue.'
+              : order.customerPhone
+                ? 'Informações enviadas para o WhatsApp. Comprovante impresso com sucesso.'
+                : order.slotTime === 'Imediata'
+                  ? 'Comprovante impresso com sucesso. Dirija-se ao balcão do açougue.'
+                  : 'Comprovante impresso com sucesso. Dirija-se ao açougue no horário agendado.'}
         </div>
         <div style={{ background: 'var(--s2)', border: '1px solid var(--border2)', borderRadius: 'var(--r)', padding: '14px 20px', marginBottom: 20, width: '100%' }}>
           <div style={{ fontSize: 10.5, fontWeight: 700, textTransform: 'uppercase', letterSpacing: 1.2, color: 'var(--t3)', marginBottom: 8 }}>

@@ -3,7 +3,9 @@ import { getOrderTrackingUrl } from './orderTrackingUrl'
 import { generateQrDataUrl } from './qrCode'
 
 const PRINT_SERVER_URL = 'http://127.0.0.1:3334'
-const PRINT_API_BASE = import.meta.env.VITE_PRINT_API_URL as string | undefined
+const PRINT_API_BASE =
+  (import.meta.env.VITE_PRINT_API_URL as string | undefined)
+  ?? (import.meta.env.VITE_API_URL as string | undefined)
 
 type ReceiptPayload = {
   storeName: string
@@ -52,17 +54,18 @@ async function postPrint(url: string, payload: ReceiptPayload): Promise<boolean>
   }
 }
 
-/** Impressão silenciosa no totem — sem diálogo do navegador. */
-export async function printReceiptSilent(order: Order, storeName: string, storeSlug: string): Promise<void> {
+/** Impressão silenciosa no totem — sem diálogo do navegador. Retorna true se algum destino respondeu com sucesso. */
+export async function printReceiptSilent(order: Order, storeName: string, storeSlug: string): Promise<boolean> {
   const qrDataUrl = await generateQrDataUrl(getOrderTrackingUrl(order.pickupCode), 120)
   const payload = orderToPayload(order, storeName, qrDataUrl)
 
-  if (await postPrint(`${PRINT_SERVER_URL}/print`, payload)) return
+  if (await postPrint(`${PRINT_SERVER_URL}/print`, payload)) return true
 
   if (PRINT_API_BASE) {
     const base = PRINT_API_BASE.replace(/\/$/, '')
-    if (await postPrint(`${base}/totem/${encodeURIComponent(storeSlug)}/print`, payload)) return
+    if (await postPrint(`${base}/totem/${encodeURIComponent(storeSlug)}/print`, payload)) return true
   }
 
   console.warn('[print] Impressão não concluída — verifique o print-server (porta 3334) e a impressora')
+  return false
 }
