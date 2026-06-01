@@ -4,6 +4,7 @@ import { useStore } from '../../data/config'
 import { getOrderTrackingUrl } from '../../utils/orderTrackingUrl'
 import { generateQrDataUrl } from '../../utils/qrCode'
 import { printReceiptSilent } from '../../utils/silentPrint'
+import { isTotemPrintCapable } from '../../utils/totemAccess'
 
 type Props = {
   order: Order
@@ -17,11 +18,6 @@ function pickupLabel(slotTime: string) {
 }
 
 const COUNTER_LINE = 'Atendimento presencial no balcão'
-
-function isTotemLocalHost(): boolean {
-  const h = window.location.hostname
-  return h === 'localhost' || h === '127.0.0.1'
-}
 
 export default function PrintScreen({ order, onDone }: Props) {
   const store = useStore()
@@ -78,10 +74,9 @@ export default function PrintScreen({ order, onDone }: Props) {
             fontSize: 13, color: 'var(--t1)', lineHeight: 1.5,
           }}>
             Não foi possível imprimir o comprovante. Anote o código abaixo ou procure um funcionário.
-            {!isTotemLocalHost() && (
-              <> O totem deve ser aberto via <strong>corte.bat</strong> (http://localhost:4173), não pela URL da internet.</>
-            )}
-            {isTotemLocalHost() && (
+            {!isTotemPrintCapable() ? (
+              <> Feche este Chrome. No PC do totem, execute <strong>corte.bat</strong> → opção <strong>2</strong>. A barra de endereço deve mostrar <strong>http://localhost:4173</strong> (não https nem domínio da internet).</>
+            ) : (
               <> Verifique a janela <strong>CORTE Print</strong> (porta 3334) e o nome da impressora em <code>print-server\.env</code>.</>
             )}
           </div>

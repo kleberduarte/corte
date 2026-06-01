@@ -47,8 +47,7 @@ goto :eof
 call :setup
 call :instalar_print_server
 call :localiza_chrome
-echo [print-server] Iniciando servidor de impressao em http://localhost:3334 (PDFs em print-server\receipts) ...
-start /min "CORTE Print" cmd /k "cd /d %~dp0print-server & set SAVE_PDF_DIR=%~dp0print-server\receipts & node server.mjs"
+call :iniciar_print_server dev
 call :aguarda_print_server
 echo [dev] Iniciando API em http://localhost:3333 ...
 start /min "CORTE API" cmd /k "cd /d %~dp0backend && npm run dev"
@@ -82,6 +81,31 @@ if not exist "%~dp0print-server\.env" (
 )
 goto :eof
 
+:iniciar_print_server
+powershell -Command "try{Invoke-WebRequest -Uri 'http://127.0.0.1:3334/health' -UseBasicParsing -TimeoutSec 2|Out-Null;exit 0}catch{exit 1}" >nul 2>&1
+if %errorlevel%==0 (
+  echo [print-server] Ja em execucao em http://localhost:3334
+  goto :eof
+)
+netstat -ano | findstr ":3334" | findstr "LISTENING" >nul 2>&1
+if %errorlevel%==0 (
+  echo [print-server] Porta 3334 ocupada — encerrando instancia anterior...
+  call :liberar_porta_3334
+  timeout /t 1 /nobreak >nul
+)
+if /i "%1"=="dev" (
+  echo [print-server] Iniciando em http://localhost:3334 ^(PDFs em print-server\receipts^) ...
+  start /min "CORTE Print" cmd /k "cd /d %~dp0print-server & set SAVE_PDF_DIR=%~dp0print-server\receipts & node server.mjs"
+) else (
+  echo [print-server] Iniciando em http://localhost:3334 ...
+  start /min "CORTE Print" cmd /k "cd /d %~dp0print-server & node server.mjs"
+)
+goto :eof
+
+:liberar_porta_3334
+powershell -Command "$p=Get-NetTCPConnection -LocalPort 3334 -State Listen -ErrorAction SilentlyContinue|Select-Object -ExpandProperty OwningProcess -Unique; foreach($i in $p){if($i){Stop-Process -Id $i -Force -ErrorAction SilentlyContinue}}"
+goto :eof
+
 :aguarda_print_server
 echo [aguarda] Esperando print-server em http://localhost:3334 ...
 :aguarda_print_loop
@@ -101,8 +125,7 @@ if %errorlevel% NEQ 0 (
   echo [aviso] Inclua http://localhost:4173 em CORS_ORIGINS no backend\.env para o fallback de impressao.
 )
 
-echo [print-server] Iniciando servidor de impressao em http://localhost:3334 ...
-start /min "CORTE Print" cmd /k "cd /d %~dp0print-server & node server.mjs"
+call :iniciar_print_server
 call :aguarda_print_server
 
 echo [build] Gerando build do totem (API local 127.0.0.1)...

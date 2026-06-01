@@ -198,6 +198,14 @@ const server = http.createServer(async (req, res) => {
   res.writeHead(404); res.end()
 })
 
+server.on('error', (err) => {
+  if (err.code === 'EADDRINUSE') {
+    console.error(`[print-server] Porta ${PORT} ja em uso. Feche a janela "CORTE Print" ou rode corte.bat de novo.`)
+    process.exit(1)
+  }
+  throw err
+})
+
 server.listen(PORT, '127.0.0.1', () => {
   console.log(`[print-server] ouvindo em http://localhost:${PORT}`)
   if (SAVE_PDF_DIR) {
