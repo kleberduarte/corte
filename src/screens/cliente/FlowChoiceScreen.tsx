@@ -86,7 +86,7 @@ const CARDS: FlowCard[] = [
     subtitle: 'Navegue pelo cardápio, escolha corte e peso, e finalize no totem',
     hint: 'Corte · peso · retirada',
     features: [
-      { icon: '◫', label: '7 categorias' },
+      { icon: '◫', label: '8 categorias' },
       { icon: '✦', label: 'Cortes sob medida' },
       { icon: '◷', label: 'Agende ou retire já' },
     ],
