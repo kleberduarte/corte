@@ -1,4 +1,4 @@
-import { CATEGORY_CARDS, type CategoryCard } from '../../data/products'
+import { CATEGORY_CARDS } from '../../data/products'
 
 type Props = { onSelect: (filter: string) => void }
 
