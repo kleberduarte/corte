@@ -1,5 +1,6 @@
 import { useState } from 'react'
-import { PRODUCTS, CATEGORIES, type Product } from '../../data/products'
+import { useCatalog } from '../../data/catalog'
+import type { Product } from '../../data/products'
 
 type Props = {
   initialFilter?: string
@@ -10,10 +11,11 @@ type Props = {
 }
 
 export default function CatalogScreen({ initialFilter = 'todos', onProduct, cartCount, onCart, immediate = false }: Props) {
+  const { products, categories } = useCatalog()
   const [filter, setFilter] = useState(initialFilter)
   const [added, setAdded]   = useState<string | null>(null)
 
-  const visible = filter === 'todos' ? PRODUCTS : PRODUCTS.filter((p) => p.category === filter)
+  const visible = filter === 'todos' ? products : products.filter((p) => p.category === filter)
 
   function handleAdd(e: React.MouseEvent, p: Product) {
     e.stopPropagation()
@@ -25,14 +27,14 @@ export default function CatalogScreen({ initialFilter = 'todos', onProduct, cart
   return (
     <div className="screen" style={{ position: 'relative' }}>
       <div style={{ flexShrink: 0, padding: '8px 24px 10px' }}>
-        <div style={{ fontFamily: 'var(--font-serif)', fontSize: 28, fontWeight: 600, color: 'var(--accent)' }}>
+        <div style={{ fontFamily: 'var(--font-serif)', fontSize: 'calc(28px * var(--font-scale))', fontWeight: 600, color: 'var(--accent)' }}>
           Nossos Cortes
         </div>
-        <div style={{ fontSize: 12, color: 'var(--t3)', marginTop: 3 }}>{visible.length} produto{visible.length !== 1 ? 's' : ''} disponíve{visible.length !== 1 ? 'is' : 'l'}</div>
+        <div style={{ fontSize: 'calc(12px * var(--font-scale))', color: 'var(--t3)', marginTop: 3 }}>{visible.length} produto{visible.length !== 1 ? 's' : ''} disponíve{visible.length !== 1 ? 'is' : 'l'}</div>
       </div>
 
       <div className="chips">
-        {CATEGORIES.map((c) => (
+        {categories.map((c) => (
           <div key={c.id} className={`chip${filter === c.id ? ' on' : ''}`} onClick={() => setFilter(c.id)}>
             {c.label}
           </div>
@@ -90,26 +92,26 @@ function ProductCard({ product: p, added, onClick, onAdd }: {
           style={{ width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'center 42%', display: 'block', transition: 'transform .4s' }}
         />
         {p.badge && (
-          <div style={{ position: 'absolute', top: 8, left: 8, background: 'rgba(0,0,0,.65)', backdropFilter: 'blur(4px)', color: 'var(--t1)', fontSize: 9.5, fontWeight: 600, padding: '3px 7px', borderRadius: 20, border: '1px solid rgba(255,255,255,.1)' }}>
+          <div style={{ position: 'absolute', top: 8, left: 8, background: 'rgba(0,0,0,.65)', backdropFilter: 'blur(4px)', color: 'var(--t1)', fontSize: 'calc(9.5px * var(--font-scale))', fontWeight: 600, padding: '3px 7px', borderRadius: 20, border: '1px solid rgba(255,255,255,.1)' }}>
             {p.badge}
           </div>
         )}
       </div>
       <div style={{ flex: 1, padding: '12px 14px 14px', display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
         <div>
-          <div style={{ fontSize: 15, fontWeight: 600, color: 'var(--t1)', marginBottom: 3 }}>{p.name}</div>
-          <div style={{ fontSize: 11.5, color: 'var(--t3)', lineHeight: 1.45, marginBottom: 8, display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>
+          <div style={{ fontSize: 'calc(15px * var(--font-scale))', fontWeight: 600, color: 'var(--t1)', marginBottom: 3 }}>{p.name}</div>
+          <div style={{ fontSize: 'calc(11.5px * var(--font-scale))', color: 'var(--t3)', lineHeight: 1.45, marginBottom: 8, display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>
             {p.description}
           </div>
         </div>
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
           <div>
-            <div style={{ fontSize: 16, fontWeight: 700, color: 'var(--accent)' }}>
-              <sup style={{ fontSize: 11, fontWeight: 600 }}>R$</sup>
+            <div style={{ fontSize: 'calc(16px * var(--font-scale))', fontWeight: 700, color: 'var(--accent)' }}>
+              <sup style={{ fontSize: 'calc(11px * var(--font-scale))', fontWeight: 600 }}>R$</sup>
               {p.pricePerKg.toFixed(2).replace('.', ',')}
-              <sub style={{ fontSize: 11, fontWeight: 400, color: 'var(--t3)' }}>/kg</sub>
+              <sub style={{ fontSize: 'calc(11px * var(--font-scale))', fontWeight: 400, color: 'var(--t3)' }}>/kg</sub>
             </div>
-            <div className="stars" style={{ fontSize: 10.5, display: 'flex', alignItems: 'center', gap: 3 }}>
+            <div className="stars" style={{ fontSize: 'calc(10.5px * var(--font-scale))', display: 'flex', alignItems: 'center', gap: 3 }}>
               {'★'.repeat(Math.round(p.rating))}{'☆'.repeat(5 - Math.round(p.rating))}
               <span style={{ color: 'var(--t3)' }}>({p.reviews})</span>
             </div>

@@ -1,14 +1,5 @@
 // =============================================================================
-// Pricing Service — Sincronização de Preços por Loja
-//
-// Cada rede de supermercado (Linx, TOTVS, SAP, etc.) tem sua própria API.
-// Este serviço abstrai essas diferenças: o caller sempre chama syncStorePrices()
-// e o serviço decide como buscar os dados com base em StoreIntegration.type.
-//
-// Para adicionar uma nova integração:
-//   1. Adicionar o tipo em IntegrationType no schema.prisma
-//   2. Criar um adapter em src/services/pricing-adapters/<nome>.ts
-//   3. Registrar o adapter no switch abaixo
+// Catalog Sync — importação de produtos/preços (ERP / Veltrix / REST genérico)
 // =============================================================================
 
 import { PriceSource } from '@prisma/client'
@@ -19,6 +10,7 @@ import {
   upsertStoreProduct,
 } from '../repositories/product.repository'
 import { AppError } from '../errors/AppError'
+import { syncCatalogFromVeltrix } from './veltrix-catalog.service'
 import {
   resolveVeltrixCredentials,
   veltrixFetchProducts,
@@ -26,27 +18,43 @@ import {
 } from '../integrations/veltrix.client'
 import { veltrixExternalCode } from '../integrations/veltrix-category'
 
-type PriceRecord = {
+export type CatalogPriceRecord = {
   externalProductCode: string
   productId?: string
   price: number
   available: boolean
 }
 
-export async function syncStorePrices(storeId: string): Promise<{ synced: number }> {
+export type CatalogSyncResult =
+  | { source: 'VELTRIX'; imported: number; deactivated: number }
+  | { source: 'GENERIC_REST'; synced: number }
+
+export async function syncStoreCatalog(storeId: string): Promise<CatalogSyncResult> {
   const integration = await findStoreIntegration(storeId)
 
   if (!integration || !integration.syncEnabled) {
-    throw new AppError('Integração de preços não configurada ou desativada para esta loja', 400)
+    throw new AppError('Integração não configurada ou desativada para esta loja', 400)
   }
 
-  const records = await fetchPricesFromProvider(
+  if (integration.type === 'VELTRIX') {
+    const result = await syncCatalogFromVeltrix(
+      storeId,
+      integration.apiBaseUrl,
+      integration.apiKey,
+      integration.integrationMeta,
+    )
+    await updateLastSync(storeId, true)
+    return { source: 'VELTRIX', ...result }
+  }
+
+  const records = await fetchCatalogPricesFromProvider(
     integration.type,
     integration.apiBaseUrl,
     integration.apiKey,
     integration.integrationMeta,
   )
 
+  let synced = 0
   for (const record of records) {
     const storeProduct =
       (record.productId
@@ -59,26 +67,27 @@ export async function syncStorePrices(storeId: string): Promise<{ synced: number
     await upsertStoreProduct(storeId, storeProduct.productId, {
       price: record.price,
       available: record.available,
-      externalProductCode: record.externalProductCode,
       priceSource: PriceSource.INTEGRATION,
+      externalProductCode: record.externalProductCode,
     })
+    synced += 1
   }
 
-  await updateLastSync(storeId, true)
-
-  return { synced: records.length }
+  await updateLastSync(storeId, synced > 0)
+  return { source: 'GENERIC_REST', synced }
 }
 
-// ---------------------------------------------------------------------------
-// Adapters por tipo de integração
-// ---------------------------------------------------------------------------
+/** @deprecated Use syncStoreCatalog — mantido para rota /sync-catalog */
+export async function syncStoreCatalogPrices(storeId: string) {
+  return syncStoreCatalog(storeId)
+}
 
-async function fetchPricesFromProvider(
+async function fetchCatalogPricesFromProvider(
   type: string,
   baseUrl: string,
   apiKey: string,
   integrationMeta: unknown,
-): Promise<PriceRecord[]> {
+): Promise<CatalogPriceRecord[]> {
   switch (type) {
     case 'VELTRIX': {
       const { baseUrl: url, email, password } = resolveVeltrixCredentials(baseUrl, apiKey, integrationMeta)
@@ -93,34 +102,24 @@ async function fetchPricesFromProvider(
           available: (p.stock ?? 0) > 0,
         }))
     }
-    case 'GENERIC_REST':
-      return fetchGenericRest(baseUrl, apiKey)
-
+    case 'GENERIC_REST': {
+      const response = await fetch(`${baseUrl.replace(/\/$/, '')}/catalog/prices`, {
+        headers: { Authorization: `Bearer ${apiKey}` },
+      })
+      if (!response.ok) {
+        throw new AppError(`Erro ao buscar catálogo/preços: ${response.statusText}`, 502)
+      }
+      return response.json() as Promise<CatalogPriceRecord[]>
+    }
     case 'LINX':
     case 'TOTVS':
     case 'SAP':
-      // TODO: implementar adapters específicos quando a documentação das APIs for fornecida
-      throw new AppError(`Adapter para ${type} ainda não implementado`, 501)
-
+      throw new AppError(`Sincronização de catálogo para ${type} ainda não implementada`, 501)
     case 'MANUAL':
-      // Preços manuais — não há sincronização automática
       return []
-
     default:
       throw new AppError(`Tipo de integração desconhecido: ${type}`, 400)
   }
-}
-
-async function fetchGenericRest(baseUrl: string, apiKey: string): Promise<PriceRecord[]> {
-  const response = await fetch(`${baseUrl}/prices`, {
-    headers: { Authorization: `Bearer ${apiKey}` },
-  })
-
-  if (!response.ok) {
-    throw new AppError(`Erro ao buscar preços: ${response.statusText}`, 502)
-  }
-
-  return response.json() as Promise<PriceRecord[]>
 }
 
 async function updateLastSync(storeId: string, success: boolean) {

@@ -108,8 +108,9 @@ model StoreIntegration {
   id           String          @id @default(cuid())
   storeId      String          @unique
   type         IntegrationType
-  apiBaseUrl   String
-  apiKey       String          // armazenada criptografada
+  apiBaseUrl   String          // Veltrix: URL da API Spring (ex. Railway), não o frontend Vercel
+  apiKey       String          // Veltrix: senha da conta de serviço; GENERIC_REST: Bearer token
+  integrationMeta Json?        // Veltrix: { "email": "sync@empresa.com" }
   syncEnabled  Boolean         @default(false)
   syncInterval Int             @default(60) // minutos entre sincronizações
   lastSyncAt   DateTime?
@@ -125,6 +126,7 @@ enum IntegrationType {
   TOTVS
   SAP
   GENERIC_REST
+  VELTRIX
   MANUAL
 }
 
@@ -175,17 +177,26 @@ enum OperatorRole {
 // CATÁLOGO DE PRODUTOS (global + preço por loja)
 // ---------------------------------------------------------------------------
 
-// Produto base — compartilhado entre todas as lojas (nome, categoria, unidade)
+// Produto base — catálogo global CORTE (nome, vitrine, tipos de corte)
+// Integração ERP: sku/ean no produto; externalProductCode por loja em StoreProduct
 model Product {
-  id          String      @id @default(cuid())
+  id          String   @id // slug estável (ex: picanha-angus) — alinhado ao totem
   name        String
   category    Category
   unit        Unit
   description String?
   imageUrl    String?
-  active      Boolean     @default(true)
-  createdAt   DateTime    @default(now())
-  updatedAt   DateTime    @updatedAt
+  badge       String?
+  rating      Decimal? @db.Decimal(2, 1)
+  reviewCount Int      @default(0) @map("review_count")
+  tags        Json     @default("[]")
+  cutTypes    Json     @default("[]") @map("cut_types")
+  sortOrder   Int      @default(0) @map("sort_order")
+  sku         String?  @unique // código interno / referência CORTE para integrações
+  ean         String?  // GTIN/EAN quando disponível no ERP
+  active      Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
 
   storeProducts StoreProduct[]
   orderItems    OrderItem[]
@@ -200,6 +211,7 @@ enum Category {
   LINGUICA
   PEIXE
   FRUTOS_DO_MAR
+  FRIOS
   ESPECIAL
   OUTROS
 }
@@ -212,19 +224,27 @@ enum Unit {
 
 // Preço e disponibilidade do produto específico por loja
 model StoreProduct {
-  id          String   @id @default(cuid())
-  storeId     String
-  productId   String
-  price       Decimal  @db.Decimal(10, 2)   // preço atual desta loja
-  available   Boolean  @default(true)
-  updatedAt   DateTime @updatedAt
+  id                  String      @id @default(cuid())
+  storeId             String
+  productId           String
+  price               Decimal     @db.Decimal(10, 2)
+  available           Boolean     @default(true)
+  externalProductCode String?     @map("external_product_code") // PLU/código no ERP da rede
+  priceSource         PriceSource @default(MANUAL) @map("price_source")
+  updatedAt           DateTime    @updatedAt
 
   store   Store   @relation(fields: [storeId], references: [id], onDelete: Cascade)
   product Product @relation(fields: [productId], references: [id])
 
   @@unique([storeId, productId])
+  @@unique([storeId, externalProductCode])
   @@index([storeId])
   @@map("store_products")
+}
+
+enum PriceSource {
+  MANUAL
+  INTEGRATION
 }
 
 // ---------------------------------------------------------------------------

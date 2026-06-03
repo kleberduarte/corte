@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState, useCallback } from 'react'
 import { applyStoreTheme } from './data/theme'
 import { fetchActiveStore, StoreContext, useStore } from './data/config'
+import { fetchCatalog, CatalogContext, type TotemCatalog } from './data/catalog'
 import type { StoreConfig } from './data/config'
 import { useCartStore } from './store/cartStore'
 import { useKanbanStore } from './store/kanbanStore'
@@ -269,7 +270,7 @@ function ModeBadge({ label }: { label: string }) {
   return (
     <div style={{
       position: 'fixed', bottom: 10, left: 10, zIndex: 9999,
-      fontSize: 10, fontWeight: 600, textTransform: 'uppercase',
+      fontSize: 'calc(10px * var(--font-scale))', fontWeight: 600, textTransform: 'uppercase',
       padding: '5px 10px', borderRadius: 8,
       background: 'rgba(0,0,0,.55)', color: 'rgba(255,255,255,.75)',
       border: '1px solid rgba(255,255,255,.12)', backdropFilter: 'blur(8px)',
@@ -289,25 +290,29 @@ export default function App() {
 
 function TotemApp({ view }: { view: string | null }) {
   const [store, setStore] = useState<StoreConfig | null>(null)
+  const [catalog, setCatalog] = useState<TotemCatalog | null>(null)
 
   useEffect(() => {
-    fetchActiveStore().then((s) => {
+    void (async () => {
+      const s = await fetchActiveStore()
       applyStoreTheme(s)
       setStore(s)
-    })
+      const cat = await fetchCatalog(s.id)
+      setCatalog(cat)
+    })()
   }, [])
 
-  if (!store) return (
-    <div style={{ height: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#0d0d0e', color: 'rgba(255,255,255,.4)', fontSize: 14 }}>
+  if (!store || !catalog) return (
+    <div style={{ height: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#0d0d0e', color: 'rgba(255,255,255,.4)', fontSize: 'calc(14px * var(--font-scale))' }}>
       Carregando...
     </div>
   )
 
   if (store.active === false) return (
     <div style={{ height: '100vh', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', background: '#0d0d0e', padding: 32, textAlign: 'center' }}>
-      <div style={{ fontSize: 48, marginBottom: 20 }}>🔪</div>
-      <div style={{ fontSize: 22, fontWeight: 700, color: '#fff', marginBottom: 10 }}>{store.name}</div>
-      <div style={{ fontSize: 16, color: 'rgba(255,255,255,.5)', maxWidth: 340, lineHeight: 1.6 }}>
+      <div style={{ fontSize: 'calc(48px * var(--font-scale))', marginBottom: 20 }}>🔪</div>
+      <div style={{ fontSize: 'calc(22px * var(--font-scale))', fontWeight: 700, color: '#fff', marginBottom: 10 }}>{store.name}</div>
+      <div style={{ fontSize: 'calc(16px * var(--font-scale))', color: 'rgba(255,255,255,.5)', maxWidth: 340, lineHeight: 1.6 }}>
         Este serviço está temporariamente indisponível.<br />Por favor, procure um funcionário do açougue.
       </div>
     </div>
@@ -317,6 +322,7 @@ function TotemApp({ view }: { view: string | null }) {
 
   return (
     <StoreContext.Provider value={store}>
+      <CatalogContext.Provider value={catalog}>
       {view === 'operador' ? (
         <OperadorView />
       ) : view === 'pedido' && trackingOrderId ? (
@@ -324,6 +330,7 @@ function TotemApp({ view }: { view: string | null }) {
       ) : (
         <ClienteView />
       )}
+      </CatalogContext.Provider>
     </StoreContext.Provider>
   )
 }

@@ -8,7 +8,7 @@ import { createOrderSchema } from '../schemas/order.schema'
 import { placeOrder } from '../services/order.service'
 import { printReceipt } from '../services/print.service'
 import { findStoreBySlug } from '../repositories/store.repository'
-import { findProductsByStore } from '../repositories/product.repository'
+import { getTotemCatalog } from '../services/catalog.service'
 import { NotFoundError } from '../errors/AppError'
 
 export async function totemRoutes(app: FastifyInstance) {
@@ -46,7 +46,22 @@ export async function totemRoutes(app: FastifyInstance) {
     },
   )
 
-  // GET /totem/:storeSlug/products — catálogo com preços da loja
+  // GET /totem/:storeSlug/catalog — catálogo completo (produtos, categorias, preços da loja)
+  app.get<{ Params: { storeSlug: string } }>(
+    '/:storeSlug/catalog',
+    {
+      config: { rateLimit: { max: 60, timeWindow: '1 minute' } },
+    },
+    async (req, reply) => {
+      const store = await findStoreBySlug(req.params.storeSlug)
+      if (!store || !store.active) throw new NotFoundError('Loja')
+
+      const catalog = await getTotemCatalog(store.id, store.slug)
+      return reply.send(catalog)
+    },
+  )
+
+  // GET /totem/:storeSlug/products — alias legado → mesmo payload que /catalog
   app.get<{ Params: { storeSlug: string } }>(
     '/:storeSlug/products',
     {
@@ -56,8 +71,8 @@ export async function totemRoutes(app: FastifyInstance) {
       const store = await findStoreBySlug(req.params.storeSlug)
       if (!store || !store.active) throw new NotFoundError('Loja')
 
-      const products = await findProductsByStore(store.id)
-      return reply.send(products)
+      const catalog = await getTotemCatalog(store.id, store.slug)
+      return reply.send(catalog)
     },
   )
 
