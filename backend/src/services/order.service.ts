@@ -39,6 +39,7 @@ export async function placeOrder(storeId: string, input: CreateOrderInput) {
       pickupMode: input.pickupMode,
       scheduledAt: input.scheduledAt ? new Date(input.scheduledAt) : null,
       notes: input.notes,
+      priority: input.priority ?? false,
       totalAmount: 0,
       items: { create: [] },
     })
@@ -80,6 +81,7 @@ export async function placeOrder(storeId: string, input: CreateOrderInput) {
     pickupMode: input.pickupMode,
     scheduledAt: input.scheduledAt ? new Date(input.scheduledAt) : null,
     notes: input.notes,
+    priority: input.priority ?? false,
     totalAmount,
     items: { create: itemsWithPrices },
   })

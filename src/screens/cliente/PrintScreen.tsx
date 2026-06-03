@@ -10,12 +10,21 @@ type Props = {
 }
 
 function pickupLabel(slotTime: string) {
+  if (slotTime === 'Preferencial') return 'Atendimento preferencial'
   if (slotTime === 'Imediata') return 'Escolher e Aguardar'
   if (slotTime === 'Balcão') return 'Atendimento no balcão'
   return `Hoje · ${slotTime}`
 }
 
+function receiptTitle(order: Order) {
+  if (order.priority || order.slotTime === 'Preferencial') return 'SENHA PREFERENCIAL'
+  if (order.items.length === 0) return 'SENHA DE BALCÃO'
+  if (order.slotTime === 'Imediata') return 'PEDIDO IMEDIATO'
+  return 'PEDIDO AGENDADO'
+}
+
 const COUNTER_LINE = 'Atendimento presencial no balcão'
+const PREFERENTIAL_LINE = 'Atendimento preferencial no balcão (fila prioritária)'
 
 const PRINT_DIV_ID = '__corte_receipt__'
 const PRINT_STYLE_ID = '__corte_receipt_style__'
@@ -66,8 +75,9 @@ function buildReceiptInnerHtml(order: Order, storeName: string, qrDataUrl: strin
   const dateStr = new Date().toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit', year: 'numeric' })
   const timeStr = new Date().toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })
 
+  const counterLine = order.priority || order.slotTime === 'Preferencial' ? PREFERENTIAL_LINE : COUNTER_LINE
   const itemsHtml = order.items.length === 0
-    ? `<div class="rp-section"><div><b>Pedido:</b> ${COUNTER_LINE}</div></div>`
+    ? `<div class="rp-section"><div><b>Pedido:</b> ${counterLine}</div></div>`
     : order.items.map((item, idx) => `
       <div class="rp-section">
         ${order.items.length > 1 ? `<div class="rp-label">Item ${idx + 1}</div>` : ''}
@@ -83,7 +93,7 @@ function buildReceiptInnerHtml(order: Order, storeName: string, qrDataUrl: strin
     <div class="rp-center rp-bold" style="font-size:14px">CORTE · Açougue Inteligente</div>
     <div class="rp-center rp-small">${storeName}</div>
     <div class="rp-dashed"></div>
-    <div class="rp-center rp-bold" style="font-size:13px">${order.items.length === 0 ? 'SENHA DE BALCÃO' : order.slotTime === 'Imediata' ? 'PEDIDO IMEDIATO' : 'PEDIDO AGENDADO'}</div>
+    <div class="rp-center rp-bold" style="font-size:13px">${receiptTitle(order)}</div>
     <div class="rp-dashed"></div>
     ${itemsHtml}
     <div class="rp-dashed"></div>
@@ -204,7 +214,9 @@ export default function PrintScreen({ order, onDone }: Props) {
           Pedido finalizado!
         </div>
         <div style={{ fontSize: 18, color: 'var(--t2)', lineHeight: 1.55, marginBottom: 24, maxWidth: 300 }}>
-          {order.items.length === 0
+          {order.priority || order.slotTime === 'Preferencial'
+            ? 'Comprovante impresso. Apresente a senha preferencial no balcão — você tem prioridade na fila.'
+            : order.items.length === 0
             ? 'Comprovante impresso com sucesso. Apresente a senha no balcão do açougue.'
             : order.customerPhone
               ? 'Informações enviadas para o WhatsApp. Comprovante impresso com sucesso.'
@@ -255,11 +267,11 @@ export default function PrintScreen({ order, onDone }: Props) {
           <div style={{ textAlign: 'center', fontSize: 13, marginBottom: 4 }}>{store.name}</div>
           <div style={{ borderTop: '1px dashed #999', margin: '8px 0' }} />
           <div style={{ textAlign: 'center', fontWeight: 700, fontSize: 19, margin: '6px 0' }}>
-            {order.items.length === 0 ? 'SENHA DE BALCÃO' : order.slotTime === 'Imediata' ? 'PEDIDO IMEDIATO' : 'PEDIDO AGENDADO'}
+            {receiptTitle(order)}
           </div>
           <div style={{ borderTop: '1px dashed #999', margin: '8px 0' }} />
           {order.items.length === 0 ? (
-            <div><strong>Pedido:</strong> {COUNTER_LINE}</div>
+            <div><strong>Pedido:</strong> {order.priority || order.slotTime === 'Preferencial' ? PREFERENTIAL_LINE : COUNTER_LINE}</div>
           ) : order.items.map((item, idx) => (
             <div key={item.product.id} style={{ marginBottom: idx < order.items.length - 1 ? 6 : 0 }}>
               <div><strong>{order.items.length > 1 ? `Item ${idx + 1}:` : 'Corte:'}</strong> {item.product.name}</div>

@@ -62,9 +62,17 @@ async function deliverPdf(pdfPath, pickupCode) {
 // ── Geração do PDF ────────────────────────────────────────────────────────────
 
 function pickupLabel(slotTime) {
+  if (slotTime === 'Preferencial') return 'Atendimento preferencial'
   if (slotTime === 'Imediata') return 'Escolher e Aguardar'
   if (slotTime === 'Balcão') return 'Atendimento no balcão'
   return `Hoje · ${slotTime}`
+}
+
+function receiptTitle(data) {
+  if (data.slotTime === 'Preferencial') return 'SENHA PREFERENCIAL'
+  if (data.items.length === 0) return 'SENHA DE BALCÃO'
+  if (data.slotTime === 'Imediata') return 'PEDIDO IMEDIATO'
+  return 'PEDIDO AGENDADO'
 }
 
 function buildPdf(data, qrTmpPath) {
@@ -94,13 +102,13 @@ function buildPdf(data, qrTmpPath) {
     txt(data.storeName, { size: 7, align: 'center' })
     dashed()
 
-    const title = data.items.length === 0 ? 'SENHA DE BALCÃO'
-      : data.slotTime === 'Imediata' ? 'PEDIDO IMEDIATO' : 'PEDIDO AGENDADO'
-    txt(title, { bold: true, size: 9, align: 'center' })
+    txt(receiptTitle(data), { bold: true, size: 9, align: 'center' })
     dashed()
 
     if (data.items.length === 0) {
-      txt('Pedido: Atendimento presencial no balcão')
+      txt(data.slotTime === 'Preferencial'
+        ? 'Pedido: Atendimento preferencial no balcão (fila prioritária)'
+        : 'Pedido: Atendimento presencial no balcão')
     } else {
       data.items.forEach((item, idx) => {
         if (data.items.length > 1) txt(`ITEM ${idx + 1}`, { bold: true, size: 7 })

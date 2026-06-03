@@ -242,6 +242,7 @@ model Order {
   status         OrderStatus @default(PENDING)
   totalAmount    Decimal     @db.Decimal(10, 2)
   notes          String?
+  priority       Boolean     @default(false)  // atendimento preferencial (Lei 10.048)
   createdAt      DateTime    @default(now())
   updatedAt      DateTime    @updatedAt
 

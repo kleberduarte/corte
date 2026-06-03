@@ -45,10 +45,18 @@ export default function KanbanScreen() {
     return <LoginScreen onSuccess={() => setLoggedIn(true)} />
   }
 
-  const waiting = orders.filter((o) => o.status === 'aguardando')
-  const inProg = orders.filter((o) => o.status === 'em_preparo')
+  const sortQueue = (list: Order[]) =>
+    [...list].sort((a, b) => {
+      if (a.priority && !b.priority) return -1
+      if (!a.priority && b.priority) return 1
+      return b.createdAt.getTime() - a.createdAt.getTime()
+    })
+
+  const waiting = sortQueue(orders.filter((o) => o.status === 'aguardando'))
+  const inProg = sortQueue(orders.filter((o) => o.status === 'em_preparo'))
   const done = orders.filter((o) => o.status === 'pronto')
   const urgent = orders.filter((o) => {
+    if (o.priority && o.status !== 'pronto' && o.status !== 'retirado') return true
     const diff = (new Date(`1970-01-01T${o.slotTime}:00`).getTime() - clock.getTime() + 8.64e7) % 8.64e7
     return diff < 10 * 60 * 1000 && o.status !== 'pronto'
   })
@@ -202,17 +210,26 @@ function KanbanCard({ order, primaryLabel, onPrimary, isGreen, clock }: {
   const timerClass = minutesLeft < 5 ? 'timer-urg' : minutesLeft < 10 ? 'timer-warn' : 'timer-ok'
   const timerLabel = minutesLeft > 0 ? `${minutesLeft}min` : 'AGORA'
 
+  const isPriority = order.priority || order.slotTime === 'Preferencial'
+
   return (
-    <div className={`tkc${minutesLeft < 5 ? ' urgent' : ''}`} style={{ animation: 'tkcIn .45s ease' }}>
+    <div className={`tkc${isPriority ? ' priority' : ''}${minutesLeft < 5 && !isPriority ? ' urgent' : ''}`} style={{ animation: 'tkcIn .45s ease' }}>
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
         <div style={{ fontFamily: 'var(--font-serif)', fontSize: 15, fontWeight: 700, color: 'var(--t1)', letterSpacing: 1 }}>
           {order.pickupCode}
         </div>
-        {clock && <div className={`timer-badge ${timerClass}`}>{timerLabel}</div>}
+        <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+          {isPriority && (
+            <span style={{ fontSize: 9, fontWeight: 800, letterSpacing: 0.8, textTransform: 'uppercase', padding: '3px 7px', borderRadius: 6, background: 'rgba(74,144,217,.2)', color: '#7eb8f0', border: '1px solid rgba(74,144,217,.45)' }}>
+              Preferencial
+            </span>
+          )}
+          {clock && !isPriority && <div className={`timer-badge ${timerClass}`}>{timerLabel}</div>}
+        </div>
       </div>
       {order.items.length === 0 ? (
         <div style={{ fontSize: 13, fontWeight: 600, color: 'var(--t2)', marginBottom: 8, lineHeight: 1.4 }}>
-          Atendimento no balcão
+          {isPriority ? 'Atendimento preferencial no balcão' : 'Atendimento no balcão'}
         </div>
       ) : order.items.map((item, idx) => (
         <div key={item.product.id} style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: idx < order.items.length - 1 ? 6 : 8 }}>

@@ -1,7 +1,7 @@
 import type { ReactNode } from 'react'
 import { CATEGORY_CARDS } from '../../data/products'
 
-export type FlowChoice = 'categories' | 'counter'
+export type FlowChoice = 'categories' | 'counter' | 'preferential'
 
 type Props = {
   onSelect: (choice: FlowChoice) => void
@@ -40,6 +40,30 @@ function CategoryHeroDecor() {
             <span className="flow-thumb-label">{cat.name}</span>
           </div>
         ))}
+      </div>
+    </div>
+  )
+}
+
+function PreferentialHeroDecor() {
+  return (
+    <div className="flow-hero-decor flow-hero-decor--preferential">
+      <div className="flow-priority-badge" aria-hidden>
+        <span className="flow-priority-icon">♿</span>
+        <span>Prioridade na fila</span>
+      </div>
+      <div className="flow-ticket-wrap">
+        <div className="flow-ticket flow-ticket--priority">
+          <div className="flow-ticket-priority-tag">P</div>
+          <div className="flow-ticket-body">
+            <div className="flow-ticket-brand">CORTE</div>
+            <div className="flow-ticket-label">Senha preferencial</div>
+            <div className="flow-ticket-code">P-2847</div>
+            <div className="flow-ticket-hint">Fila prioritária</div>
+          </div>
+          <div className="flow-ticket-notch flow-ticket-notch--left" />
+          <div className="flow-ticket-notch flow-ticket-notch--right" />
+        </div>
       </div>
     </div>
   )
@@ -115,6 +139,24 @@ const CARDS: FlowCard[] = [
     badgeText: '#0d0d0e',
     heroDecor: <CounterHeroDecor />,
   },
+  {
+    choice: 'preferential',
+    badge: 'Lei 10.048',
+    title: 'Atendimento preferencial',
+    subtitle: 'Idosos, gestantes, PCD e demais grupos com direito à prioridade na fila',
+    hint: 'Senha com prioridade',
+    features: [
+      { icon: 'priority', label: 'Fila prioritária' },
+      { icon: 'fast', label: 'Atendimento ágil' },
+      { icon: 'access', label: 'Direito garantido' },
+    ],
+    imageUrl: FEATURED_MEAT.imageUrl.replace('w=900&h=500', 'w=1200&h=700'),
+    imagePosition: 'center 42%',
+    accent: '#7EB8F0',
+    accentRgb: '74,144,217',
+    badgeText: '#0a1628',
+    heroDecor: <PreferentialHeroDecor />,
+  },
 ]
 
 const COUNTER_IMG_FALLBACK =
@@ -144,6 +186,21 @@ function FeatureIcon({ type }: { type: string }) {
       </svg>
     )
   }
+  if (type === 'priority') {
+    return (
+      <svg width="11" height="11" viewBox="0 0 24 24" fill="none" aria-hidden>
+        <path d="M12 2l2.4 7.4H22l-6 4.6 2.3 7-6.3-4.6L6 21l2.3-7-6-4.6h7.6L12 2z" stroke="currentColor" strokeWidth="1.8" strokeLinejoin="round" />
+      </svg>
+    )
+  }
+  if (type === 'access') {
+    return (
+      <svg width="11" height="11" viewBox="0 0 24 24" fill="none" aria-hidden>
+        <circle cx="12" cy="4" r="2" stroke="currentColor" strokeWidth="1.8" />
+        <path d="M12 7v5M8 20l4-8 4 8M6 12h12" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
+      </svg>
+    )
+  }
   return <span>{type}</span>
 }
 
@@ -158,6 +215,8 @@ function FlowChoiceCard({
 }) {
   const isCategories = card.choice === 'categories'
   const isCounter = card.choice === 'counter'
+  const isPreferential = card.choice === 'preferential'
+  const usesIcons = isCounter || isPreferential
 
   return (
     <button
@@ -178,7 +237,7 @@ function FlowChoiceCard({
           style={{ objectPosition: card.imagePosition }}
           loading="eager"
           onError={(e) => {
-            if (isCounter) (e.currentTarget as HTMLImageElement).src = COUNTER_IMG_FALLBACK
+            if (isCounter || isPreferential) (e.currentTarget as HTMLImageElement).src = COUNTER_IMG_FALLBACK
           }}
         />
         <div className="flow-card-hero-shade" />
@@ -202,7 +261,7 @@ function FlowChoiceCard({
           {card.features.map((f) => (
             <li key={f.label}>
               <span className="flow-feature-icon" aria-hidden>
-                {isCounter ? <FeatureIcon type={f.icon} /> : f.icon}
+                {usesIcons ? <FeatureIcon type={f.icon} /> : f.icon}
               </span>
               {f.label}
             </li>
@@ -212,7 +271,7 @@ function FlowChoiceCard({
         <div className="flow-card-footer">
           <span className="flow-card-hint">{card.hint}</span>
           <span
-            className={`flow-card-cta ${isCategories ? 'flow-card-cta--gold' : ''} ${isCounter ? 'flow-card-cta--counter' : ''}`}
+            className={`flow-card-cta ${isCategories ? 'flow-card-cta--gold' : ''} ${isCounter ? 'flow-card-cta--counter' : ''} ${isPreferential ? 'flow-card-cta--preferential' : ''}`}
             aria-hidden
           >
             →
@@ -275,7 +334,7 @@ export default function FlowChoiceScreen({ onSelect }: Props) {
 
         .flow-card {
           flex: 1;
-          min-height: 268px;
+          min-height: 220px;
           display: flex;
           flex-direction: column;
           padding: 0;
@@ -283,7 +342,6 @@ export default function FlowChoiceScreen({ onSelect }: Props) {
           border-radius: 22px;
           overflow: hidden;
           cursor: pointer;
-          text-align: left;
           background: var(--s2);
           box-shadow:
             0 14px 48px rgba(0,0,0,.55),
@@ -300,6 +358,13 @@ export default function FlowChoiceScreen({ onSelect }: Props) {
             0 0 40px rgba(232,226,212,.06),
             inset 0 1px 0 rgba(255,255,255,.08);
         }
+        .flow-card--preferential {
+          border: 1px solid rgba(74,144,217,.4);
+          box-shadow:
+            0 14px 48px rgba(0,0,0,.55),
+            0 0 36px rgba(74,144,217,.12),
+            inset 0 1px 0 rgba(255,255,255,.08);
+        }
 
         .flow-card-hero {
           position: relative;
@@ -307,9 +372,13 @@ export default function FlowChoiceScreen({ onSelect }: Props) {
           min-height: 128px;
           overflow: hidden;
         }
+        .flow-card--counter .flow-card-hero,
+        .flow-card--preferential .flow-card-hero {
+          flex: 0 0 50%;
+          min-height: 140px;
+          background: linear-gradient(145deg, #2a3548 0%, #1a1c22 55%, #121214 100%);
+        }
         .flow-card--counter .flow-card-hero {
-          flex: 0 0 54%;
-          min-height: 158px;
           background: linear-gradient(145deg, #3d3530 0%, #1e1c1a 55%, #121214 100%);
         }
         .flow-card-hero-img {
@@ -408,8 +477,7 @@ export default function FlowChoiceScreen({ onSelect }: Props) {
           justify-content: flex-start;
         }
         .flow-thumb {
-          flex: 1;
-          max-width: 72px;
+          flex: 1 1 0;
           min-width: 0;
           border-radius: 12px;
           overflow: hidden;
@@ -426,17 +494,18 @@ export default function FlowChoiceScreen({ onSelect }: Props) {
         }
         .flow-thumb-label {
           display: block;
-          font-size: 14px;
+          font-size: 11px;
           font-weight: 700;
           text-transform: uppercase;
-          letter-spacing: .4px;
+          letter-spacing: .2px;
           color: rgba(255,255,255,.85);
-          padding: 4px 5px 5px;
+          padding: 5px 4px 6px;
           text-align: center;
+          line-height: 1.2;
           background: linear-gradient(180deg, rgba(13,13,14,.2), rgba(13,13,14,.92));
-          white-space: nowrap;
-          overflow: hidden;
-          text-overflow: ellipsis;
+          white-space: normal;
+          word-break: break-word;
+          hyphens: auto;
         }
 
         .flow-hero-decor--counter {
@@ -613,28 +682,45 @@ export default function FlowChoiceScreen({ onSelect }: Props) {
           flex: 1;
           display: flex;
           flex-direction: column;
+          align-items: center;
+          text-align: center;
           padding: 16px 18px 18px;
           background: linear-gradient(180deg, #161618 0%, #0f0f10 100%);
         }
         .flow-card--categories .flow-card-body {
           border-top: 1px solid rgba(var(--flow-accent-rgb), .2);
         }
-        .flow-card--counter .flow-card-body {
+        .flow-card--counter .flow-card-body,
+        .flow-card--preferential .flow-card-body {
           border-top: 1px solid rgba(232,226,212,.15);
           background: linear-gradient(180deg, #18181a 0%, #0c0c0d 100%);
         }
-        .flow-card--counter .flow-card-title {
+        .flow-card--preferential .flow-card-body {
+          border-top-color: rgba(74,144,217,.22);
+        }
+        .flow-card--counter .flow-card-title,
+        .flow-card--preferential .flow-card-title {
           color: var(--accent);
         }
-        .flow-card--counter .flow-card-features li {
+        .flow-card--preferential .flow-card-title {
+          color: #7EB8F0;
+        }
+        .flow-card--counter .flow-card-features li,
+        .flow-card--preferential .flow-card-features li {
           color: rgba(245,237,219,.82);
         }
-        .flow-card--counter .flow-feature-icon {
+        .flow-card--counter .flow-feature-icon,
+        .flow-card--preferential .flow-feature-icon {
           width: 22px;
           height: 22px;
           background: rgba(232,226,212,.1);
           border-color: rgba(232,226,212,.28);
           color: var(--accent);
+        }
+        .flow-card--preferential .flow-feature-icon {
+          background: rgba(74,144,217,.15);
+          border-color: rgba(74,144,217,.35);
+          color: #7EB8F0;
         }
         .flow-card-title {
           margin: 0 0 6px;
@@ -657,6 +743,7 @@ export default function FlowChoiceScreen({ onSelect }: Props) {
           padding: 0;
           display: flex;
           flex-wrap: wrap;
+          justify-content: center;
           gap: 8px 14px;
         }
         .flow-card-features li {
@@ -690,9 +777,11 @@ export default function FlowChoiceScreen({ onSelect }: Props) {
 
         .flow-card-footer {
           margin-top: auto;
+          width: 100%;
           display: flex;
           align-items: center;
-          justify-content: space-between;
+          justify-content: center;
+          gap: 16px;
           padding-top: 12px;
           border-top: 1px solid rgba(255,255,255,.08);
         }
@@ -730,8 +819,80 @@ export default function FlowChoiceScreen({ onSelect }: Props) {
           border: 1px solid rgba(255,255,255,.35);
           box-shadow: 0 4px 24px rgba(232,226,212,.25);
         }
-        .flow-card--counter .flow-card-footer {
+        .flow-card-cta--preferential {
+          color: #0a1628;
+          background: linear-gradient(145deg, #A8D4FF, #4A90D9);
+          border: 1px solid rgba(255,255,255,.35);
+          box-shadow: 0 4px 24px rgba(74,144,217,.35);
+        }
+        .flow-card--counter .flow-card-footer,
+        .flow-card--preferential .flow-card-footer {
           border-top-color: rgba(232,226,212,.12);
+        }
+        .flow-card--preferential .flow-card-footer {
+          border-top-color: rgba(74,144,217,.15);
+        }
+        .flow-hero-decor--preferential {
+          display: block;
+        }
+        .flow-priority-badge {
+          position: absolute;
+          left: 12px;
+          bottom: 12px;
+          z-index: 3;
+          display: flex;
+          align-items: center;
+          gap: 8px;
+          font-size: 13px;
+          font-weight: 700;
+          text-transform: uppercase;
+          letter-spacing: .6px;
+          color: #e8f4ff;
+          padding: 7px 12px;
+          border-radius: 22px;
+          background: linear-gradient(135deg, rgba(74,144,217,.92), rgba(42,98,168,.94));
+          border: 1px solid rgba(255,255,255,.35);
+          box-shadow: 0 8px 24px rgba(0,0,0,.4);
+        }
+        .flow-priority-icon {
+          font-size: 16px;
+          line-height: 1;
+        }
+        .flow-ticket--priority {
+          border: 2px solid #4A90D9;
+          box-shadow:
+            0 18px 44px rgba(0,0,0,.5),
+            0 0 24px rgba(74,144,217,.35);
+        }
+        .flow-ticket-priority-tag {
+          position: absolute;
+          top: -8px;
+          right: 10px;
+          width: 22px;
+          height: 22px;
+          border-radius: 50%;
+          background: linear-gradient(145deg, #A8D4FF, #4A90D9);
+          color: #0a1628;
+          font-size: 12px;
+          font-weight: 800;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          border: 2px solid #FDFCF9;
+          box-shadow: 0 4px 12px rgba(74,144,217,.5);
+        }
+        .flow-card--preferential .flow-card-badge {
+          background: linear-gradient(135deg, #A8D4FF, #4A90D9);
+          color: #0a1628;
+          border: 1px solid rgba(255,255,255,.45);
+        }
+        .flow-card--preferential .flow-card-hero-shade {
+          background: linear-gradient(
+            112deg,
+            rgba(10,22,40,.65) 0%,
+            rgba(74,144,217,.12) 40%,
+            rgba(13,13,14,.35) 100%
+          );
         }
 
         .flow-card:active .flow-card-hero-img {

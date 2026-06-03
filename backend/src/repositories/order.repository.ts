@@ -21,7 +21,7 @@ export async function findOrdersByStore(
       }),
     },
     include: { items: { include: { product: true } } },
-    orderBy: { createdAt: 'desc' },
+    orderBy: [{ priority: 'desc' }, { createdAt: 'desc' }],
   })
 }
 

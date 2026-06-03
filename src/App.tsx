@@ -11,7 +11,7 @@ import InactivityOverlay from './components/InactivityOverlay'
 import StepProgress from './components/StepProgress'
 import HomeScreen from './screens/cliente/HomeScreen'
 import PickupModeScreen, { type PickupMode } from './screens/cliente/PickupModeScreen'
-import FlowChoiceScreen from './screens/cliente/FlowChoiceScreen'
+import FlowChoiceScreen, { type FlowChoice } from './screens/cliente/FlowChoiceScreen'
 import CategoriesScreen from './screens/cliente/CategoriesScreen'
 import CatalogScreen from './screens/cliente/CatalogScreen'
 import DetailScreen from './screens/cliente/DetailScreen'
@@ -27,6 +27,7 @@ type ClienteScreen = 'home' | 'pickup-mode' | 'flow-choice' | 'categories' | 'ca
 const INACTIVITY_MS = 90_000
 const COUNTDOWN_S   = 15
 const IMMEDIATE_SLOT = 'Imediata'
+const PREFERENTIAL_SLOT = 'Preferencial'
 
 function getBackScreen(screen: ClienteScreen, pickupMode: PickupMode, counterOnly: boolean): ClienteScreen {
   const map: Record<ClienteScreen, ClienteScreen> = {
@@ -139,15 +140,20 @@ function ClienteView() {
     go('flow-choice')
   }
 
-  async function handleFlowChoice(choice: 'categories' | 'counter') {
+  async function handleFlowChoice(choice: FlowChoice) {
     if (choice === 'categories') {
       setCounterOnly(false)
       go('categories')
       return
     }
     setCounterOnly(true)
-    const slot = pickupMode === 'immediate' ? IMMEDIATE_SLOT : 'Balcão'
-    const order = await createCounterTicket(store.id, slot)
+    const isPreferential = choice === 'preferential'
+    const slot = isPreferential
+      ? PREFERENTIAL_SLOT
+      : pickupMode === 'immediate'
+        ? IMMEDIATE_SLOT
+        : 'Balcão'
+    const order = await createCounterTicket(store.id, slot, { priority: isPreferential })
     addOrder(order)
     go('print')
   }
