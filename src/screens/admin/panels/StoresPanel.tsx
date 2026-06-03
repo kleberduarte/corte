@@ -165,12 +165,12 @@ export default function StoresPanel({ onNew, onEdit, onOperators }: {
                 />
                 <div className="admin-card__info">
                   <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: 8, marginBottom: 4 }}>
-                    <strong style={{ fontSize: 15 }}>{store.name}</strong>
+                    <strong style={{ fontSize: 'calc(15px * var(--font-scale))' }}>{store.name}</strong>
                     <span className="admin-tag">{CHAIN_LABELS[store.chain] ?? store.chain}</span>
                     {!store.active && <span className="admin-tag admin-tag--warn">Inativa</span>}
                   </div>
-                  <div style={{ fontSize: 12, color: 'var(--t3)' }}>
-                    <code style={{ fontSize: 12 }}>?store={store.slug}</code>
+                  <div style={{ fontSize: 'calc(12px * var(--font-scale))', color: 'var(--t3)' }}>
+                    <code style={{ fontSize: 'calc(12px * var(--font-scale))' }}>?store={store.slug}</code>
                     {' · '}
                     {store._count.operators} operador{store._count.operators !== 1 ? 'es' : ''}
                     {' · '}

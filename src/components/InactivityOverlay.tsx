@@ -38,17 +38,17 @@ export default function InactivityOverlay({ secondsLeft, onContinue, onReset }: 
         <div style={{
           position: 'absolute', inset: 0,
           display: 'flex', alignItems: 'center', justifyContent: 'center',
-          fontFamily: 'var(--font-serif)', fontSize: 42, fontWeight: 700,
+          fontFamily: 'var(--font-serif)', fontSize: 'calc(42px * var(--font-scale))', fontWeight: 700,
           color: 'white',
         }}>
           {secondsLeft}
         </div>
       </div>
 
-      <div style={{ fontFamily: 'var(--font-serif)', fontSize: 26, fontWeight: 700, color: 'white', textAlign: 'center', marginBottom: 10 }}>
+      <div style={{ fontFamily: 'var(--font-serif)', fontSize: 'calc(26px * var(--font-scale))', fontWeight: 700, color: 'white', textAlign: 'center', marginBottom: 10 }}>
         Ainda está aí?
       </div>
-      <div style={{ fontSize: 15, color: 'rgba(255,255,255,.65)', textAlign: 'center', marginBottom: 36, lineHeight: 1.5 }}>
+      <div style={{ fontSize: 'calc(15px * var(--font-scale))', color: 'rgba(255,255,255,.65)', textAlign: 'center', marginBottom: 36, lineHeight: 1.5 }}>
         A sessão será reiniciada em <strong style={{ color: 'white' }}>{secondsLeft} segundo{secondsLeft !== 1 ? 's' : ''}</strong>
       </div>
 
@@ -58,7 +58,7 @@ export default function InactivityOverlay({ secondsLeft, onContinue, onReset }: 
           padding: '18px 48px',
           background: 'var(--primary)', color: 'white',
           border: 'none', borderRadius: 'var(--r-lg)',
-          fontSize: 17, fontWeight: 700,
+          fontSize: 'calc(17px * var(--font-scale))', fontWeight: 700,
           fontFamily: 'var(--font-sans)',
           cursor: 'pointer',
           boxShadow: '0 8px 28px var(--primary-glow)',
@@ -74,7 +74,7 @@ export default function InactivityOverlay({ secondsLeft, onContinue, onReset }: 
           background: 'transparent', color: 'rgba(255,255,255,.5)',
           border: '1px solid rgba(255,255,255,.2)',
           borderRadius: 'var(--r)',
-          fontSize: 14, fontWeight: 500,
+          fontSize: 'calc(14px * var(--font-scale))', fontWeight: 500,
           fontFamily: 'var(--font-sans)',
           cursor: 'pointer',
         }}

@@ -11,14 +11,14 @@ export default function StepProgress({ current, total, labels }: Props) {
             flexShrink: 0,
             background: i < current ? 'var(--green)' : i === current ? 'var(--primary)' : 'var(--s3)',
             border: `2px solid ${i < current ? 'var(--green)' : i === current ? 'var(--primary)' : 'var(--border)'}`,
-            fontSize: 11, fontWeight: 700,
+            fontSize: 'calc(11px * var(--font-scale))', fontWeight: 700,
             color: i <= current ? 'white' : 'var(--t4)',
             transition: 'all .3s',
           }}>
             {i < current ? '✓' : i + 1}
           </div>
           {labels && (
-            <div style={{ fontSize: 10, color: i === current ? 'var(--t2)' : 'var(--t4)', whiteSpace: 'nowrap', display: i < total - 1 ? 'none' : undefined }}>
+            <div style={{ fontSize: 'calc(10px * var(--font-scale))', color: i === current ? 'var(--t2)' : 'var(--t4)', whiteSpace: 'nowrap', display: i < total - 1 ? 'none' : undefined }}>
               {labels[i]}
             </div>
           )}

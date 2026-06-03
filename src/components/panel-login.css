@@ -25,7 +25,7 @@
 
 .panel-login__brand {
   font-family: var(--font-serif);
-  font-size: 28px;
+  font-size: calc(28px * var(--font-scale));
   font-weight: 700;
   color: var(--accent);
   letter-spacing: 3px;
@@ -33,7 +33,7 @@
 }
 
 .panel-login__sub {
-  font-size: 13px;
+  font-size: calc(13px * var(--font-scale));
   color: var(--t3);
 }
 
@@ -45,7 +45,7 @@
 
 .panel-login__field label {
   display: block;
-  font-size: 12px;
+  font-size: calc(12px * var(--font-scale));
   font-weight: 600;
   color: var(--t3);
   text-transform: uppercase;
@@ -60,7 +60,7 @@
   border: 1px solid var(--border2);
   background: var(--s2);
   color: var(--t1);
-  font-size: 14px;
+  font-size: calc(14px * var(--font-scale));
   font-family: inherit;
   outline: none;
   box-sizing: border-box;
@@ -74,7 +74,7 @@
 .panel-login__toggle-pass {
   align-self: flex-end;
   margin-top: -8px;
-  font-size: 12px;
+  font-size: calc(12px * var(--font-scale));
   color: var(--t3);
   background: none;
   border: none;
@@ -87,7 +87,7 @@
 }
 
 .panel-login__error {
-  font-size: 13px;
+  font-size: calc(13px * var(--font-scale));
   color: #ff8a8f;
   background: rgba(255, 107, 107, 0.1);
   border: 1px solid rgba(255, 107, 107, 0.25);
@@ -106,7 +106,7 @@
   color: #fff;
   border: none;
   border-radius: var(--r);
-  font-size: 15px;
+  font-size: calc(15px * var(--font-scale));
   font-weight: 700;
   font-family: inherit;
   cursor: pointer;
@@ -145,7 +145,7 @@
   justify-content: center;
   gap: 10px;
   color: var(--t3);
-  font-size: 14px;
+  font-size: calc(14px * var(--font-scale));
 }
 
 .panel-login__loading .panel-login__spinner {

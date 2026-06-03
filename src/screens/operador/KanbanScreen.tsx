@@ -60,29 +60,29 @@ export default function KanbanScreen() {
     <div style={{ width: '100%', height: '100%', display: 'flex', flexDirection: 'column', background: 'var(--bg)' }}>
       {/* Top bar */}
       <div style={{ flexShrink: 0, height: 'auto', minHeight: 52, display: 'flex', alignItems: 'center', padding: '10px 16px', gap: 12, background: 'var(--s1)', borderBottom: '1px solid var(--border)', flexWrap: 'wrap' }}>
-        <div style={{ width: 34, height: 34, background: 'linear-gradient(145deg, var(--primary-dark), var(--primary))', borderRadius: 10, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 17 }}>🔪</div>
-        <div style={{ fontFamily: 'var(--font-serif)', fontSize: 16, fontWeight: 700, color: 'var(--accent)', letterSpacing: 2 }}>CORTE</div>
-        <div style={{ fontSize: 12, color: 'var(--t3)', padding: '4px 10px', background: 'var(--s2)', border: '1px solid var(--border)', borderRadius: 20 }}>
+        <div style={{ width: 34, height: 34, background: 'linear-gradient(145deg, var(--primary-dark), var(--primary))', borderRadius: 10, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 'calc(17px * var(--font-scale))' }}>🔪</div>
+        <div style={{ fontFamily: 'var(--font-serif)', fontSize: 'calc(16px * var(--font-scale))', fontWeight: 700, color: 'var(--accent)', letterSpacing: 2 }}>CORTE</div>
+        <div style={{ fontSize: 'calc(12px * var(--font-scale))', color: 'var(--t3)', padding: '4px 10px', background: 'var(--s2)', border: '1px solid var(--border)', borderRadius: 20 }}>
           {store.name}
         </div>
         <div style={{ flex: 1 }} />
         <div>
-          <div style={{ fontSize: 13, fontWeight: 600, color: 'var(--t2)' }}>{timeStr}</div>
-          <div style={{ fontSize: 10, color: 'var(--t3)' }}>{dateStr}</div>
+          <div style={{ fontSize: 'calc(13px * var(--font-scale))', fontWeight: 600, color: 'var(--t2)' }}>{timeStr}</div>
+          <div style={{ fontSize: 'calc(10px * var(--font-scale))', color: 'var(--t3)' }}>{dateStr}</div>
         </div>
-        <div style={{ width: 34, height: 34, borderRadius: 10, background: 'var(--s2)', border: '1px solid var(--border)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 15, position: 'relative', cursor: 'pointer' }}>
+        <div style={{ width: 34, height: 34, borderRadius: 10, background: 'var(--s2)', border: '1px solid var(--border)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 'calc(15px * var(--font-scale))', position: 'relative', cursor: 'pointer' }}>
           🔔
           {orders.length > 0 && (
-            <div style={{ position: 'absolute', top: 4, right: 4, width: 14, height: 14, borderRadius: '50%', background: 'var(--primary)', fontSize: 8, fontWeight: 700, color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+            <div style={{ position: 'absolute', top: 4, right: 4, width: 14, height: 14, borderRadius: '50%', background: 'var(--primary)', fontSize: 'calc(8px * var(--font-scale))', fontWeight: 700, color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
               {orders.length}
             </div>
           )}
         </div>
         <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-          <div style={{ width: 32, height: 32, borderRadius: 10, background: 'linear-gradient(135deg, var(--primary-dark), var(--primary))', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 14, color: 'white' }}>👤</div>
+          <div style={{ width: 32, height: 32, borderRadius: 10, background: 'linear-gradient(135deg, var(--primary-dark), var(--primary))', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 'calc(14px * var(--font-scale))', color: 'white' }}>👤</div>
           <button
             onClick={() => { logoutOperator(); setLoggedIn(false) }}
-            style={{ fontSize: 11, color: 'var(--t3)', background: 'none', border: 'none', cursor: 'pointer', padding: '4px 6px', borderRadius: 6 }}
+            style={{ fontSize: 'calc(11px * var(--font-scale))', color: 'var(--t3)', background: 'none', border: 'none', cursor: 'pointer', padding: '4px 6px', borderRadius: 6 }}
             title="Sair"
           >
             Sair
@@ -102,8 +102,8 @@ export default function KanbanScreen() {
       {/* Kanban header */}
       <div style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '10px 16px 8px', flexShrink: 0 }}>
         <div>
-          <div style={{ fontFamily: 'var(--font-serif)', fontSize: 16, fontWeight: 700, color: 'var(--t1)' }}>Pedidos do Dia</div>
-          <div style={{ fontSize: 10, color: 'var(--t3)' }}>
+          <div style={{ fontFamily: 'var(--font-serif)', fontSize: 'calc(16px * var(--font-scale))', fontWeight: 700, color: 'var(--t1)' }}>Pedidos do Dia</div>
+          <div style={{ fontSize: 'calc(10px * var(--font-scale))', color: 'var(--t3)' }}>
             {orders.length === 0 ? 'Fila vazia · faça um pedido no totem' : `${orders.length} pedido(s) no total`}
           </div>
         </div>
@@ -141,13 +141,13 @@ export default function KanbanScreen() {
         <button
           onClick={() => { const next = waiting[0]; if (next) moveOrder(next.id, 'em_preparo') }}
           disabled={waiting.length === 0}
-          style={{ flex: 1, padding: '14px 12px', borderRadius: 12, fontSize: 14, fontWeight: 700, textAlign: 'center', cursor: waiting.length > 0 ? 'pointer' : 'not-allowed', border: 'none', background: 'var(--primary)', color: '#fff', opacity: waiting.length > 0 ? 1 : 0.35, fontFamily: 'var(--font-sans)', transition: 'opacity .2s' }}
+          style={{ flex: 1, padding: '14px 12px', borderRadius: 12, fontSize: 'calc(14px * var(--font-scale))', fontWeight: 700, textAlign: 'center', cursor: waiting.length > 0 ? 'pointer' : 'not-allowed', border: 'none', background: 'var(--primary)', color: '#fff', opacity: waiting.length > 0 ? 1 : 0.35, fontFamily: 'var(--font-sans)', transition: 'opacity .2s' }}
         >
           ▶ Iniciar próximo
         </button>
         <button
           onClick={resetOrders}
-          style={{ padding: '14px 16px', borderRadius: 12, fontSize: 14, fontWeight: 700, cursor: 'pointer', border: '1px solid var(--border)', background: 'var(--s3)', color: 'var(--t2)', fontFamily: 'var(--font-sans)' }}
+          style={{ padding: '14px 16px', borderRadius: 12, fontSize: 'calc(14px * var(--font-scale))', fontWeight: 700, cursor: 'pointer', border: '1px solid var(--border)', background: 'var(--s3)', color: 'var(--t2)', fontFamily: 'var(--font-sans)' }}
           title="Zerar fila"
         >↺</button>
       </div>
@@ -160,8 +160,8 @@ function MetricCard({ color, value, label, pulse }: { color: string; value: numb
     <div style={{ background: 'var(--s2)', border: `1px solid ${pulse && value > 0 ? 'rgba(192,39,45,.3)' : 'var(--border)'}`, borderRadius: 10, padding: '8px 10px', display: 'flex', alignItems: 'center', gap: 8 }}>
       <div style={{ width: 10, height: 10, borderRadius: '50%', background: color, flexShrink: 0, animation: pulse && value > 0 ? 'pulse 1.5s infinite' : undefined }} />
       <div>
-        <div style={{ fontSize: 20, fontWeight: 700, color: pulse && value > 0 ? 'var(--primary)' : 'var(--t1)' }}>{value}</div>
-        <div style={{ fontSize: 9, color: 'var(--t3)', marginTop: 1 }}>{label}</div>
+        <div style={{ fontSize: 'calc(20px * var(--font-scale))', fontWeight: 700, color: pulse && value > 0 ? 'var(--primary)' : 'var(--t1)' }}>{value}</div>
+        <div style={{ fontSize: 'calc(9px * var(--font-scale))', color: 'var(--t3)', marginTop: 1 }}>{label}</div>
       </div>
     </div>
   )
@@ -205,28 +205,28 @@ function KanbanCard({ order, primaryLabel, onPrimary, isGreen, clock }: {
   return (
     <div className={`tkc${minutesLeft < 5 ? ' urgent' : ''}`} style={{ animation: 'tkcIn .45s ease' }}>
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
-        <div style={{ fontFamily: 'var(--font-serif)', fontSize: 15, fontWeight: 700, color: 'var(--t1)', letterSpacing: 1 }}>
+        <div style={{ fontFamily: 'var(--font-serif)', fontSize: 'calc(15px * var(--font-scale))', fontWeight: 700, color: 'var(--t1)', letterSpacing: 1 }}>
           {order.pickupCode}
         </div>
         {clock && <div className={`timer-badge ${timerClass}`}>{timerLabel}</div>}
       </div>
       {order.items.length === 0 ? (
-        <div style={{ fontSize: 13, fontWeight: 600, color: 'var(--t2)', marginBottom: 8, lineHeight: 1.4 }}>
+        <div style={{ fontSize: 'calc(13px * var(--font-scale))', fontWeight: 600, color: 'var(--t2)', marginBottom: 8, lineHeight: 1.4 }}>
           Atendimento no balcão
         </div>
       ) : order.items.map((item, idx) => (
         <div key={item.product.id} style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: idx < order.items.length - 1 ? 6 : 8 }}>
           <img src={item.product.imageUrl} alt="" style={{ width: 44, height: 44, borderRadius: 9, objectFit: 'cover', flexShrink: 0 }} />
           <div style={{ flex: 1, minWidth: 0 }}>
-            <div style={{ fontSize: 13, fontWeight: 600, color: 'var(--t1)' }}>{item.product.name}</div>
-            <div style={{ fontSize: 11, color: 'var(--t3)' }}>{item.cutType.name} · ~{item.weightKg}kg</div>
+            <div style={{ fontSize: 'calc(13px * var(--font-scale))', fontWeight: 600, color: 'var(--t1)' }}>{item.product.name}</div>
+            <div style={{ fontSize: 'calc(11px * var(--font-scale))', color: 'var(--t3)' }}>{item.cutType.name} · ~{item.weightKg}kg</div>
           </div>
         </div>
       ))}
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '7px 9px', background: 'var(--s3)', borderRadius: 9, marginBottom: 10 }}>
-        <span style={{ fontSize: 11, color: 'var(--t3)' }}>🕐 {order.slotTime}</span>
+        <span style={{ fontSize: 'calc(11px * var(--font-scale))', color: 'var(--t3)' }}>🕐 {order.slotTime}</span>
         {order.items.length > 1 && (
-          <span style={{ fontSize: 11, fontWeight: 600, color: 'var(--gold)' }}>{order.items.length} itens</span>
+          <span style={{ fontSize: 'calc(11px * var(--font-scale))', fontWeight: 600, color: 'var(--gold)' }}>{order.items.length} itens</span>
         )}
       </div>
       <div style={{ display: 'flex', gap: 6 }}>

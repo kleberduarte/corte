@@ -68,25 +68,25 @@ export default function HomeScreen({ onStart }: Props) {
 
         {/* Relógio no topo direito */}
         <div style={{ position: 'absolute', top: 24, right: 24, textAlign: 'right', zIndex: 3 }}>
-          <div style={{ fontSize: 36, fontWeight: 700, color: 'white', fontFamily: 'var(--font-serif)', lineHeight: 1 }}>{timeStr}</div>
-          <div style={{ fontSize: 12, color: 'rgba(255,255,255,.6)', marginTop: 3, textTransform: 'capitalize' }}>{dateStr}</div>
+          <div style={{ fontSize: 'calc(36px * var(--font-scale))', fontWeight: 700, color: 'white', fontFamily: 'var(--font-serif)', lineHeight: 1 }}>{timeStr}</div>
+          <div style={{ fontSize: 'calc(12px * var(--font-scale))', color: 'rgba(255,255,255,.6)', marginTop: 3, textTransform: 'capitalize' }}>{dateStr}</div>
         </div>
 
         {/* Conteúdo hero */}
         <div key={slide} style={{ position: 'absolute', bottom: 0, left: 0, right: 0, padding: '0 28px 64px', zIndex: 3, animation: 'slideUp .4s ease both' }}>
           <div style={{
             display: 'inline-flex', alignItems: 'center', gap: 5,
-            fontSize: 11, fontWeight: 700, padding: '5px 12px', borderRadius: 20,
+            fontSize: 'calc(11px * var(--font-scale))', fontWeight: 700, padding: '5px 12px', borderRadius: 20,
             background: 'var(--gold)', color: '#1a0f00', marginBottom: 10,
             textTransform: 'uppercase', letterSpacing: '.5px',
           }}>{s.badge}</div>
-          <div style={{ fontFamily: 'var(--font-serif)', fontSize: 32, fontWeight: 700, color: 'white', lineHeight: 1.2, marginBottom: 8, whiteSpace: 'pre-line' }}>
+          <div style={{ fontFamily: 'var(--font-serif)', fontSize: 'calc(32px * var(--font-scale))', fontWeight: 700, color: 'white', lineHeight: 1.2, marginBottom: 8, whiteSpace: 'pre-line' }}>
             {s.name}
           </div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 10, fontSize: 14, color: 'rgba(255,255,255,.7)' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 12, fontSize: 'calc(20px * var(--font-scale))', color: 'rgba(255,255,255,.7)' }}>
             <span>{s.tag}</span>
             <span style={{ color: 'rgba(255,255,255,.3)' }}>·</span>
-            <span style={{ fontSize: 17, fontWeight: 700, color: 'white' }}>{s.price}</span>
+            <span style={{ fontSize: 'calc(26px * var(--font-scale))', fontWeight: 700, color: 'white' }}>{s.price}</span>
           </div>
         </div>
 
@@ -111,17 +111,17 @@ export default function HomeScreen({ onStart }: Props) {
         <button
           onClick={onStart}
           style={{
-            width: '100%', padding: '22px 28px',
+            width: '100%', padding: '36px 40px',
             background: 'var(--primary)', color: 'white', border: 'none',
-            borderRadius: 'var(--r-lg)', fontFamily: 'var(--font-sans)',
-            fontSize: 20, fontWeight: 700, letterSpacing: '.3px', cursor: 'pointer',
+            borderRadius: 'var(--r-xl)', fontFamily: 'var(--font-sans)',
+            fontSize: 'calc(32px * var(--font-scale))', fontWeight: 700, letterSpacing: '.3px', cursor: 'pointer',
             boxShadow: '0 10px 36px var(--primary-glow)',
             animation: 'totemPulse 2.4s ease-in-out infinite',
           }}
         >
           Toque aqui para iniciar
         </button>
-        <p style={{ fontSize: 13, color: 'var(--t3)', textAlign: 'center', lineHeight: 1.55 }}>
+        <p style={{ fontSize: 'calc(13px * var(--font-scale))', color: 'var(--t3)', textAlign: 'center', lineHeight: 1.55 }}>
           Escolha seu corte · personalize · retire sem fila
         </p>
       </div>

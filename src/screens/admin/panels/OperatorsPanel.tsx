@@ -201,8 +201,8 @@ export default function OperatorsPanel({
               <div className="admin-card__row">
                 <span className={`admin-status-dot ${op.active ? 'admin-status-dot--on' : 'admin-status-dot--off'}`} aria-hidden />
                 <div className="admin-card__info">
-                  <strong style={{ fontSize: 14 }}>{op.name}</strong>
-                  <div style={{ fontSize: 12, color: 'var(--t3)', marginTop: 2 }}>
+                  <strong style={{ fontSize: 'calc(14px * var(--font-scale))' }}>{op.name}</strong>
+                  <div style={{ fontSize: 'calc(12px * var(--font-scale))', color: 'var(--t3)', marginTop: 2 }}>
                     {op.email} · {op.role === 'MANAGER' ? 'Gerente' : 'Operador'}
                   </div>
                 </div>
