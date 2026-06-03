@@ -1,0 +1,550 @@
+/**
+ * Totem 21" — referência 1080×1920 (portrait)
+ * Escala uniforme em telas menores (dev/preview); 1:1 no hardware real.
+ */
+
+:root {
+  --totem-ref-w: 1080;
+  --totem-ref-h: 1920;
+  --totem-scale: min(calc(100vw / var(--totem-ref-w)), calc(100dvh / var(--totem-ref-h)));
+}
+
+.totem-viewport {
+  width: 100vw;
+  height: 100dvh;
+  overflow: hidden;
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  background: var(--bg);
+}
+
+.totem-shell.totem-21 {
+  width: calc(var(--totem-ref-w) * 1px);
+  height: calc(var(--totem-ref-h) * 1px);
+  flex-shrink: 0;
+  transform: scale(var(--totem-scale));
+  transform-origin: top center;
+}
+
+/* ── Tipografia e controles (legibilidade à ~1 m no totem 21") ── */
+.totem-shell.totem-21 .topbar { padding: 28px 32px 18px; }
+.totem-shell.totem-21 .brand-icon { width: 56px; height: 56px; font-size: 30px; border-radius: 18px; }
+.totem-shell.totem-21 .brand-name { font-size: 34px; letter-spacing: 5px; }
+.totem-shell.totem-21 .brand-sub { font-size: 15px; margin-top: 4px; }
+.totem-shell.totem-21 .status-pill { padding: 9px 18px; }
+.totem-shell.totem-21 .status-dot { width: 8px; height: 8px; }
+.totem-shell.totem-21 .status-txt { font-size: 16px; }
+.totem-shell.totem-21 .back-btn { padding: 12px 20px; font-size: 18px; border-radius: 14px; gap: 8px; }
+
+.totem-shell.totem-21 .btn-primary { padding: 24px 32px; font-size: 22px; border-radius: var(--r-lg); min-height: 64px; }
+.totem-shell.totem-21 .btn-secondary { padding: 20px 28px; font-size: 19px; min-height: 56px; }
+.totem-shell.totem-21 .chip { padding: 12px 20px; font-size: 18px; border-radius: 24px; }
+.totem-shell.totem-21 .chips { padding: 0 32px 18px; gap: 12px; }
+
+.totem-shell.totem-21 .fab { bottom: 32px; left: 32px; right: 32px; padding: 22px 28px; border-radius: var(--r-xl); }
+.totem-shell.totem-21 .fab-cnt { font-size: 18px; padding: 4px 12px; }
+.totem-shell.totem-21 .fab-label { font-size: 21px; }
+.totem-shell.totem-21 .fab-hint { font-size: 16px; }
+
+.totem-shell.totem-21 .input-prefix { font-size: 21px; padding: 20px 18px 20px 20px; }
+.totem-shell.totem-21 .input-f { font-size: 26px; padding: 20px; }
+.totem-shell.totem-21 .input-wrap { border-radius: 16px; }
+
+.totem-shell.totem-21 .slot { padding: 18px 0; font-size: 20px; border-radius: 14px; }
+.totem-shell.totem-21 .slots-grid--compact .slot { padding: 15px 0; font-size: 19px; }
+
+.totem-shell.totem-21 .combo-suggest-inner { padding: 22px 20px 20px; }
+.totem-shell.totem-21 .combo-suggest-badge { font-size: 14px; padding: 7px 16px; }
+.totem-shell.totem-21 .combo-suggest-hook { font-size: 26px; }
+.totem-shell.totem-21 .combo-suggest-msg { font-size: 18px; }
+.totem-shell.totem-21 .combo-suggest-name { font-size: 19px; }
+.totem-shell.totem-21 .combo-suggest-price { font-size: 16px; }
+.totem-shell.totem-21 .combo-suggest-btn { font-size: 16px; padding: 14px 20px; }
+.totem-shell.totem-21 .combo-suggest-skip { font-size: 16px; }
+
+/* Tela de impressão / conclusão — QR centralizado */
+.print-done-screen {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  min-height: 0;
+  text-align: center;
+  overflow: hidden;
+}
+
+.print-done-top {
+  flex-shrink: 0;
+  padding: 20px 28px 12px;
+}
+
+.print-done-icon {
+  width: 56px;
+  height: 56px;
+  margin: 0 auto 12px;
+  border-radius: 50%;
+  background: rgba(52, 199, 89, 0.15);
+  border: 2px solid var(--green);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 34px;
+}
+
+.print-done-title {
+  font-family: var(--font-serif);
+  font-size: 28px;
+  font-weight: 700;
+  color: var(--accent);
+  margin-bottom: 6px;
+}
+
+.print-done-msg {
+  margin: 0 auto 12px;
+  max-width: 480px;
+  font-size: 15px;
+  color: var(--t2);
+  line-height: 1.45;
+}
+
+.print-done-code-box {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  padding: 10px 20px;
+  background: var(--s2);
+  border: 1px solid var(--border2);
+  border-radius: var(--r);
+}
+
+.print-done-code-label {
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 1.2px;
+  color: var(--t3);
+}
+
+.print-done-code {
+  font-family: var(--font-serif);
+  font-size: 36px;
+  font-weight: 700;
+  color: var(--accent);
+  letter-spacing: 6px;
+  line-height: 1;
+}
+
+.print-done-qr-center {
+  flex: 1 1 0;
+  min-height: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 8px 24px;
+}
+
+.print-done-qr-wrap {
+  width: 100%;
+  max-width: 520px;
+  margin: 0 auto;
+  padding: 20px 16px;
+  background: var(--s2);
+  border: 1px solid var(--border2);
+  border-radius: var(--r-xl);
+}
+
+.print-done-footer {
+  flex-shrink: 0;
+  padding: 16px 28px 32px;
+  display: flex;
+  justify-content: center;
+}
+
+.print-done-btn {
+  width: 100%;
+  max-width: 400px;
+}
+
+.totem-shell.totem-21 .print-done-top { padding: 24px 36px 14px; }
+.totem-shell.totem-21 .print-done-icon {
+  width: 64px;
+  height: 64px;
+  font-size: 38px;
+  margin-bottom: 14px;
+}
+.totem-shell.totem-21 .print-done-title { font-size: 32px; }
+.totem-shell.totem-21 .print-done-msg { font-size: 17px; max-width: 520px; }
+.totem-shell.totem-21 .print-done-code { font-size: 42px; letter-spacing: 8px; }
+.totem-shell.totem-21 .print-done-code-label { font-size: 12px; }
+.totem-shell.totem-21 .print-done-qr-center { padding: 12px 32px; }
+.totem-shell.totem-21 .print-done-qr-wrap { max-width: 560px; padding: 24px 20px; }
+.totem-shell.totem-21 .print-done-footer { padding: 20px 36px 40px; }
+.totem-shell.totem-21 .print-done-btn { max-width: 440px; }
+
+.totem-shell.totem-21 .print-stage-msg { font-size: 22px !important; margin-bottom: 24px !important; }
+.totem-shell.totem-21 .print-stage-spinner { width: 26px !important; height: 26px !important; }
+.totem-shell.totem-21 .print-receipt-preview { max-width: 380px !important; padding: 20px !important; }
+
+/* ── QR Scan Prompt (totem 21") ── */
+.totem-shell.totem-21 .qr-scan-prompt {
+  --qr-frame: 380px;
+  --qr-code: 320px;
+  --qr-corner: 44px;
+}
+
+.qr-scan-prompt {
+  --qr-frame: 300px;
+  --qr-code: 248px;
+  --qr-corner: 36px;
+  width: 100%;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.qr-scan-prompt__title {
+  margin: 0 0 8px;
+  font-size: 15px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 1.4px;
+  color: var(--t3);
+}
+
+.totem-shell.totem-21 .qr-scan-prompt__title { font-size: 17px; }
+
+.qr-scan-prompt__hint {
+  margin: 0 0 24px;
+  font-size: 22px;
+  font-weight: 600;
+  color: var(--t1);
+  line-height: 1.35;
+}
+
+.totem-shell.totem-21 .qr-scan-prompt__hint { font-size: 28px; margin-bottom: 28px; }
+
+.qr-scan-prompt__stage {
+  position: relative;
+  width: var(--qr-frame);
+  height: var(--qr-frame);
+  margin: 0 auto 20px;
+  overflow: visible;
+}
+
+.qr-scan-prompt__frame {
+  position: relative;
+  width: 100%;
+  height: 100%;
+}
+
+/* Anel externo pulsante */
+.qr-scan-prompt__frame::before {
+  content: '';
+  position: absolute;
+  inset: -12px;
+  border-radius: 24px;
+  border: 2px solid rgba(192, 39, 45, 0.4);
+  animation: qrRingPulse 2.4s ease-in-out infinite;
+  pointer-events: none;
+}
+
+.qr-scan-prompt__code {
+  position: absolute;
+  inset: 28px;
+  background: #fff;
+  border-radius: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.4);
+  transition: box-shadow 0.3s;
+}
+
+.qr-scan-prompt__code img {
+  display: block;
+  width: var(--qr-code);
+  height: var(--qr-code);
+}
+
+/* Cantos de mira */
+.qr-scan-corner {
+  position: absolute;
+  width: var(--qr-corner);
+  height: var(--qr-corner);
+  border: 5px solid var(--primary);
+  animation: qrCornerPulse 4.8s ease-in-out infinite;
+  transition: border-color 0.2s;
+}
+
+.qr-scan-corner--tl { top: 0; left: 0; border-right: none; border-bottom: none; border-radius: 12px 0 0 0; }
+.qr-scan-corner--tr { top: 0; right: 0; border-left: none; border-bottom: none; border-radius: 0 12px 0 0; animation-delay: .15s; }
+.qr-scan-corner--bl { bottom: 0; left: 0; border-right: none; border-top: none; border-radius: 0 0 0 12px; animation-delay: .3s; }
+.qr-scan-corner--br { bottom: 0; right: 0; border-left: none; border-top: none; border-radius: 0 0 12px 0; animation-delay: .45s; }
+
+/* Linha de varredura — aparece só na fase de scan */
+.qr-scan-line {
+  position: absolute;
+  left: 24px;
+  right: 24px;
+  height: 4px;
+  border-radius: 4px;
+  background: linear-gradient(90deg, transparent, var(--primary) 20%, #ff8a8a 50%, var(--primary) 80%, transparent);
+  box-shadow: 0 0 20px rgba(192, 39, 45, 0.8);
+  animation: qrScanSweep 4.8s ease-in-out infinite;
+  z-index: 2;
+  pointer-events: none;
+}
+
+/* Flash verde de leitura confirmada */
+.qr-scan-success-flash {
+  position: absolute;
+  inset: 28px;
+  border-radius: 16px;
+  background: rgba(40, 200, 80, 0.55);
+  z-index: 6;
+  pointer-events: none;
+  opacity: 0;
+  animation: qrSuccessFlash 4.8s ease-in-out infinite;
+}
+
+/* Cena: celular (costas) apontando para o QR */
+.qr-scan-phone-scene {
+  position: absolute;
+  /* Começa à direita do frame, centralizado verticalmente */
+  left: calc(var(--qr-frame) + 24px);
+  top: 50%;
+  width: 140px;
+  height: 220px;
+  margin-top: -110px;
+  pointer-events: none;
+  z-index: 5;
+  animation: qrPhoneApproach 4.8s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+}
+
+.totem-shell.totem-21 .qr-scan-phone-scene {
+  width: 168px;
+  height: 264px;
+  margin-top: -132px;
+}
+
+/* SVG do celular */
+.qr-scan-phone-scene > svg {
+  width: 100%;
+  height: 100%;
+  filter: drop-shadow(0 12px 32px rgba(0, 0, 0, 0.55));
+}
+
+/* Seta direcional celular → QR */
+.qr-scan-arrow {
+  position: absolute;
+  width: 44px;
+  height: 44px;
+  left: -52px;
+  top: 50%;
+  margin-top: -22px;
+  animation: qrArrowPulse 4.8s ease-in-out infinite;
+  pointer-events: none;
+}
+
+.totem-shell.totem-21 .qr-scan-arrow {
+  width: 52px;
+  height: 52px;
+  left: -60px;
+  margin-top: -26px;
+}
+
+/* Feixe entre câmera e QR — cresce da borda direita do frame ao celular */
+.qr-scan-beam {
+  position: absolute;
+  top: 50%;
+  left: 100%;
+  height: 4px;
+  width: 0;
+  margin-top: -2px;
+  background: linear-gradient(90deg, var(--primary), #ff8a8a 50%, rgba(192, 39, 45, 0));
+  box-shadow: 0 0 16px rgba(192, 39, 45, 0.7);
+  border-radius: 4px;
+  animation: qrBeamShoot 4.8s ease-in-out infinite;
+  z-index: 4;
+  pointer-events: none;
+}
+
+/* Glow radial no centro do QR */
+.qr-scan-beam-glow {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 160px;
+  height: 160px;
+  margin: -80px 0 0 -80px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(192, 39, 45, 0.22) 0%, transparent 70%);
+  animation: qrBeamGlow 4.8s ease-in-out infinite;
+  pointer-events: none;
+  z-index: 1;
+}
+
+.qr-scan-prompt__action {
+  margin: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  font-size: 20px;
+  font-weight: 600;
+  color: var(--t2);
+}
+
+.totem-shell.totem-21 .qr-scan-prompt__action { font-size: 22px; }
+
+.qr-scan-prompt__pulse-dot {
+  width: 11px;
+  height: 11px;
+  border-radius: 50%;
+  background: var(--primary);
+  flex-shrink: 0;
+  animation: qrDotPulse 1.2s ease-in-out infinite;
+}
+
+/* ── Keyframes (ciclo 4.8s) ──────────────────────────────────────
+   Fases:
+   0–20%   Celular afastado, aguardando
+   20–45%  Celular se aproxima do QR
+   45–65%  Escaneia (linha varre, feixe visível, glow)
+   65–72%  Flash de sucesso
+   72–88%  Celular recua
+   88–100% Pausa antes de repetir
+──────────────────────────────────────────────────────────────── */
+
+/* Linha de varredura — só durante a fase de scan */
+@keyframes qrScanSweep {
+  0%, 44%  { top: 28px; opacity: 0; }
+  46%      { top: 28px; opacity: 0.7; }
+  64%      { top: calc(100% - 28px); opacity: 1; }
+  66%, 100%{ top: calc(100% - 28px); opacity: 0; }
+}
+
+/* Cantos: flash branco no momento de sucesso */
+@keyframes qrCornerPulse {
+  0%, 44%  { opacity: 0.55; border-color: var(--primary); }
+  48%      { opacity: 1;    border-color: var(--primary); }
+  63%      { opacity: 1;    border-color: var(--primary); }
+  66%      { opacity: 1;    border-color: #28c850; box-shadow: 0 0 14px rgba(40,200,80,0.8); }
+  74%      { opacity: 0.7;  border-color: var(--primary); }
+  100%     { opacity: 0.55; border-color: var(--primary); }
+}
+
+/* Anel externo */
+@keyframes qrRingPulse {
+  0%, 100% { opacity: 0.3; transform: scale(1); }
+  50%      { opacity: 0.8; transform: scale(1.025); }
+}
+
+/* Celular: parte afastado à direita, se aproxima ao QR, escaneia, recua */
+@keyframes qrPhoneApproach {
+  0%, 18% {
+    transform: translateX(0);
+    opacity: 0.75;
+  }
+  42%, 70% {
+    /* desloca ~(frame/2 + 72px) para a esquerda — fica adjacente ao QR */
+    transform: translateX(calc(-1 * (var(--qr-frame) / 2 + 80px)));
+    opacity: 1;
+  }
+  88%, 100% {
+    transform: translateX(0);
+    opacity: 0.75;
+  }
+}
+
+/* Seta direcional */
+@keyframes qrArrowPulse {
+  0%, 18%   { opacity: 0.9; transform: translateX(0); }
+  30%       { opacity: 0.6; transform: translateX(-8px); }
+  42%, 70%  { opacity: 0;   transform: translateX(-16px); }
+  82%, 100% { opacity: 0.9; transform: translateX(0); }
+}
+
+/* Feixe horizontal QR → câmera (cresce para a direita até o celular) */
+@keyframes qrBeamShoot {
+  0%, 40%   { width: 0;   opacity: 0; }
+  48%, 64%  { width: 80px; opacity: 1; }
+  72%, 100% { width: 0;   opacity: 0; }
+}
+
+/* Glow central */
+@keyframes qrBeamGlow {
+  0%, 40%  { opacity: 0; transform: scale(0.5); }
+  50%, 62% { opacity: 1; transform: scale(1); }
+  72%      { opacity: 0; transform: scale(0.7); }
+  100%     { opacity: 0; transform: scale(0.5); }
+}
+
+/* Flash de sucesso verde */
+@keyframes qrSuccessFlash {
+  0%, 63%  { opacity: 0; }
+  67%      { opacity: 0.7; }
+  72%      { opacity: 0; }
+  100%     { opacity: 0; }
+}
+
+@keyframes qrDotPulse {
+  0%, 100% { transform: scale(1); opacity: 0.5; }
+  50%      { transform: scale(1.35); opacity: 1; }
+}
+
+/* ── Telas do fluxo cliente (totem 21") ── */
+.totem-shell.totem-21 .flow-choice-header { padding: 12px 28px 16px; }
+.totem-shell.totem-21 .flow-choice-heading { font-size: 42px; }
+.totem-shell.totem-21 .flow-choice-lead { font-size: 19px; margin-top: 8px; }
+.totem-shell.totem-21 .flow-choice-scroll { padding: 0 16px 10px; }
+.totem-shell.totem-21 .flow-choice-list { gap: 16px; }
+.totem-shell.totem-21 .flow-card { min-height: 260px; border-radius: 24px; }
+.totem-shell.totem-21 .flow-card-hero { min-height: 148px; }
+.totem-shell.totem-21 .flow-card-badge { font-size: 15px; padding: 6px 14px; top: 16px; left: 16px; }
+.totem-shell.totem-21 .flow-card-title { font-size: 44px; }
+.totem-shell.totem-21 .flow-card-subtitle { font-size: 20px; }
+.totem-shell.totem-21 .flow-card-cta { width: 56px; height: 56px; font-size: 28px; }
+.totem-shell.totem-21 .flow-card-body { padding: 18px 24px 20px; }
+.totem-shell.totem-21 .flow-ticket-code { font-size: 40px; }
+
+.totem-shell.totem-21 .pickup-heading { font-size: 40px !important; }
+.totem-shell.totem-21 .pickup-lead { font-size: 19px !important; }
+.totem-shell.totem-21 .pickup-card { min-height: 280px !important; border-radius: 22px !important; }
+
+.totem-shell.totem-21 .home-cta-btn {
+  min-height: 116px !important;
+  padding: 44px 48px !important;
+  font-size: 46px !important;
+  border-radius: var(--r-xl) !important;
+}
+.totem-shell.totem-21 .home-hero-title { font-size: 44px !important; }
+.totem-shell.totem-21 .home-hero-price { font-size: 24px !important; }
+.totem-shell.totem-21 .home-hero-tag { font-size: 20px !important; }
+.totem-shell.totem-21 .home-clock { font-size: 50px !important; }
+.totem-shell.totem-21 .home-tagline { font-size: 20px !important; max-width: 380px !important; }
+
+.totem-shell.totem-21 .cat-heading { font-size: 34px !important; }
+.totem-shell.totem-21 .cat-hint { font-size: 17px !important; }
+.totem-shell.totem-21 .cat-name { font-size: 34px !important; }
+.totem-shell.totem-21 .cat-grid { grid-auto-rows: minmax(148px, 1fr) !important; gap: 10px !important; }
+
+.totem-shell.totem-21 .catalog-heading { font-size: 40px !important; }
+.totem-shell.totem-21 .catalog-count { font-size: 17px !important; }
+
+.totem-shell.totem-21 .detail-title { font-size: 42px !important; }
+.totem-shell.totem-21 .detail-price { font-size: 50px !important; }
+
+.totem-shell.totem-21 .phone-heading { font-size: 40px !important; }
+.totem-shell.totem-21 .phone-lead { font-size: 20px !important; }
+
+.totem-shell.totem-21 .inactivity-ring { width: 140px !important; height: 140px !important; margin-bottom: 32px !important; }
+.totem-shell.totem-21 .inactivity-count { font-size: 60px !important; }
+.totem-shell.totem-21 .inactivity-title { font-size: 36px !important; }
+.totem-shell.totem-21 .inactivity-msg { font-size: 21px !important; margin-bottom: 40px !important; }
+.totem-shell.totem-21 .inactivity-btn-primary { font-size: 24px !important; padding: 20px 52px !important; }
+.totem-shell.totem-21 .inactivity-btn-secondary { font-size: 19px !important; padding: 14px 36px !important; }
+
+.totem-shell.totem-21 .step-dot { width: 34px !important; height: 34px !important; font-size: 17px !important; }
