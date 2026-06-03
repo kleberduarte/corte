@@ -4,7 +4,7 @@ type Props = {
   hint?: string
 }
 
-/** QR grande com animação de celular apontando — totem 21" */
+/** QR com animação de celular apontando — totem 21" */
 export default function QrScanPrompt({
   dataUrl,
   title = 'Acompanhe seu pedido',

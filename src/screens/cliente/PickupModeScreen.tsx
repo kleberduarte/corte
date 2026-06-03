@@ -31,10 +31,10 @@ export default function PickupModeScreen({ onSelect }: Props) {
   return (
     <div className="screen" style={{ padding: '0 0 12px' }}>
       <div style={{ flexShrink: 0, padding: '8px 20px 16px' }}>
-        <div style={{ fontFamily: 'var(--font-serif)', fontSize: 36, fontWeight: 700, color: 'var(--accent)', lineHeight: 1.15 }}>
+        <div className="pickup-heading" style={{ fontFamily: 'var(--font-serif)', fontSize: 36, fontWeight: 700, color: 'var(--accent)', lineHeight: 1.15 }}>
           Como deseja retirar?
         </div>
-        <div style={{ fontSize: 17, color: 'var(--t3)', marginTop: 6, lineHeight: 1.5 }}>
+        <div className="pickup-lead" style={{ fontSize: 17, color: 'var(--t3)', marginTop: 6, lineHeight: 1.5 }}>
           Toque em uma opção para continuar
         </div>
       </div>

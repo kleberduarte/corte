@@ -68,7 +68,7 @@ export default function HomeScreen({ onStart }: Props) {
 
         {/* Relógio no topo direito */}
         <div style={{ position: 'absolute', top: 24, right: 24, textAlign: 'right', zIndex: 3 }}>
-          <div style={{ fontSize: 46, fontWeight: 700, color: 'white', fontFamily: 'var(--font-serif)', lineHeight: 1 }}>{timeStr}</div>
+          <div className="home-clock" style={{ fontSize: 46, fontWeight: 700, color: 'white', fontFamily: 'var(--font-serif)', lineHeight: 1 }}>{timeStr}</div>
           <div style={{ fontSize: 15, color: 'rgba(255,255,255,.6)', marginTop: 3, textTransform: 'capitalize' }}>{dateStr}</div>
         </div>
 
@@ -80,13 +80,13 @@ export default function HomeScreen({ onStart }: Props) {
             background: 'var(--gold)', color: '#1a0f00', marginBottom: 10,
             textTransform: 'uppercase', letterSpacing: '.5px',
           }}>{s.badge}</div>
-          <div style={{ fontFamily: 'var(--font-serif)', fontSize: 41, fontWeight: 700, color: 'white', lineHeight: 1.2, marginBottom: 8, whiteSpace: 'pre-line' }}>
+          <div className="home-hero-title" style={{ fontFamily: 'var(--font-serif)', fontSize: 41, fontWeight: 700, color: 'white', lineHeight: 1.2, marginBottom: 8, whiteSpace: 'pre-line' }}>
             {s.name}
           </div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 10, fontSize: 18, color: 'rgba(255,255,255,.7)' }}>
+          <div className="home-hero-tag" style={{ display: 'flex', alignItems: 'center', gap: 10, fontSize: 18, color: 'rgba(255,255,255,.7)' }}>
             <span>{s.tag}</span>
             <span style={{ color: 'rgba(255,255,255,.3)' }}>·</span>
-            <span style={{ fontSize: 22, fontWeight: 700, color: 'white' }}>{s.price}</span>
+            <span className="home-hero-price" style={{ fontSize: 22, fontWeight: 700, color: 'white' }}>{s.price}</span>
           </div>
         </div>
 
@@ -113,6 +113,7 @@ export default function HomeScreen({ onStart }: Props) {
         background: 'var(--bg)',
       }}>
         <button
+          className="home-cta-btn"
           onClick={onStart}
           style={{
             width: '100%', minHeight: 108, padding: '40px 44px',
@@ -126,7 +127,7 @@ export default function HomeScreen({ onStart }: Props) {
         >
           Toque aqui para iniciar
         </button>
-        <p style={{
+        <p className="home-tagline" style={{
           fontSize: 19, color: 'var(--t3)', textAlign: 'center',
           lineHeight: 1.5, maxWidth: 320, letterSpacing: '.1px',
         }}>

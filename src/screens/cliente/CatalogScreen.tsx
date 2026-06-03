@@ -25,10 +25,10 @@ export default function CatalogScreen({ initialFilter = 'todos', onProduct, cart
   return (
     <div className="screen" style={{ position: 'relative' }}>
       <div style={{ flexShrink: 0, padding: '8px 24px 10px' }}>
-        <div style={{ fontFamily: 'var(--font-serif)', fontSize: 36, fontWeight: 600, color: 'var(--accent)' }}>
+        <div className="catalog-heading" style={{ fontFamily: 'var(--font-serif)', fontSize: 36, fontWeight: 600, color: 'var(--accent)' }}>
           Nossos Cortes
         </div>
-        <div style={{ fontSize: 15, color: 'var(--t3)', marginTop: 3 }}>{visible.length} produto{visible.length !== 1 ? 's' : ''} disponíve{visible.length !== 1 ? 'is' : 'l'}</div>
+        <div className="catalog-count" style={{ fontSize: 15, color: 'var(--t3)', marginTop: 3 }}>{visible.length} produto{visible.length !== 1 ? 's' : ''} disponíve{visible.length !== 1 ? 'is' : 'l'}</div>
       </div>
 
       <div className="chips">

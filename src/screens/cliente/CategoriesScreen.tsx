@@ -6,10 +6,10 @@ export default function CategoriesScreen({ onSelect }: Props) {
   return (
     <div className="screen" style={{ padding: '0 0 8px' }}>
       <div style={{ flexShrink: 0, padding: '8px 16px 12px', display: 'flex', alignItems: 'baseline', justifyContent: 'space-between' }}>
-        <div style={{ fontFamily: 'var(--font-serif)', fontSize: 31, fontWeight: 700, color: 'var(--accent)' }}>
+        <div className="cat-heading" style={{ fontFamily: 'var(--font-serif)', fontSize: 31, fontWeight: 700, color: 'var(--accent)' }}>
           O que você procura?
         </div>
-        <div style={{ fontSize: 15, color: 'var(--t3)', textAlign: 'right' }}>
+        <div className="cat-hint" style={{ fontSize: 15, color: 'var(--t3)', textAlign: 'right' }}>
           Toque em uma categoria
         </div>
       </div>
@@ -23,6 +23,7 @@ export default function CategoriesScreen({ onSelect }: Props) {
         }}
       >
         <div
+          className="cat-grid"
           style={{
             display: 'grid',
             gridTemplateColumns: '1fr 1fr',
@@ -76,6 +77,7 @@ export default function CategoriesScreen({ onSelect }: Props) {
                   }}
                 >
                   <div
+                    className="cat-name"
                     style={{
                       fontFamily: 'var(--font-serif)',
                       fontSize: 31,

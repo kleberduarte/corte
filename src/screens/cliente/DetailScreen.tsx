@@ -23,7 +23,7 @@ export default function DetailScreen({ product: p, immediate = false, onSchedule
       </div>
 
       <div style={{ padding: '0 24px 24px' }}>
-        <div style={{ fontFamily: 'var(--font-serif)', fontSize: 38, fontWeight: 700, color: 'var(--accent)', lineHeight: 1.1, marginBottom: 16, marginTop: 12 }}>
+        <div className="detail-title" style={{ fontFamily: 'var(--font-serif)', fontSize: 38, fontWeight: 700, color: 'var(--accent)', lineHeight: 1.1, marginBottom: 16, marginTop: 12 }}>
           {p.name}
         </div>
 
@@ -54,7 +54,7 @@ export default function DetailScreen({ product: p, immediate = false, onSchedule
         <div style={{ display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between', marginBottom: 16 }}>
           <div>
             <div style={{ fontSize: 14, color: 'var(--t3)', marginBottom: 3 }}>Preço por kg</div>
-            <div style={{ fontFamily: 'var(--font-serif)', fontSize: 46, fontWeight: 700, color: 'var(--accent)' }}>
+            <div className="detail-price" style={{ fontFamily: 'var(--font-serif)', fontSize: 46, fontWeight: 700, color: 'var(--accent)' }}>
               <sup style={{ fontSize: 23 }}>R$</sup>
               {p.pricePerKg.toFixed(2).replace('.', ',')}
               <sub style={{ fontSize: 18, fontWeight: 400, color: 'var(--t3)' }}>/kg</sub>

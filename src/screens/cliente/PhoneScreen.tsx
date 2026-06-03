@@ -20,10 +20,10 @@ export default function PhoneScreen({ items, slotTime, immediate = false, onConf
   return (
     <div className="screen">
     <div className="scroll" style={{ flex: 1, padding: '16px 28px 28px' }}>
-      <div style={{ fontFamily: 'var(--font-serif)', fontSize: 36, fontWeight: 700, color: 'var(--accent)', marginBottom: 8 }}>
+      <div className="phone-heading" style={{ fontFamily: 'var(--font-serif)', fontSize: 36, fontWeight: 700, color: 'var(--accent)', marginBottom: 8 }}>
         Seu WhatsApp
       </div>
-      <div style={{ fontSize: 18, color: 'var(--t3)', lineHeight: 1.5, marginBottom: 22 }}>
+      <div className="phone-lead" style={{ fontSize: 18, color: 'var(--t3)', lineHeight: 1.5, marginBottom: 22 }}>
         Informe o número para receber as informações do pedido por mensagem.
       </div>
 

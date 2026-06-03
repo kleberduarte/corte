@@ -200,7 +200,8 @@ function ClienteView() {
   const stepIndex  = STEP_SCREENS.indexOf(screen)
 
   return (
-    <div className="totem-shell">
+    <div className="totem-viewport">
+    <div className="totem-shell totem-21">
       {screen === 'home' && (
         <div style={{ position: 'absolute', top: 0, left: 0, right: 0, zIndex: 30 }}>
           <Topbar hideStatus />
@@ -258,15 +259,18 @@ function ClienteView() {
       )}
       <ModeBadge label="Cliente" />
     </div>
+    </div>
   )
 }
 
 // ─── View do Operador ─────────────────────────────────────────────────────────
 function OperadorView() {
   return (
-    <div className="totem-shell">
+    <div className="totem-viewport">
+    <div className="totem-shell totem-21">
       <KanbanScreen />
       <ModeBadge label="Operador" />
+    </div>
     </div>
   )
 }
@@ -274,7 +278,7 @@ function OperadorView() {
 function ModeBadge({ label }: { label: string }) {
   return (
     <div style={{
-      position: 'fixed', bottom: 10, left: 10, zIndex: 9999,
+      position: 'absolute', bottom: 10, left: 10, zIndex: 9999,
       fontSize: 10, fontWeight: 600, textTransform: 'uppercase',
       padding: '5px 10px', borderRadius: 8,
       background: 'rgba(0,0,0,.55)', color: 'rgba(255,255,255,.75)',

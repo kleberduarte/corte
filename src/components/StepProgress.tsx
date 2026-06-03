@@ -5,7 +5,7 @@ export default function StepProgress({ current, total, labels }: Props) {
     <div style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '10px 28px 0', flexShrink: 0 }}>
       {Array.from({ length: total }).map((_, i) => (
         <div key={i} style={{ display: 'flex', alignItems: 'center', flex: i < total - 1 ? 1 : undefined, gap: 8 }}>
-          <div style={{
+          <div className="step-dot" style={{
             width: 30, height: 30, borderRadius: '50%',
             display: 'flex', alignItems: 'center', justifyContent: 'center',
             flexShrink: 0,

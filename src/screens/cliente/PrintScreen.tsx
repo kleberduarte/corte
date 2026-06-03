@@ -5,7 +5,9 @@ import { getOrderTrackingUrl } from '../../utils/orderTrackingUrl'
 import QrScanPrompt from '../../components/QrScanPrompt'
 import { generateQrDataUrl, generateQrObjectUrl } from '../../utils/qrCode'
 
-const QR_DISPLAY_SIZE = 320
+const QR_DISPLAY_SIZE = 256
+/** Tempo na tela do QR antes de voltar ao início automaticamente */
+const QR_SCAN_DISPLAY_SECONDS = 20
 
 type Props = {
   order: Order
@@ -164,7 +166,7 @@ async function printReceipt(order: Order, storeName: string, qrSrc: string) {
 export default function PrintScreen({ order, onDone }: Props) {
   const store = useStore()
   const [stage, setStage] = useState<'printing' | 'done'>('printing')
-  const [countdown, setCountdown] = useState(8)
+  const [countdown, setCountdown] = useState(QR_SCAN_DISPLAY_SECONDS)
   const [qrDataUrl, setQrDataUrl] = useState<string | null>(null)
   const printedRef = useRef(false)
 
@@ -209,40 +211,43 @@ export default function PrintScreen({ order, onDone }: Props) {
 
   if (stage === 'done') {
     return (
-      <div className="screen" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '0 28px', textAlign: 'center' }}>
-        <div style={{ width: 72, height: 72, borderRadius: '50%', background: 'rgba(52,199,89,.15)', border: '2px solid var(--green)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 46, marginBottom: 18, animation: 'popIn .55s cubic-bezier(.175,.885,.32,1.275) both' }}>
-          ✓
-        </div>
-        <div style={{ fontFamily: 'var(--font-serif)', fontSize: 36, fontWeight: 700, color: 'var(--accent)', marginBottom: 8 }}>
-          Pedido finalizado!
-        </div>
-        <div style={{ fontSize: 18, color: 'var(--t2)', lineHeight: 1.55, marginBottom: 24, maxWidth: 300 }}>
-          {order.priority || order.slotTime === 'Preferencial'
-            ? 'Comprovante impresso. Apresente a senha preferencial no balcão — você tem prioridade na fila.'
-            : order.items.length === 0
-            ? 'Comprovante impresso com sucesso. Apresente a senha no balcão do açougue.'
-            : order.customerPhone
-              ? 'Informações enviadas para o WhatsApp. Comprovante impresso com sucesso.'
-              : order.slotTime === 'Imediata'
-                ? 'Comprovante impresso com sucesso. Dirija-se ao balcão do açougue.'
-                : 'Comprovante impresso com sucesso. Dirija-se ao açougue no horário agendado.'}
-        </div>
-        <div style={{ background: 'var(--s2)', border: '1px solid var(--border2)', borderRadius: 'var(--r)', padding: '14px 20px', marginBottom: 20, width: '100%' }}>
-          <div style={{ fontSize: 13, fontWeight: 700, textTransform: 'uppercase', letterSpacing: 1.2, color: 'var(--t3)', marginBottom: 8 }}>
-            Código de retirada
+      <div className="screen print-done-screen">
+        <header className="print-done-top">
+          <div className="print-done-icon" style={{ animation: 'popIn .55s cubic-bezier(.175,.885,.32,1.275) both' }}>
+            ✓
           </div>
-          <div style={{ fontFamily: 'var(--font-serif)', fontSize: 61, fontWeight: 700, color: 'var(--accent)', letterSpacing: 8 }}>
-            {order.pickupCode}
+          <div className="print-done-title">Pedido finalizado!</div>
+          <p className="print-done-msg">
+            {order.priority || order.slotTime === 'Preferencial'
+              ? 'Comprovante impresso. Senha preferencial no balcão.'
+              : order.items.length === 0
+              ? 'Comprovante impresso. Apresente a senha no balcão.'
+              : order.customerPhone
+                ? 'WhatsApp enviado e comprovante impresso.'
+                : order.slotTime === 'Imediata'
+                  ? 'Comprovante impresso. Dirija-se ao balcão.'
+                  : 'Comprovante impresso. Retire no horário agendado.'}
+          </p>
+          <div className="print-done-code-box">
+            <span className="print-done-code-label">Código de retirada</span>
+            <span className="print-done-code">{order.pickupCode}</span>
           </div>
-        </div>
+        </header>
+
         {qrDataUrl && (
-          <div style={{ background: 'var(--s2)', border: '1px solid var(--border2)', borderRadius: 'var(--r-lg)', padding: '22px 16px 20px', marginBottom: 28, width: '100%' }}>
-            <QrScanPrompt dataUrl={qrDataUrl} />
-          </div>
+          <main className="print-done-qr-center">
+            <div className="print-done-qr-wrap">
+              <QrScanPrompt dataUrl={qrDataUrl} />
+            </div>
+          </main>
         )}
-        <button className="btn-primary" onClick={onDone} style={{ maxWidth: 320 }}>
-          Voltar ao início ({countdown}s)
-        </button>
+
+        <footer className="print-done-footer">
+          <button type="button" className="btn-primary print-done-btn" onClick={onDone}>
+            Voltar ao início ({countdown}s)
+          </button>
+        </footer>
+
         <style>{`@keyframes popIn { from { transform: scale(.2); opacity: 0; } to { transform: scale(1); opacity: 1; } }`}</style>
       </div>
     )
@@ -250,12 +255,12 @@ export default function PrintScreen({ order, onDone }: Props) {
 
   return (
     <div className="screen" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '0 28px' }}>
-      <div style={{ fontSize: 20, fontWeight: 600, color: 'var(--t2)', marginBottom: 20, display: 'flex', alignItems: 'center', gap: 10 }}>
-        <div style={{ width: 22, height: 22, border: '3px solid var(--border2)', borderTopColor: 'var(--primary)', borderRadius: '50%', animation: 'spin .8s linear infinite' }} />
+      <div className="print-stage-msg" style={{ fontSize: 20, fontWeight: 600, color: 'var(--t2)', marginBottom: 20, display: 'flex', alignItems: 'center', gap: 10 }}>
+        <div className="print-stage-spinner" style={{ width: 22, height: 22, border: '3px solid var(--border2)', borderTopColor: 'var(--primary)', borderRadius: '50%', animation: 'spin .8s linear infinite' }} />
         Imprimindo pedido...
       </div>
 
-      <div style={{ width: '100%', maxWidth: 320, background: '#1a1a1c', borderRadius: 16, padding: 16, border: '1px solid var(--border2)', boxShadow: '0 20px 50px rgba(0,0,0,.4)' }}>
+      <div className="print-receipt-preview" style={{ width: '100%', maxWidth: 320, background: '#1a1a1c', borderRadius: 16, padding: 16, border: '1px solid var(--border2)', boxShadow: '0 20px 50px rgba(0,0,0,.4)' }}>
         <div style={{ background: '#2a2a2e', borderRadius: '10px 10px 4px 4px', height: 14, marginBottom: 8, overflow: 'hidden', position: 'relative' }}>
           <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(90deg, transparent, #3a3a3e, transparent)', animation: 'slotShine 1.2s ease-in-out infinite' }} />
         </div>
