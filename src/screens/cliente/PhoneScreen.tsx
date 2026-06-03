@@ -20,16 +20,16 @@ export default function PhoneScreen({ items, slotTime, immediate = false, onConf
   return (
     <div className="screen">
     <div className="scroll" style={{ flex: 1, padding: '16px 28px 28px' }}>
-      <div style={{ fontFamily: 'var(--font-serif)', fontSize: 28, fontWeight: 700, color: 'var(--accent)', marginBottom: 8 }}>
+      <div style={{ fontFamily: 'var(--font-serif)', fontSize: 36, fontWeight: 700, color: 'var(--accent)', marginBottom: 8 }}>
         Seu WhatsApp
       </div>
-      <div style={{ fontSize: 14, color: 'var(--t3)', lineHeight: 1.5, marginBottom: 22 }}>
+      <div style={{ fontSize: 18, color: 'var(--t3)', lineHeight: 1.5, marginBottom: 22 }}>
         Informe o número para receber as informações do pedido por mensagem.
       </div>
 
       {/* Resumo */}
       <div style={{ background: 'var(--s2)', border: '1px solid var(--border2)', borderRadius: 'var(--r)', padding: '14px 16px', marginBottom: 22 }}>
-        <div style={{ fontSize: 10, fontWeight: 700, textTransform: 'uppercase', letterSpacing: 1, color: 'var(--t3)', marginBottom: 10 }}>
+        <div style={{ fontSize: 13, fontWeight: 700, textTransform: 'uppercase', letterSpacing: 1, color: 'var(--t3)', marginBottom: 10 }}>
           Resumo do pedido · {immediate ? 'Escolher e Aguardar' : `Hoje · ${slotTime}`}
         </div>
         <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
@@ -37,20 +37,20 @@ export default function PhoneScreen({ items, slotTime, immediate = false, onConf
             <div key={item.product.id} style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
               <img src={item.product.imageUrl} alt="" style={{ width: 40, height: 40, borderRadius: 8, objectFit: 'cover', flexShrink: 0 }} />
               <div style={{ flex: 1, minWidth: 0 }}>
-                <div style={{ fontSize: 14, fontWeight: 600, color: 'var(--t1)' }}>{item.product.name}</div>
-                <div style={{ fontSize: 12, color: 'var(--t2)' }}>{item.cutType.name} · ~{item.weightKg}kg</div>
+                <div style={{ fontSize: 18, fontWeight: 600, color: 'var(--t1)' }}>{item.product.name}</div>
+                <div style={{ fontSize: 15, color: 'var(--t2)' }}>{item.cutType.name} · ~{item.weightKg}kg</div>
               </div>
             </div>
           ))}
         </div>
         {items.length > 1 && (
-          <div style={{ marginTop: 12, paddingTop: 10, borderTop: '1px solid var(--border2)', fontSize: 13, fontWeight: 600, color: 'var(--gold)', textAlign: 'right' }}>
+          <div style={{ marginTop: 12, paddingTop: 10, borderTop: '1px solid var(--border2)', fontSize: 17, fontWeight: 600, color: 'var(--gold)', textAlign: 'right' }}>
             Estimativa ~R$ {totalEstimate.toFixed(2).replace('.', ',')}
           </div>
         )}
       </div>
 
-      <label style={{ fontSize: 11, fontWeight: 600, textTransform: 'uppercase', letterSpacing: 1, color: 'var(--t3)', display: 'block', marginBottom: 7 }}>
+      <label style={{ fontSize: 14, fontWeight: 600, textTransform: 'uppercase', letterSpacing: 1, color: 'var(--t3)', display: 'block', marginBottom: 7 }}>
         Número com DDD
       </label>
       <div className="input-wrap" style={{ marginBottom: 20 }}>
@@ -72,7 +72,7 @@ export default function PhoneScreen({ items, slotTime, immediate = false, onConf
         Pular — apenas imprimir comprovante
       </button>
 
-      <p style={{ fontSize: 12, color: 'var(--t3)', textAlign: 'center', marginTop: 16, lineHeight: 1.5 }}>
+      <p style={{ fontSize: 15, color: 'var(--t3)', textAlign: 'center', marginTop: 16, lineHeight: 1.5 }}>
         Você receberá a confirmação no WhatsApp e um comprovante impresso aqui no totem. Dados usados apenas para este pedido (LGPD).
       </p>
     </div>

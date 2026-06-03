@@ -69,16 +69,16 @@ export default function ScheduleScreen({
   return (
     <div className="screen screen--flow" style={{ paddingBottom: 28 }}>
       <div style={{ padding: '4px 24px 14px' }}>
-        <div style={{ fontFamily: 'var(--font-serif)', fontSize: 26, fontWeight: 600, color: 'var(--accent)' }}>
+        <div style={{ fontFamily: 'var(--font-serif)', fontSize: 33, fontWeight: 600, color: 'var(--accent)' }}>
           Agendar retirada
         </div>
-        <div style={{ fontSize: 12, color: 'var(--t3)', marginTop: 4 }}>
+        <div style={{ fontSize: 15, color: 'var(--t3)', marginTop: 4 }}>
           Escolha o peso e o horário para buscar hoje
         </div>
       </div>
 
       <div style={{ margin: '0 24px 16px' }}>
-        <div style={{ fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: 1, color: 'var(--t3)', marginBottom: 8 }}>
+        <div style={{ fontSize: 14, fontWeight: 700, textTransform: 'uppercase', letterSpacing: 1, color: 'var(--t3)', marginBottom: 8 }}>
           {cartItems.length > 1 ? `${cartItems.length} itens no pedido` : 'Seu corte'}
         </div>
         <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
@@ -93,11 +93,11 @@ export default function ScheduleScreen({
             >
               <img src={item.product.imageUrl} alt={item.product.name} style={{ width: 48, height: 48, borderRadius: 10, objectFit: 'cover', flexShrink: 0 }} />
               <div style={{ flex: 1, minWidth: 0 }}>
-                <div style={{ fontSize: 14, fontWeight: 600, color: 'var(--t1)' }}>{item.product.name}</div>
-                <div style={{ fontSize: 11, color: 'var(--t3)', marginTop: 2 }}>{item.cutType.name}</div>
+                <div style={{ fontSize: 18, fontWeight: 600, color: 'var(--t1)' }}>{item.product.name}</div>
+                <div style={{ fontSize: 14, color: 'var(--t3)', marginTop: 2 }}>{item.cutType.name}</div>
               </div>
               {item.product.id !== product.id && (
-                <span style={{ fontSize: 10, fontWeight: 700, color: 'var(--green)', background: 'rgba(52,199,89,.12)', padding: '3px 8px', borderRadius: 8 }}>
+                <span style={{ fontSize: 13, fontWeight: 700, color: 'var(--green)', background: 'rgba(52,199,89,.12)', padding: '3px 8px', borderRadius: 8 }}>
                   + combo
                 </span>
               )}
@@ -130,7 +130,7 @@ export default function ScheduleScreen({
       )}
 
       <div style={{ margin: '0 24px 18px' }}>
-        <div style={{ fontSize: 13, fontWeight: 600, color: 'var(--t2)', marginBottom: 10 }}>
+        <div style={{ fontSize: 17, fontWeight: 600, color: 'var(--t2)', marginBottom: 10 }}>
           {cartItems.length > 1 ? 'Peso para todos os itens' : 'Quanto você quer?'}
         </div>
         <div style={{ display: 'flex', gap: 8 }}>
@@ -143,7 +143,7 @@ export default function ScheduleScreen({
                 border: `1px solid ${weight === w ? 'var(--primary)' : 'var(--border)'}`,
                 background: weight === w ? 'rgba(192,39,45,.18)' : 'var(--s2)',
                 color: weight === w ? '#FF8A8A' : 'var(--t3)',
-                fontSize: 13, fontWeight: 600, cursor: 'pointer', transition: 'all .15s',
+                fontSize: 17, fontWeight: 600, cursor: 'pointer', transition: 'all .15s',
               }}
             >
               {w < 1 ? `${w * 1000}g` : `${w}kg`}
@@ -153,18 +153,18 @@ export default function ScheduleScreen({
       </div>
 
       <div style={{ margin: '0 24px 18px' }}>
-        <div style={{ fontSize: 13, fontWeight: 600, color: 'var(--t2)', marginBottom: 10 }}>Retirada</div>
+        <div style={{ fontSize: 17, fontWeight: 600, color: 'var(--t2)', marginBottom: 10 }}>Retirada</div>
         <div style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '14px 16px', background: 'rgba(52,199,89,.1)', border: '1px solid rgba(52,199,89,.28)', borderRadius: 14 }}>
           <div style={{ width: 8, height: 8, borderRadius: '50%', background: 'var(--green)', boxShadow: '0 0 0 3px rgba(52,199,89,.2)' }} />
-          <span style={{ fontSize: 15, fontWeight: 600, color: 'var(--t1)', textTransform: 'capitalize' }}>Hoje · {today}</span>
+          <span style={{ fontSize: 19, fontWeight: 600, color: 'var(--t1)', textTransform: 'capitalize' }}>Hoje · {today}</span>
         </div>
-        <p style={{ fontSize: 12, color: 'var(--t3)', marginTop: 8, lineHeight: 1.4 }}>
+        <p style={{ fontSize: 15, color: 'var(--t3)', marginTop: 8, lineHeight: 1.4 }}>
           Agendamento disponível apenas para retirada no mesmo dia.
         </p>
       </div>
 
       <div style={{ margin: '0 24px 18px' }}>
-        <div style={{ fontSize: 13, fontWeight: 600, color: 'var(--t2)', marginBottom: 10 }}>Horário</div>
+        <div style={{ fontSize: 17, fontWeight: 600, color: 'var(--t2)', marginBottom: 10 }}>Horário</div>
         <div className="slots-grid slots-grid--compact">
           {slots.filter((s) => s.available).map((s) => (
             <div
@@ -179,12 +179,12 @@ export default function ScheduleScreen({
       </div>
 
       <div style={{ margin: '8px 24px 0', padding: 16, background: 'var(--s2)', border: '1px solid var(--border2)', borderRadius: 'var(--r-lg)' }}>
-        <div style={{ fontSize: 15, fontWeight: 600, color: 'var(--accent)', textAlign: 'center', marginBottom: 6 }}>
+        <div style={{ fontSize: 19, fontWeight: 600, color: 'var(--accent)', textAlign: 'center', marginBottom: 6 }}>
           Hoje · {selectedSlot} · {weight}kg
           {cartItems.length > 1 && ` · ${cartItems.length} itens`}
         </div>
         {cartItems.length > 1 && (
-          <div style={{ fontSize: 12, color: 'var(--t3)', textAlign: 'center', marginBottom: 12 }}>
+          <div style={{ fontSize: 15, color: 'var(--t3)', textAlign: 'center', marginBottom: 12 }}>
             Estimativa total ~R$ {totalEstimate.toFixed(2).replace('.', ',')}
           </div>
         )}
@@ -196,7 +196,7 @@ export default function ScheduleScreen({
         >
           Confirmar agendamento
         </button>
-        <div style={{ fontSize: 11.5, color: 'var(--t3)', textAlign: 'center', marginTop: 10 }}>
+        <div style={{ fontSize: 15, color: 'var(--t3)', textAlign: 'center', marginTop: 10 }}>
           Pagamento no caixa do mercado
         </div>
       </div>

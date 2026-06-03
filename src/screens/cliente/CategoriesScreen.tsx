@@ -6,10 +6,10 @@ export default function CategoriesScreen({ onSelect }: Props) {
   return (
     <div className="screen" style={{ padding: '0 0 8px' }}>
       <div style={{ flexShrink: 0, padding: '8px 16px 12px', display: 'flex', alignItems: 'baseline', justifyContent: 'space-between' }}>
-        <div style={{ fontFamily: 'var(--font-serif)', fontSize: 24, fontWeight: 700, color: 'var(--accent)' }}>
+        <div style={{ fontFamily: 'var(--font-serif)', fontSize: 31, fontWeight: 700, color: 'var(--accent)' }}>
           O que você procura?
         </div>
-        <div style={{ fontSize: 12, color: 'var(--t3)', textAlign: 'right' }}>
+        <div style={{ fontSize: 15, color: 'var(--t3)', textAlign: 'right' }}>
           Toque em uma categoria
         </div>
       </div>
@@ -78,7 +78,7 @@ export default function CategoriesScreen({ onSelect }: Props) {
                   <div
                     style={{
                       fontFamily: 'var(--font-serif)',
-                      fontSize: 24,
+                      fontSize: 31,
                       fontWeight: 700,
                       color: 'white',
                       lineHeight: 1.05,
@@ -89,7 +89,7 @@ export default function CategoriesScreen({ onSelect }: Props) {
                   </div>
                   <div
                     style={{
-                      fontSize: 12,
+                      fontSize: 15,
                       color: 'rgba(255,255,255,.72)',
                       marginTop: 5,
                       fontWeight: 500,

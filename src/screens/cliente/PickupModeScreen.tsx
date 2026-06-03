@@ -37,10 +37,10 @@ export default function PickupModeScreen({ onSelect }: Props) {
   return (
     <div className="screen" style={{ padding: '0 0 12px' }}>
       <div style={{ flexShrink: 0, padding: '8px 20px 16px' }}>
-        <div style={{ fontFamily: 'var(--font-serif)', fontSize: 28, fontWeight: 700, color: 'var(--accent)', lineHeight: 1.15 }}>
+        <div style={{ fontFamily: 'var(--font-serif)', fontSize: 36, fontWeight: 700, color: 'var(--accent)', lineHeight: 1.15 }}>
           Como deseja retirar?
         </div>
-        <div style={{ fontSize: 13, color: 'var(--t3)', marginTop: 6, lineHeight: 1.5 }}>
+        <div style={{ fontSize: 17, color: 'var(--t3)', marginTop: 6, lineHeight: 1.5 }}>
           Toque em uma opção para continuar
         </div>
       </div>
@@ -119,7 +119,7 @@ export default function PickupModeScreen({ onSelect }: Props) {
                 <div
                   style={{
                     alignSelf: 'flex-start',
-                    fontSize: 10,
+                    fontSize: 13,
                     fontWeight: 700,
                     letterSpacing: 1.2,
                     textTransform: 'uppercase',
@@ -137,7 +137,7 @@ export default function PickupModeScreen({ onSelect }: Props) {
                 <div
                   style={{
                     fontFamily: 'var(--font-serif)',
-                    fontSize: 32,
+                    fontSize: 41,
                     fontWeight: 700,
                     color: 'white',
                     lineHeight: 1.05,
@@ -150,7 +150,7 @@ export default function PickupModeScreen({ onSelect }: Props) {
 
                 <div
                   style={{
-                    fontSize: 14,
+                    fontSize: 18,
                     color: 'rgba(255,255,255,.78)',
                     lineHeight: 1.45,
                     marginBottom: 14,
@@ -170,7 +170,7 @@ export default function PickupModeScreen({ onSelect }: Props) {
                     borderTop: '1px solid rgba(255,255,255,.12)',
                   }}
                 >
-                  <span style={{ fontSize: 12.5, fontWeight: 600, color: 'rgba(255,255,255,.55)' }}>
+                  <span style={{ fontSize: 16, fontWeight: 600, color: 'rgba(255,255,255,.55)' }}>
                     {card.hint}
                   </span>
                   <span
@@ -184,7 +184,7 @@ export default function PickupModeScreen({ onSelect }: Props) {
                       display: 'flex',
                       alignItems: 'center',
                       justifyContent: 'center',
-                      fontSize: 18,
+                      fontSize: 23,
                       color: 'white',
                     }}
                   >

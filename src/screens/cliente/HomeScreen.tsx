@@ -68,25 +68,25 @@ export default function HomeScreen({ onStart }: Props) {
 
         {/* Relógio no topo direito */}
         <div style={{ position: 'absolute', top: 24, right: 24, textAlign: 'right', zIndex: 3 }}>
-          <div style={{ fontSize: 36, fontWeight: 700, color: 'white', fontFamily: 'var(--font-serif)', lineHeight: 1 }}>{timeStr}</div>
-          <div style={{ fontSize: 12, color: 'rgba(255,255,255,.6)', marginTop: 3, textTransform: 'capitalize' }}>{dateStr}</div>
+          <div style={{ fontSize: 46, fontWeight: 700, color: 'white', fontFamily: 'var(--font-serif)', lineHeight: 1 }}>{timeStr}</div>
+          <div style={{ fontSize: 15, color: 'rgba(255,255,255,.6)', marginTop: 3, textTransform: 'capitalize' }}>{dateStr}</div>
         </div>
 
         {/* Conteúdo hero */}
         <div key={slide} style={{ position: 'absolute', bottom: 0, left: 0, right: 0, padding: '0 28px 64px', zIndex: 3, animation: 'slideUp .4s ease both' }}>
           <div style={{
             display: 'inline-flex', alignItems: 'center', gap: 5,
-            fontSize: 11, fontWeight: 700, padding: '5px 12px', borderRadius: 20,
+            fontSize: 14, fontWeight: 700, padding: '5px 12px', borderRadius: 20,
             background: 'var(--gold)', color: '#1a0f00', marginBottom: 10,
             textTransform: 'uppercase', letterSpacing: '.5px',
           }}>{s.badge}</div>
-          <div style={{ fontFamily: 'var(--font-serif)', fontSize: 32, fontWeight: 700, color: 'white', lineHeight: 1.2, marginBottom: 8, whiteSpace: 'pre-line' }}>
+          <div style={{ fontFamily: 'var(--font-serif)', fontSize: 41, fontWeight: 700, color: 'white', lineHeight: 1.2, marginBottom: 8, whiteSpace: 'pre-line' }}>
             {s.name}
           </div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 10, fontSize: 14, color: 'rgba(255,255,255,.7)' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 10, fontSize: 18, color: 'rgba(255,255,255,.7)' }}>
             <span>{s.tag}</span>
             <span style={{ color: 'rgba(255,255,255,.3)' }}>·</span>
-            <span style={{ fontSize: 17, fontWeight: 700, color: 'white' }}>{s.price}</span>
+            <span style={{ fontSize: 22, fontWeight: 700, color: 'white' }}>{s.price}</span>
           </div>
         </div>
 
@@ -107,21 +107,29 @@ export default function HomeScreen({ onStart }: Props) {
       </div>
 
       {/* CTA */}
-      <div style={{ flexShrink: 0, padding: '22px 28px 36px', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 14, background: 'var(--bg)' }}>
+      <div style={{
+        flexShrink: 0, padding: '24px 32px 40px',
+        display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 18,
+        background: 'var(--bg)',
+      }}>
         <button
           onClick={onStart}
           style={{
-            width: '100%', padding: '22px 28px',
+            width: '100%', minHeight: 108, padding: '40px 44px',
             background: 'var(--primary)', color: 'white', border: 'none',
-            borderRadius: 'var(--r-lg)', fontFamily: 'var(--font-sans)',
-            fontSize: 20, fontWeight: 700, letterSpacing: '.3px', cursor: 'pointer',
-            boxShadow: '0 10px 36px var(--primary-glow)',
+            borderRadius: 'var(--r-xl)', fontFamily: 'var(--font-sans)',
+            fontSize: 44, fontWeight: 700, lineHeight: 1.15,
+            letterSpacing: '.2px', cursor: 'pointer',
+            boxShadow: '0 12px 40px var(--primary-glow)',
             animation: 'totemPulse 2.4s ease-in-out infinite',
           }}
         >
           Toque aqui para iniciar
         </button>
-        <p style={{ fontSize: 13, color: 'var(--t3)', textAlign: 'center', lineHeight: 1.55 }}>
+        <p style={{
+          fontSize: 19, color: 'var(--t3)', textAlign: 'center',
+          lineHeight: 1.5, maxWidth: 320, letterSpacing: '.1px',
+        }}>
           Escolha seu corte · personalize · retire sem fila
         </p>
       </div>
@@ -129,8 +137,8 @@ export default function HomeScreen({ onStart }: Props) {
       <style>{`
 @keyframes slideUp   { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: none; } }
         @keyframes totemPulse {
-          0%,100% { box-shadow: 0 10px 36px var(--primary-glow); }
-          50%      { box-shadow: 0 14px 48px rgba(192,39,45,.55), 0 0 0 6px rgba(192,39,45,.12); }
+          0%,100% { box-shadow: 0 12px 40px var(--primary-glow); }
+          50%      { box-shadow: 0 16px 52px rgba(192,39,45,.55), 0 0 0 8px rgba(192,39,45,.12); }
         }
       `}</style>
     </div>

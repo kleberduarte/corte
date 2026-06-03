@@ -250,14 +250,14 @@ export default function FlowChoiceScreen({ onSelect }: Props) {
         .flow-choice-heading {
           margin: 0;
           font-family: var(--font-serif);
-          font-size: 28px;
+          font-size: 36px;
           font-weight: 700;
           color: var(--accent);
           line-height: 1.15;
         }
         .flow-choice-lead {
           margin: 6px 0 0;
-          font-size: 13px;
+          font-size: 17px;
           color: var(--t3);
           line-height: 1.5;
         }
@@ -369,7 +369,7 @@ export default function FlowChoiceScreen({ onSelect }: Props) {
           top: 14px;
           left: 14px;
           z-index: 3;
-          font-size: 9.5px;
+          font-size: 14px;
           font-weight: 700;
           letter-spacing: 1.2px;
           text-transform: uppercase;
@@ -380,7 +380,7 @@ export default function FlowChoiceScreen({ onSelect }: Props) {
         .flow-card--counter .flow-card-badge {
           top: 12px;
           left: 12px;
-          font-size: 8.5px;
+          font-size: 13px;
           letter-spacing: 1.4px;
           padding: 6px 13px;
           background: linear-gradient(135deg, #F8F4EA, #E8E2D4);
@@ -426,7 +426,7 @@ export default function FlowChoiceScreen({ onSelect }: Props) {
         }
         .flow-thumb-label {
           display: block;
-          font-size: 8px;
+          font-size: 14px;
           font-weight: 700;
           text-transform: uppercase;
           letter-spacing: .4px;
@@ -511,7 +511,7 @@ export default function FlowChoiceScreen({ onSelect }: Props) {
           text-align: center;
         }
         .flow-ticket-brand {
-          font-size: 7px;
+          font-size: 9px;
           font-weight: 800;
           letter-spacing: 2.2px;
           color: #a08040;
@@ -534,7 +534,7 @@ export default function FlowChoiceScreen({ onSelect }: Props) {
           right: -4px;
         }
         .flow-ticket-label {
-          font-size: 7px;
+          font-size: 9px;
           font-weight: 700;
           letter-spacing: 1.4px;
           text-transform: uppercase;
@@ -543,14 +543,14 @@ export default function FlowChoiceScreen({ onSelect }: Props) {
         }
         .flow-ticket-code {
           font-family: var(--font-serif);
-          font-size: 26px;
+          font-size: 33px;
           font-weight: 700;
           color: #1a0f00;
           letter-spacing: 1.5px;
           line-height: 1;
         }
         .flow-ticket-hint {
-          font-size: 8.5px;
+          font-size: 11px;
           font-weight: 600;
           color: #666;
           margin-top: 5px;
@@ -571,7 +571,7 @@ export default function FlowChoiceScreen({ onSelect }: Props) {
           display: flex;
           align-items: center;
           gap: 6px;
-          font-size: 10px;
+          font-size: 15px;
           font-weight: 700;
           text-transform: uppercase;
           letter-spacing: .5px;
@@ -592,7 +592,7 @@ export default function FlowChoiceScreen({ onSelect }: Props) {
           display: inline-flex;
           align-items: center;
           justify-content: center;
-          font-size: 10px;
+          font-size: 13px;
           font-weight: 800;
           background: #1a0f00;
           color: #F5F0E6;
@@ -603,7 +603,7 @@ export default function FlowChoiceScreen({ onSelect }: Props) {
           background: none !important;
           border: none !important;
           box-shadow: none !important;
-          font-size: 13px !important;
+          font-size: 17px !important;
           color: rgba(245,240,230,.85) !important;
           font-weight: 400 !important;
           letter-spacing: 0 !important;
@@ -639,14 +639,14 @@ export default function FlowChoiceScreen({ onSelect }: Props) {
         .flow-card-title {
           margin: 0 0 6px;
           font-family: var(--font-serif);
-          font-size: 26px;
+          font-size: 33px;
           font-weight: 700;
           color: #fff;
           line-height: 1.08;
         }
         .flow-card-subtitle {
           margin: 0 0 12px;
-          font-size: 13px;
+          font-size: 17px;
           color: rgba(255,255,255,.72);
           line-height: 1.45;
           font-weight: 500;
@@ -663,7 +663,7 @@ export default function FlowChoiceScreen({ onSelect }: Props) {
           display: flex;
           align-items: center;
           gap: 6px;
-          font-size: 11px;
+          font-size: 14px;
           font-weight: 600;
           color: rgba(255,255,255,.65);
         }
@@ -671,7 +671,7 @@ export default function FlowChoiceScreen({ onSelect }: Props) {
           color: rgba(245,237,219,.8);
         }
         .flow-feature-icon {
-          font-size: 10px;
+          font-size: 13px;
           width: 18px;
           height: 18px;
           border-radius: 50%;
@@ -700,18 +700,18 @@ export default function FlowChoiceScreen({ onSelect }: Props) {
           border-top-color: rgba(var(--flow-accent-rgb), .18);
         }
         .flow-card-hint {
-          font-size: 12px;
+          font-size: 17px;
           font-weight: 600;
           color: rgba(255,255,255,.45);
         }
         .flow-card-cta {
-          width: 42px;
-          height: 42px;
+          width: 50px;
+          height: 50px;
           border-radius: 50%;
           display: flex;
           align-items: center;
           justify-content: center;
-          font-size: 18px;
+          font-size: 26px;
           color: #fff;
           background: rgba(255,255,255,.1);
           border: 1px solid rgba(255,255,255,.18);

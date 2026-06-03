@@ -36,15 +36,15 @@ export default function ComboSuggestionCard({
             <div style={{
               width: 44, height: 44, borderRadius: '50%', flexShrink: 0,
               background: 'rgba(52,199,89,.15)', border: '2px solid var(--green)',
-              display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 22,
+              display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 28,
             }}>
               ✓
             </div>
             <div>
-              <div style={{ fontSize: 15, fontWeight: 700, color: 'var(--t1)' }}>
+              <div style={{ fontSize: 19, fontWeight: 700, color: 'var(--t1)' }}>
                 {suggestedProduct.name} adicionado!
               </div>
-              <div style={{ fontSize: 12, color: 'var(--t3)', marginTop: 2 }}>
+              <div style={{ fontSize: 15, color: 'var(--t3)', marginTop: 2 }}>
                 Mesmo horário e peso do seu pedido principal.
               </div>
             </div>
@@ -55,7 +55,7 @@ export default function ComboSuggestionCard({
             style={{
               width: '100%', padding: '10px 14px', borderRadius: 12,
               border: '1px solid var(--border2)', background: 'var(--s2)',
-              color: 'var(--t2)', fontSize: 12, fontWeight: 600, cursor: 'pointer',
+              color: 'var(--t2)', fontSize: 15, fontWeight: 600, cursor: 'pointer',
               fontFamily: 'var(--font-sans)',
             }}
           >

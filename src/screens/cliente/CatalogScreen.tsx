@@ -25,10 +25,10 @@ export default function CatalogScreen({ initialFilter = 'todos', onProduct, cart
   return (
     <div className="screen" style={{ position: 'relative' }}>
       <div style={{ flexShrink: 0, padding: '8px 24px 10px' }}>
-        <div style={{ fontFamily: 'var(--font-serif)', fontSize: 28, fontWeight: 600, color: 'var(--accent)' }}>
+        <div style={{ fontFamily: 'var(--font-serif)', fontSize: 36, fontWeight: 600, color: 'var(--accent)' }}>
           Nossos Cortes
         </div>
-        <div style={{ fontSize: 12, color: 'var(--t3)', marginTop: 3 }}>{visible.length} produto{visible.length !== 1 ? 's' : ''} disponíve{visible.length !== 1 ? 'is' : 'l'}</div>
+        <div style={{ fontSize: 15, color: 'var(--t3)', marginTop: 3 }}>{visible.length} produto{visible.length !== 1 ? 's' : ''} disponíve{visible.length !== 1 ? 'is' : 'l'}</div>
       </div>
 
       <div className="chips">
@@ -90,26 +90,26 @@ function ProductCard({ product: p, added, onClick, onAdd }: {
           style={{ width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'center 42%', display: 'block', transition: 'transform .4s' }}
         />
         {p.badge && (
-          <div style={{ position: 'absolute', top: 8, left: 8, background: 'rgba(0,0,0,.65)', backdropFilter: 'blur(4px)', color: 'var(--t1)', fontSize: 9.5, fontWeight: 600, padding: '3px 7px', borderRadius: 20, border: '1px solid rgba(255,255,255,.1)' }}>
+          <div style={{ position: 'absolute', top: 8, left: 8, background: 'rgba(0,0,0,.65)', backdropFilter: 'blur(4px)', color: 'var(--t1)', fontSize: 12, fontWeight: 600, padding: '3px 7px', borderRadius: 20, border: '1px solid rgba(255,255,255,.1)' }}>
             {p.badge}
           </div>
         )}
       </div>
       <div style={{ flex: 1, padding: '12px 14px 14px', display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
         <div>
-          <div style={{ fontSize: 15, fontWeight: 600, color: 'var(--t1)', marginBottom: 3 }}>{p.name}</div>
-          <div style={{ fontSize: 11.5, color: 'var(--t3)', lineHeight: 1.45, marginBottom: 8, display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>
+          <div style={{ fontSize: 19, fontWeight: 600, color: 'var(--t1)', marginBottom: 3 }}>{p.name}</div>
+          <div style={{ fontSize: 15, color: 'var(--t3)', lineHeight: 1.45, marginBottom: 8, display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>
             {p.description}
           </div>
         </div>
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
           <div>
-            <div style={{ fontSize: 16, fontWeight: 700, color: 'var(--accent)' }}>
-              <sup style={{ fontSize: 11, fontWeight: 600 }}>R$</sup>
+            <div style={{ fontSize: 20, fontWeight: 700, color: 'var(--accent)' }}>
+              <sup style={{ fontSize: 14, fontWeight: 600 }}>R$</sup>
               {p.pricePerKg.toFixed(2).replace('.', ',')}
-              <sub style={{ fontSize: 11, fontWeight: 400, color: 'var(--t3)' }}>/kg</sub>
+              <sub style={{ fontSize: 14, fontWeight: 400, color: 'var(--t3)' }}>/kg</sub>
             </div>
-            <div className="stars" style={{ fontSize: 10.5, display: 'flex', alignItems: 'center', gap: 3 }}>
+            <div className="stars" style={{ fontSize: 13, display: 'flex', alignItems: 'center', gap: 3 }}>
               {'★'.repeat(Math.round(p.rating))}{'☆'.repeat(5 - Math.round(p.rating))}
               <span style={{ color: 'var(--t3)' }}>({p.reviews})</span>
             </div>
