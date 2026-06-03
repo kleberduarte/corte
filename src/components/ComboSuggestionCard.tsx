@@ -12,15 +12,12 @@ type Props = {
 }
 
 export default function ComboSuggestionCard({
-  product,
   suggestedProduct,
-  suggestion,
   added,
   onAdd,
   onCustomize,
   onDismiss,
 }: Props) {
-  const firstName = product.name.split(' ')[0]
   const priceText = `R$ ${suggestedProduct.pricePerKg.toFixed(2).replace('.', ',')}/kg`
 
   if (added) {
@@ -40,13 +37,8 @@ export default function ComboSuggestionCard({
             }}>
               ✓
             </div>
-            <div>
-              <div style={{ fontSize: 19, fontWeight: 700, color: 'var(--t1)' }}>
-                {suggestedProduct.name} adicionado!
-              </div>
-              <div style={{ fontSize: 15, color: 'var(--t3)', marginTop: 2 }}>
-                Mesmo horário e peso do seu pedido principal.
-              </div>
+            <div style={{ fontSize: 19, fontWeight: 700, color: 'var(--t1)' }}>
+              {suggestedProduct.name} adicionado
             </div>
           </div>
           <button
@@ -69,9 +61,6 @@ export default function ComboSuggestionCard({
   return (
     <div className="combo-suggest" style={{ margin: '0 24px 20px' }} aria-live="polite">
       <div className="combo-suggest-inner">
-        <div className="combo-suggest-badge">{suggestion.badge}</div>
-        <div className="combo-suggest-hook">{suggestion.hook}</div>
-        <p className="combo-suggest-msg">{suggestion.message}</p>
         <div className="combo-suggest-row">
           <div className="combo-suggest-thumb">
             <img src={suggestedProduct.imageUrl} alt={suggestedProduct.name} />
@@ -85,7 +74,7 @@ export default function ComboSuggestionCard({
           </button>
         </div>
         <button type="button" className="combo-suggest-skip" onClick={onDismiss}>
-          Só o {firstName} por agora, obrigado
+          Não, obrigado
         </button>
       </div>
     </div>

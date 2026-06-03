@@ -8,26 +8,20 @@ const CARDS: {
   mode: PickupMode
   badge: string
   title: string
-  subtitle: string
-  hint: string
   imageUrl: string
   imagePosition: string
 }[] = [
   {
     mode: 'scheduled',
-    badge: 'Planeje sua visita',
-    title: 'Agendar Retirada',
-    subtitle: 'Escolha o horário e retire sem fila',
-    hint: 'Ideal para organizar seu dia',
+    badge: 'Agendar',
+    title: 'Agendar retirada',
     imageUrl: 'https://images.unsplash.com/photo-1558030006-450675393462?w=900&h=700&fit=crop&q=90',
     imagePosition: 'center 55%',
   },
   {
     mode: 'immediate',
-    badge: 'Pronto em minutos',
-    title: 'Escolher e Aguardar',
-    subtitle: 'Seu corte preparado agora no balcão',
-    hint: 'Dirija-se ao açougue ao finalizar',
+    badge: 'Agora',
+    title: 'Aguardar no balcão',
     imageUrl: 'https://images.unsplash.com/photo-1607623814075-e51df1bdc82f?w=900&h=700&fit=crop&q=90',
     imagePosition: 'center 40%',
   },
@@ -136,47 +130,29 @@ export default function PickupModeScreen({ onSelect }: Props) {
 
                 <div
                   style={{
-                    fontFamily: 'var(--font-serif)',
-                    fontSize: 41,
-                    fontWeight: 700,
-                    color: 'white',
-                    lineHeight: 1.05,
-                    textShadow: '0 2px 20px rgba(0,0,0,.7)',
-                    marginBottom: 8,
-                  }}
-                >
-                  {card.title}
-                </div>
-
-                <div
-                  style={{
-                    fontSize: 18,
-                    color: 'rgba(255,255,255,.78)',
-                    lineHeight: 1.45,
-                    marginBottom: 14,
-                    maxWidth: '92%',
-                    fontWeight: 500,
-                  }}
-                >
-                  {card.subtitle}
-                </div>
-
-                <div
-                  style={{
                     display: 'flex',
-                    alignItems: 'center',
+                    alignItems: 'flex-end',
                     justifyContent: 'space-between',
-                    paddingTop: 14,
-                    borderTop: '1px solid rgba(255,255,255,.12)',
+                    gap: 12,
                   }}
                 >
-                  <span style={{ fontSize: 16, fontWeight: 600, color: 'rgba(255,255,255,.55)' }}>
-                    {card.hint}
-                  </span>
+                  <div
+                    style={{
+                      fontFamily: 'var(--font-serif)',
+                      fontSize: 41,
+                      fontWeight: 700,
+                      color: 'white',
+                      lineHeight: 1.05,
+                      textShadow: '0 2px 20px rgba(0,0,0,.7)',
+                      flex: 1,
+                    }}
+                  >
+                    {card.title}
+                  </div>
                   <span
                     style={{
-                      width: 36,
-                      height: 36,
+                      width: 44,
+                      height: 44,
                       borderRadius: '50%',
                       background: 'rgba(255,255,255,.12)',
                       border: '1px solid rgba(255,255,255,.2)',
@@ -184,9 +160,11 @@ export default function PickupModeScreen({ onSelect }: Props) {
                       display: 'flex',
                       alignItems: 'center',
                       justifyContent: 'center',
-                      fontSize: 23,
+                      fontSize: 26,
                       color: 'white',
+                      flexShrink: 0,
                     }}
+                    aria-hidden
                   >
                     →
                   </span>

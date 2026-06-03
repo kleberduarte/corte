@@ -92,15 +92,7 @@ export default function ScheduleScreen({
               }}
             >
               <img src={item.product.imageUrl} alt={item.product.name} style={{ width: 48, height: 48, borderRadius: 10, objectFit: 'cover', flexShrink: 0 }} />
-              <div style={{ flex: 1, minWidth: 0 }}>
-                <div style={{ fontSize: 18, fontWeight: 600, color: 'var(--t1)' }}>{item.product.name}</div>
-                <div style={{ fontSize: 14, color: 'var(--t3)', marginTop: 2 }}>{item.cutType.name}</div>
-              </div>
-              {item.product.id !== product.id && (
-                <span style={{ fontSize: 13, fontWeight: 700, color: 'var(--green)', background: 'rgba(52,199,89,.12)', padding: '3px 8px', borderRadius: 8 }}>
-                  + combo
-                </span>
-              )}
+              <div style={{ flex: 1, minWidth: 0, fontSize: 18, fontWeight: 600, color: 'var(--t1)' }}>{item.product.name}</div>
             </div>
           ))}
         </div>
@@ -158,9 +150,6 @@ export default function ScheduleScreen({
           <div style={{ width: 8, height: 8, borderRadius: '50%', background: 'var(--green)', boxShadow: '0 0 0 3px rgba(52,199,89,.2)' }} />
           <span style={{ fontSize: 19, fontWeight: 600, color: 'var(--t1)', textTransform: 'capitalize' }}>Hoje · {today}</span>
         </div>
-        <p style={{ fontSize: 15, color: 'var(--t3)', marginTop: 8, lineHeight: 1.4 }}>
-          Agendamento disponível apenas para retirada no mesmo dia.
-        </p>
       </div>
 
       <div style={{ margin: '0 24px 18px' }}>

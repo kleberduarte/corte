@@ -96,23 +96,12 @@ function ProductCard({ product: p, added, onClick, onAdd }: {
         )}
       </div>
       <div style={{ flex: 1, padding: '12px 14px 14px', display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
-        <div>
-          <div style={{ fontSize: 19, fontWeight: 600, color: 'var(--t1)', marginBottom: 3 }}>{p.name}</div>
-          <div style={{ fontSize: 15, color: 'var(--t3)', lineHeight: 1.45, marginBottom: 8, display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>
-            {p.description}
-          </div>
-        </div>
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-          <div>
-            <div style={{ fontSize: 20, fontWeight: 700, color: 'var(--accent)' }}>
-              <sup style={{ fontSize: 14, fontWeight: 600 }}>R$</sup>
-              {p.pricePerKg.toFixed(2).replace('.', ',')}
-              <sub style={{ fontSize: 14, fontWeight: 400, color: 'var(--t3)' }}>/kg</sub>
-            </div>
-            <div className="stars" style={{ fontSize: 13, display: 'flex', alignItems: 'center', gap: 3 }}>
-              {'★'.repeat(Math.round(p.rating))}{'☆'.repeat(5 - Math.round(p.rating))}
-              <span style={{ color: 'var(--t3)' }}>({p.reviews})</span>
-            </div>
+        <div style={{ fontSize: 19, fontWeight: 600, color: 'var(--t1)' }}>{p.name}</div>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginTop: 10 }}>
+          <div style={{ fontSize: 22, fontWeight: 700, color: 'var(--accent)' }}>
+            <sup style={{ fontSize: 14, fontWeight: 600 }}>R$</sup>
+            {p.pricePerKg.toFixed(2).replace('.', ',')}
+            <sub style={{ fontSize: 14, fontWeight: 400, color: 'var(--t3)' }}>/kg</sub>
           </div>
           <div
             onClick={onAdd}

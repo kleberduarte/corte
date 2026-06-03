@@ -87,16 +87,6 @@ export default function CategoriesScreen({ onSelect }: Props) {
                   >
                     {cat.name}
                   </div>
-                  <div
-                    style={{
-                      fontSize: 15,
-                      color: 'rgba(255,255,255,.72)',
-                      marginTop: 5,
-                      fontWeight: 500,
-                    }}
-                  >
-                    {cat.count}
-                  </div>
                 </div>
               </div>
             )

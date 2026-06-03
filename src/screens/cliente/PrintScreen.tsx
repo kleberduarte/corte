@@ -2,7 +2,10 @@ import { useEffect, useRef, useState } from 'react'
 import type { Order } from '../../store/cartStore'
 import { useStore } from '../../data/config'
 import { getOrderTrackingUrl } from '../../utils/orderTrackingUrl'
+import QrScanPrompt from '../../components/QrScanPrompt'
 import { generateQrDataUrl, generateQrObjectUrl } from '../../utils/qrCode'
+
+const QR_DISPLAY_SIZE = 320
 
 type Props = {
   order: Order
@@ -167,7 +170,7 @@ export default function PrintScreen({ order, onDone }: Props) {
 
   useEffect(() => {
     setQrDataUrl(null)
-    generateQrDataUrl(getOrderTrackingUrl(order.pickupCode, store.id), 140).then(setQrDataUrl)
+    generateQrDataUrl(getOrderTrackingUrl(order.pickupCode, store.id), QR_DISPLAY_SIZE).then(setQrDataUrl)
   }, [order.pickupCode, store.id])
 
   useEffect(() => {
@@ -233,14 +236,8 @@ export default function PrintScreen({ order, onDone }: Props) {
           </div>
         </div>
         {qrDataUrl && (
-          <div style={{ background: 'var(--s2)', border: '1px solid var(--border2)', borderRadius: 'var(--r)', padding: '16px 20px', marginBottom: 28, width: '100%' }}>
-            <div style={{ fontSize: 13, fontWeight: 700, textTransform: 'uppercase', letterSpacing: 1.2, color: 'var(--t3)', marginBottom: 12 }}>
-              Acompanhe seu pedido
-            </div>
-            <div style={{ background: '#fff', borderRadius: 12, width: 140, height: 140, margin: '0 auto 10px', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 8 }}>
-              <img src={qrDataUrl} alt="QR Code para acompanhar pedido" width={124} height={124} style={{ display: 'block' }} />
-            </div>
-            <div style={{ fontSize: 15, color: 'var(--t3)' }}>Escaneie para ver o andamento em tempo real</div>
+          <div style={{ background: 'var(--s2)', border: '1px solid var(--border2)', borderRadius: 'var(--r-lg)', padding: '22px 16px 20px', marginBottom: 28, width: '100%' }}>
+            <QrScanPrompt dataUrl={qrDataUrl} />
           </div>
         )}
         <button className="btn-primary" onClick={onDone} style={{ maxWidth: 320 }}>

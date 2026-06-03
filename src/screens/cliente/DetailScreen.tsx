@@ -1,6 +1,5 @@
 import { useState } from 'react'
 import type { Product, CutType } from '../../data/products'
-import { CATEGORY_LABELS } from '../../data/products'
 
 type Props = {
   product: Product
@@ -24,19 +23,9 @@ export default function DetailScreen({ product: p, immediate = false, onSchedule
       </div>
 
       <div style={{ padding: '0 24px 24px' }}>
-        {/* Nome e avaliação */}
-        <div style={{ fontSize: 14, fontWeight: 600, color: 'var(--primary)', textTransform: 'uppercase', letterSpacing: 1, marginBottom: 6, marginTop: 12 }}>
-          {CATEGORY_LABELS[p.category]} · {p.badge || 'Seleção'}
-        </div>
-        <div style={{ fontFamily: 'var(--font-serif)', fontSize: 38, fontWeight: 700, color: 'var(--accent)', lineHeight: 1.1, marginBottom: 10 }}>
+        <div style={{ fontFamily: 'var(--font-serif)', fontSize: 38, fontWeight: 700, color: 'var(--accent)', lineHeight: 1.1, marginBottom: 16, marginTop: 12 }}>
           {p.name}
         </div>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 16 }}>
-          <span className="stars" style={{ fontSize: 18 }}>{'★'.repeat(Math.round(p.rating))}</span>
-          <span style={{ fontSize: 17, fontWeight: 600 }}>{p.rating.toFixed(1)}</span>
-          <span style={{ fontSize: 15, color: 'var(--t3)' }}>({p.reviews} avaliações)</span>
-        </div>
-        <div style={{ fontSize: 17, color: 'var(--t2)', lineHeight: 1.65, marginBottom: 18 }}>{p.description}</div>
 
         {/* Tipo de corte */}
         <div style={{ marginBottom: 20 }}>
@@ -56,19 +45,9 @@ export default function DetailScreen({ product: p, immediate = false, onSchedule
                 }}
               >
                 <div style={{ fontSize: 17, fontWeight: 600, color: selectedCut.id === ct.id ? '#FF9090' : 'var(--t1)' }}>{ct.name}</div>
-                <div style={{ fontSize: 13, color: 'var(--t3)', marginTop: 2 }}>{ct.desc}</div>
               </div>
             ))}
           </div>
-        </div>
-
-        {/* Tags */}
-        <div style={{ display: 'flex', gap: 7, marginBottom: 22, flexWrap: 'wrap' }}>
-          {p.tags.map((tag) => (
-            <div key={tag} style={{ padding: '5px 12px', borderRadius: 20, background: 'var(--s2)', border: '1px solid var(--border2)', fontSize: 15, color: 'var(--t2)', fontWeight: 500 }}>
-              {tag}
-            </div>
-          ))}
         </div>
 
         {/* Preço + Quantidade */}
