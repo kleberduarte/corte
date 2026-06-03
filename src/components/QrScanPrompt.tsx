@@ -36,9 +36,9 @@ export default function QrScanPrompt({
 
         {/* Celular animado apontando para o QR */}
         <div className="qr-scan-phone-scene" aria-hidden>
-          {/* Seta de direção: celular → QR */}
+          {/* Seta de direção: celular → QR (aponta para cima) */}
           <svg className="qr-scan-arrow" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <path d="M40 24H8M8 24l12-10M8 24l12 10" stroke="var(--primary)" strokeWidth="4" strokeLinecap="round" strokeLinejoin="round" />
+            <path d="M24 40V8M24 8L14 20M24 8L34 20" stroke="var(--primary)" strokeWidth="4" strokeLinecap="round" strokeLinejoin="round" />
           </svg>
 
           {/* Celular em perspectiva 3/4 — câmera visível nas costas */}

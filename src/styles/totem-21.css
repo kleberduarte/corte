@@ -186,17 +186,13 @@
 .totem-shell.totem-21 .print-stage-spinner { width: 26px !important; height: 26px !important; }
 .totem-shell.totem-21 .print-receipt-preview { max-width: 380px !important; padding: 20px !important; }
 
-/* ── QR Scan Prompt (totem 21") ── */
-.totem-shell.totem-21 .qr-scan-prompt {
-  --qr-frame: 380px;
-  --qr-code: 320px;
-  --qr-corner: 44px;
-}
-
+/* ── QR Scan Prompt ── */
 .qr-scan-prompt {
-  --qr-frame: 300px;
-  --qr-code: 248px;
-  --qr-corner: 36px;
+  --qr-frame: 220px;
+  --qr-code: 178px;
+  --qr-corner: 28px;
+  --qr-phone-w: 88px;
+  --qr-phone-h: 140px;
   width: 100%;
   text-align: center;
   display: flex;
@@ -204,47 +200,56 @@
   align-items: center;
 }
 
+.totem-shell.totem-21 .qr-scan-prompt {
+  --qr-frame: 280px;
+  --qr-code: 228px;
+  --qr-corner: 34px;
+  --qr-phone-w: 108px;
+  --qr-phone-h: 170px;
+}
+
 .qr-scan-prompt__title {
-  margin: 0 0 8px;
-  font-size: 15px;
+  margin: 0 0 6px;
+  font-size: 13px;
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 1.4px;
   color: var(--t3);
 }
 
-.totem-shell.totem-21 .qr-scan-prompt__title { font-size: 17px; }
+.totem-shell.totem-21 .qr-scan-prompt__title { font-size: 15px; }
 
 .qr-scan-prompt__hint {
-  margin: 0 0 24px;
-  font-size: 22px;
+  margin: 0 0 16px;
+  font-size: 18px;
   font-weight: 600;
   color: var(--t1);
   line-height: 1.35;
 }
 
-.totem-shell.totem-21 .qr-scan-prompt__hint { font-size: 28px; margin-bottom: 28px; }
+.totem-shell.totem-21 .qr-scan-prompt__hint { font-size: 22px; margin-bottom: 20px; }
 
 .qr-scan-prompt__stage {
   position: relative;
   width: var(--qr-frame);
-  height: var(--qr-frame);
-  margin: 0 auto 20px;
+  height: calc(var(--qr-frame) + var(--qr-phone-h) + 12px);
+  margin: 0 auto 16px;
   overflow: visible;
 }
 
 .qr-scan-prompt__frame {
-  position: relative;
-  width: 100%;
-  height: 100%;
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: var(--qr-frame);
+  height: var(--qr-frame);
 }
 
-/* Anel externo pulsante */
 .qr-scan-prompt__frame::before {
   content: '';
   position: absolute;
-  inset: -12px;
-  border-radius: 24px;
+  inset: -10px;
+  border-radius: 20px;
   border: 2px solid rgba(192, 39, 45, 0.4);
   animation: qrRingPulse 2.4s ease-in-out infinite;
   pointer-events: none;
@@ -252,14 +257,13 @@
 
 .qr-scan-prompt__code {
   position: absolute;
-  inset: 28px;
+  inset: 20px;
   background: #fff;
-  border-radius: 16px;
+  border-radius: 12px;
   display: flex;
   align-items: center;
   justify-content: center;
-  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.4);
-  transition: box-shadow 0.3s;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
 }
 
 .qr-scan-prompt__code img {
@@ -268,119 +272,107 @@
   height: var(--qr-code);
 }
 
-/* Cantos de mira */
 .qr-scan-corner {
   position: absolute;
   width: var(--qr-corner);
   height: var(--qr-corner);
-  border: 5px solid var(--primary);
+  border: 4px solid var(--primary);
   animation: qrCornerPulse 4.8s ease-in-out infinite;
-  transition: border-color 0.2s;
 }
 
-.qr-scan-corner--tl { top: 0; left: 0; border-right: none; border-bottom: none; border-radius: 12px 0 0 0; }
-.qr-scan-corner--tr { top: 0; right: 0; border-left: none; border-bottom: none; border-radius: 0 12px 0 0; animation-delay: .15s; }
-.qr-scan-corner--bl { bottom: 0; left: 0; border-right: none; border-top: none; border-radius: 0 0 0 12px; animation-delay: .3s; }
-.qr-scan-corner--br { bottom: 0; right: 0; border-left: none; border-top: none; border-radius: 0 0 12px 0; animation-delay: .45s; }
+.qr-scan-corner--tl { top: 0; left: 0; border-right: none; border-bottom: none; border-radius: 8px 0 0 0; }
+.qr-scan-corner--tr { top: 0; right: 0; border-left: none; border-bottom: none; border-radius: 0 8px 0 0; animation-delay: .15s; }
+.qr-scan-corner--bl { bottom: 0; left: 0; border-right: none; border-top: none; border-radius: 0 0 0 8px; animation-delay: .3s; }
+.qr-scan-corner--br { bottom: 0; right: 0; border-left: none; border-top: none; border-radius: 0 0 8px 0; animation-delay: .45s; }
 
-/* Linha de varredura — aparece só na fase de scan */
 .qr-scan-line {
   position: absolute;
-  left: 24px;
-  right: 24px;
-  height: 4px;
-  border-radius: 4px;
+  left: 18px;
+  right: 18px;
+  height: 3px;
+  border-radius: 3px;
   background: linear-gradient(90deg, transparent, var(--primary) 20%, #ff8a8a 50%, var(--primary) 80%, transparent);
-  box-shadow: 0 0 20px rgba(192, 39, 45, 0.8);
+  box-shadow: 0 0 16px rgba(192, 39, 45, 0.8);
   animation: qrScanSweep 4.8s ease-in-out infinite;
   z-index: 2;
   pointer-events: none;
 }
 
-/* Flash verde de leitura confirmada */
 .qr-scan-success-flash {
   position: absolute;
-  inset: 28px;
-  border-radius: 16px;
-  background: rgba(40, 200, 80, 0.55);
+  inset: 20px;
+  border-radius: 12px;
+  background: rgba(40, 200, 80, 0.5);
   z-index: 6;
   pointer-events: none;
   opacity: 0;
   animation: qrSuccessFlash 4.8s ease-in-out infinite;
 }
 
-/* Cena: celular (costas) apontando para o QR */
+/* Celular abaixo do QR, centralizado, sobe em direcao ao QR */
 .qr-scan-phone-scene {
   position: absolute;
-  /* Começa à direita do frame, centralizado verticalmente */
-  left: calc(var(--qr-frame) + 24px);
-  top: 50%;
-  width: 140px;
-  height: 220px;
-  margin-top: -110px;
+  bottom: 0;
+  left: 50%;
+  width: var(--qr-phone-w);
+  height: var(--qr-phone-h);
+  margin-left: calc(var(--qr-phone-w) / -2);
   pointer-events: none;
   z-index: 5;
   animation: qrPhoneApproach 4.8s cubic-bezier(0.4, 0, 0.2, 1) infinite;
 }
 
-.totem-shell.totem-21 .qr-scan-phone-scene {
-  width: 168px;
-  height: 264px;
-  margin-top: -132px;
-}
-
-/* SVG do celular */
 .qr-scan-phone-scene > svg {
   width: 100%;
   height: 100%;
-  filter: drop-shadow(0 12px 32px rgba(0, 0, 0, 0.55));
+  filter: drop-shadow(0 6px 18px rgba(0, 0, 0, 0.5));
 }
 
-/* Seta direcional celular → QR */
+/* Seta para cima */
 .qr-scan-arrow {
   position: absolute;
-  width: 44px;
-  height: 44px;
-  left: -52px;
-  top: 50%;
-  margin-top: -22px;
+  width: 32px;
+  height: 32px;
+  left: 50%;
+  top: -40px;
+  margin-left: -16px;
   animation: qrArrowPulse 4.8s ease-in-out infinite;
   pointer-events: none;
 }
 
 .totem-shell.totem-21 .qr-scan-arrow {
-  width: 52px;
-  height: 52px;
-  left: -60px;
-  margin-top: -26px;
+  width: 38px;
+  height: 38px;
+  margin-left: -19px;
+  top: -48px;
 }
 
-/* Feixe entre câmera e QR — cresce da borda direita do frame ao celular */
+/* Feixe vertical camera -> QR */
 .qr-scan-beam {
   position: absolute;
-  top: 50%;
-  left: 100%;
-  height: 4px;
-  width: 0;
-  margin-top: -2px;
-  background: linear-gradient(90deg, var(--primary), #ff8a8a 50%, rgba(192, 39, 45, 0));
-  box-shadow: 0 0 16px rgba(192, 39, 45, 0.7);
-  border-radius: 4px;
+  left: 50%;
+  bottom: var(--qr-phone-h);
+  width: 3px;
+  height: 0;
+  margin-left: -1.5px;
+  background: linear-gradient(180deg, rgba(192, 39, 45, 0), var(--primary) 50%, #ff8a8a);
+  box-shadow: 0 0 12px rgba(192, 39, 45, 0.7);
+  border-radius: 3px;
   animation: qrBeamShoot 4.8s ease-in-out infinite;
   z-index: 4;
   pointer-events: none;
+  transform-origin: bottom center;
 }
 
-/* Glow radial no centro do QR */
 .qr-scan-beam-glow {
   position: absolute;
   left: 50%;
-  top: 50%;
-  width: 160px;
-  height: 160px;
-  margin: -80px 0 0 -80px;
+  top: calc(var(--qr-frame) / 2);
+  width: 120px;
+  height: 120px;
+  margin: -60px 0 0 -60px;
   border-radius: 50%;
-  background: radial-gradient(circle, rgba(192, 39, 45, 0.22) 0%, transparent 70%);
+  background: radial-gradient(circle, rgba(192, 39, 45, 0.2) 0%, transparent 70%);
   animation: qrBeamGlow 4.8s ease-in-out infinite;
   pointer-events: none;
   z-index: 1;
@@ -391,90 +383,63 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: 12px;
-  font-size: 20px;
+  gap: 10px;
+  font-size: 16px;
   font-weight: 600;
   color: var(--t2);
 }
 
-.totem-shell.totem-21 .qr-scan-prompt__action { font-size: 22px; }
+.totem-shell.totem-21 .qr-scan-prompt__action { font-size: 18px; }
 
 .qr-scan-prompt__pulse-dot {
-  width: 11px;
-  height: 11px;
+  width: 9px;
+  height: 9px;
   border-radius: 50%;
   background: var(--primary);
   flex-shrink: 0;
   animation: qrDotPulse 1.2s ease-in-out infinite;
 }
 
-/* ── Keyframes (ciclo 4.8s) ──────────────────────────────────────
-   Fases:
-   0–20%   Celular afastado, aguardando
-   20–45%  Celular se aproxima do QR
-   45–65%  Escaneia (linha varre, feixe visível, glow)
-   65–72%  Flash de sucesso
-   72–88%  Celular recua
-   88–100% Pausa antes de repetir
-──────────────────────────────────────────────────────────────── */
-
-/* Linha de varredura — só durante a fase de scan */
 @keyframes qrScanSweep {
-  0%, 44%  { top: 28px; opacity: 0; }
-  46%      { top: 28px; opacity: 0.7; }
-  64%      { top: calc(100% - 28px); opacity: 1; }
-  66%, 100%{ top: calc(100% - 28px); opacity: 0; }
+  0%, 43%  { top: 18px; opacity: 0; }
+  45%      { top: 18px; opacity: 0.7; }
+  64%      { top: calc(100% - 20px); opacity: 1; }
+  67%, 100%{ top: calc(100% - 20px); opacity: 0; }
 }
 
-/* Cantos: flash branco no momento de sucesso */
 @keyframes qrCornerPulse {
-  0%, 44%  { opacity: 0.55; border-color: var(--primary); }
-  48%      { opacity: 1;    border-color: var(--primary); }
-  63%      { opacity: 1;    border-color: var(--primary); }
-  66%      { opacity: 1;    border-color: #28c850; box-shadow: 0 0 14px rgba(40,200,80,0.8); }
-  74%      { opacity: 0.7;  border-color: var(--primary); }
-  100%     { opacity: 0.55; border-color: var(--primary); }
+  0%, 43%  { opacity: 0.5; border-color: var(--primary); }
+  50%      { opacity: 1;   border-color: var(--primary); }
+  64%      { opacity: 1;   border-color: var(--primary); }
+  68%      { opacity: 1;   border-color: #28c850; box-shadow: 0 0 12px rgba(40,200,80,0.8); }
+  76%      { opacity: 0.6; border-color: var(--primary); box-shadow: none; }
+  100%     { opacity: 0.5; border-color: var(--primary); }
 }
 
-/* Anel externo */
 @keyframes qrRingPulse {
   0%, 100% { opacity: 0.3; transform: scale(1); }
-  50%      { opacity: 0.8; transform: scale(1.025); }
+  50%      { opacity: 0.75; transform: scale(1.02); }
 }
 
-/* Celular: parte afastado à direita, se aproxima ao QR, escaneia, recua */
 @keyframes qrPhoneApproach {
-  0%, 18% {
-    transform: translateX(0);
-    opacity: 0.75;
-  }
-  42%, 70% {
-    /* desloca ~(frame/2 + 72px) para a esquerda — fica adjacente ao QR */
-    transform: translateX(calc(-1 * (var(--qr-frame) / 2 + 80px)));
-    opacity: 1;
-  }
-  88%, 100% {
-    transform: translateX(0);
-    opacity: 0.75;
-  }
+  0%, 16%  { transform: translateY(0); opacity: 0.7; }
+  42%, 70% { transform: translateY(calc(-1 * (var(--qr-frame) / 2 + var(--qr-phone-h) / 2 - 8px))); opacity: 1; }
+  86%, 100%{ transform: translateY(0); opacity: 0.7; }
 }
 
-/* Seta direcional */
 @keyframes qrArrowPulse {
-  0%, 18%   { opacity: 0.9; transform: translateX(0); }
-  30%       { opacity: 0.6; transform: translateX(-8px); }
-  42%, 70%  { opacity: 0;   transform: translateX(-16px); }
-  82%, 100% { opacity: 0.9; transform: translateX(0); }
+  0%, 16%  { opacity: 0.9; transform: translateY(0); }
+  28%      { opacity: 0.6; transform: translateY(-6px); }
+  42%, 72% { opacity: 0;   transform: translateY(-14px); }
+  84%, 100%{ opacity: 0.9; transform: translateY(0); }
 }
 
-/* Feixe horizontal QR → câmera (cresce para a direita até o celular) */
 @keyframes qrBeamShoot {
-  0%, 40%   { width: 0;   opacity: 0; }
-  48%, 64%  { width: 80px; opacity: 1; }
-  72%, 100% { width: 0;   opacity: 0; }
+  0%, 40%   { height: 0;    opacity: 0; }
+  48%, 64%  { height: 60px; opacity: 1; }
+  72%, 100% { height: 0;    opacity: 0; }
 }
 
-/* Glow central */
 @keyframes qrBeamGlow {
   0%, 40%  { opacity: 0; transform: scale(0.5); }
   50%, 62% { opacity: 1; transform: scale(1); }
@@ -482,11 +447,10 @@
   100%     { opacity: 0; transform: scale(0.5); }
 }
 
-/* Flash de sucesso verde */
 @keyframes qrSuccessFlash {
-  0%, 63%  { opacity: 0; }
-  67%      { opacity: 0.7; }
-  72%      { opacity: 0; }
+  0%, 65%  { opacity: 0; }
+  69%      { opacity: 0.65; }
+  74%      { opacity: 0; }
   100%     { opacity: 0; }
 }
 
