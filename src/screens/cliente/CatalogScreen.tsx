@@ -23,12 +23,14 @@ export default function CatalogScreen({ initialFilter = 'todos', onProduct, cart
   }
 
   return (
-    <div className="screen" style={{ position: 'relative' }}>
-      <div style={{ flexShrink: 0, padding: '8px 24px 10px' }}>
+    <div className="screen screen--catalog" style={{ position: 'relative' }}>
+      <div className="catalog-header">
         <div className="catalog-heading" style={{ fontFamily: 'var(--font-serif)', fontSize: 36, fontWeight: 600, color: 'var(--accent)' }}>
           Nossos Cortes
         </div>
-        <div className="catalog-count" style={{ fontSize: 15, color: 'var(--t3)', marginTop: 3 }}>{visible.length} produto{visible.length !== 1 ? 's' : ''} disponíve{visible.length !== 1 ? 'is' : 'l'}</div>
+        <div className="catalog-count" style={{ fontSize: 15, color: 'var(--t3)', marginTop: 3 }}>
+          {visible.length} produto{visible.length !== 1 ? 's' : ''} disponíve{visible.length !== 1 ? 'is' : 'l'}
+        </div>
       </div>
 
       <div className="chips">
@@ -39,8 +41,8 @@ export default function CatalogScreen({ initialFilter = 'todos', onProduct, cart
         ))}
       </div>
 
-      <div className="scroll" style={{ flex: 1, paddingBottom: cartCount > 0 ? 100 : 16 }}>
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12, padding: '0 24px' }}>
+      <div className={`catalog-scroll scroll${cartCount > 0 ? ' catalog-scroll--fab' : ''}`}>
+        <div className="catalog-grid">
           {visible.map((p) => (
             <ProductCard
               key={p.id}
@@ -74,46 +76,24 @@ function ProductCard({ product: p, added, onClick, onAdd }: {
 }) {
   return (
     <div
+      className={`product-card${added ? ' product-card--added' : ''}`}
       onClick={onClick}
-      style={{
-        background: 'var(--s1)', borderRadius: 'var(--r)',
-        border: `1px solid ${added ? 'var(--green)' : 'var(--border)'}`,
-        overflow: 'hidden', cursor: 'pointer',
-        display: 'flex', flexDirection: 'column',
-        transition: 'border-color .25s, box-shadow .25s',
-        boxShadow: added ? '0 0 0 2px rgba(52,199,89,.25)' : 'none',
-      }}
     >
-      <div style={{ width: '100%', height: 140, position: 'relative', background: 'var(--s3)', overflow: 'hidden' }}>
-        <img
-          src={p.imageUrl} alt={p.name}
-          style={{ width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'center 42%', display: 'block', transition: 'transform .4s' }}
-        />
-        {p.badge && (
-          <div style={{ position: 'absolute', top: 8, left: 8, background: 'rgba(0,0,0,.65)', backdropFilter: 'blur(4px)', color: 'var(--t1)', fontSize: 12, fontWeight: 600, padding: '3px 7px', borderRadius: 20, border: '1px solid rgba(255,255,255,.1)' }}>
-            {p.badge}
-          </div>
-        )}
+      <div className="product-card-media">
+        <img src={p.imageUrl} alt={p.name} />
+        {p.badge && <div className="product-card-badge">{p.badge}</div>}
       </div>
-      <div style={{ flex: 1, padding: '12px 14px 14px', display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
-        <div style={{ fontSize: 19, fontWeight: 600, color: 'var(--t1)' }}>{p.name}</div>
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginTop: 10 }}>
-          <div style={{ fontSize: 22, fontWeight: 700, color: 'var(--accent)' }}>
-            <sup style={{ fontSize: 14, fontWeight: 600 }}>R$</sup>
+      <div className="product-card-body">
+        <div className="product-card-name">{p.name}</div>
+        <div className="product-card-footer">
+          <div className="product-card-price">
+            <sup>R$</sup>
             {p.pricePerKg.toFixed(2).replace('.', ',')}
-            <sub style={{ fontSize: 14, fontWeight: 400, color: 'var(--t3)' }}>/kg</sub>
+            <sub>/kg</sub>
           </div>
           <div
+            className={`product-card-add${added ? ' product-card-add--added' : ''}`}
             onClick={onAdd}
-            style={{
-              width: 36, height: 36,
-              background: added ? 'var(--green)' : 'var(--primary)',
-              borderRadius: 11, display: 'flex', alignItems: 'center', justifyContent: 'center',
-              fontSize: added ? 18 : 22, color: 'white', flexShrink: 0,
-              boxShadow: `0 3px 10px ${added ? 'rgba(52,199,89,.35)' : 'var(--primary-glow)'}`,
-              transition: 'background .25s, box-shadow .25s, transform .15s',
-              transform: added ? 'scale(1.15)' : 'scale(1)',
-            }}
           >
             {added ? '✓' : '+'}
           </div>
