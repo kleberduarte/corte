@@ -43,6 +43,10 @@
 .totem-shell.totem-21 .chips { padding: 0 32px 18px; gap: 12px; }
 
 .totem-shell.totem-21 .fab { bottom: 32px; left: 32px; right: 32px; padding: 22px 28px; border-radius: var(--r-xl); }
+
+.totem-shell.totem-21 .kanban-dock { padding: 14px 16px 18px; padding-left: 168px; gap: 12px; }
+.totem-shell.totem-21 .kanban-dock-btn { padding: 18px 24px; font-size: 20px; border-radius: var(--r-lg); min-height: 64px; }
+.totem-shell.totem-21 .kanban-dock-btn.secondary { padding: 18px 22px; min-width: 64px; }
 .totem-shell.totem-21 .fab-cnt { font-size: 18px; padding: 4px 12px; }
 .totem-shell.totem-21 .fab-label { font-size: 21px; }
 .totem-shell.totem-21 .fab-hint { font-size: 16px; }

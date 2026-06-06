@@ -145,19 +145,23 @@ export default function KanbanScreen() {
       </div>
 
       {/* Dock */}
-      <div style={{ flexShrink: 0, padding: '10px 12px 14px', borderTop: '1px solid var(--border)', background: 'var(--s1)', display: 'flex', gap: 8 }}>
+      <div className="kanban-dock">
         <button
+          type="button"
+          className="kanban-dock-btn primary"
           onClick={() => { const next = waiting[0]; if (next) moveOrder(next.id, 'em_preparo') }}
           disabled={waiting.length === 0}
-          style={{ flex: 1, padding: '14px 12px', borderRadius: 12, fontSize: 14, fontWeight: 700, textAlign: 'center', cursor: waiting.length > 0 ? 'pointer' : 'not-allowed', border: 'none', background: 'var(--primary)', color: '#fff', opacity: waiting.length > 0 ? 1 : 0.35, fontFamily: 'var(--font-sans)', transition: 'opacity .2s' }}
         >
           ▶ Iniciar próximo
         </button>
         <button
+          type="button"
+          className="kanban-dock-btn secondary"
           onClick={resetOrders}
-          style={{ padding: '14px 16px', borderRadius: 12, fontSize: 14, fontWeight: 700, cursor: 'pointer', border: '1px solid var(--border)', background: 'var(--s3)', color: 'var(--t2)', fontFamily: 'var(--font-sans)' }}
           title="Zerar fila"
-        >↺</button>
+        >
+          ↺
+        </button>
       </div>
     </div>
   )
