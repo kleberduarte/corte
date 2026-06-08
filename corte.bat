@@ -98,7 +98,8 @@ call :setup
 call :instalar_print_server
 findstr /C:"4173" "%~dp0backend\.env" >nul 2>&1
 if %errorlevel% NEQ 0 (
-  echo [aviso] Inclua http://localhost:4173 em CORS_ORIGINS no backend\.env para o fallback de impressao.
+  echo [setup] Atualizando CORS_ORIGINS para incluir totem (porta 4173)...
+  powershell -NoProfile -Command "(Get-Content '%~dp0backend\.env') -replace 'CORS_ORIGINS=.*', 'CORS_ORIGINS=\"http://localhost:5173,http://localhost:4173,http://127.0.0.1:4173\"' | Set-Content '%~dp0backend\.env'"
 )
 
 echo [print-server] Iniciando servidor de impressao em http://localhost:3334 ...

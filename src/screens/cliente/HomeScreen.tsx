@@ -1,9 +1,9 @@
 import { useEffect, useRef, useState } from 'react'
 import { HERO_SLIDES } from '../../data/products'
 
-type Props = { onStart: () => void }
+type Props = { onStart: () => void; onProductPromo: (productId: string) => void }
 
-export default function HomeScreen({ onStart }: Props) {
+export default function HomeScreen({ onStart, onProductPromo }: Props) {
   const [slide, setSlide]   = useState(0)
   const [clock, setClock]   = useState(new Date())
   const autoTimer = useRef<ReturnType<typeof setInterval> | null>(null)
@@ -38,6 +38,10 @@ export default function HomeScreen({ onStart }: Props) {
 
   const s = HERO_SLIDES[slide]
   const timeStr = clock.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })
+
+  function openPromoProduct() {
+    onProductPromo(s.productId)
+  }
   const dateStr = clock.toLocaleDateString('pt-BR', { weekday: 'long', day: 'numeric', month: 'long' })
 
   return (
@@ -76,8 +80,22 @@ export default function HomeScreen({ onStart }: Props) {
           <div style={{ fontSize: 15, color: 'rgba(255,255,255,.6)', marginTop: 3, textTransform: 'capitalize' }}>{dateStr}</div>
         </div>
 
-        {/* Conteúdo hero */}
-        <div key={slide} style={{ position: 'absolute', bottom: 0, left: 0, right: 0, padding: '0 28px 64px', zIndex: 3, animation: 'slideUp .4s ease both' }}>
+        {/* Conteúdo hero — toque abre o produto em destaque */}
+        <div
+          key={slide}
+          role="button"
+          tabIndex={0}
+          onClick={(e) => { e.stopPropagation(); openPromoProduct() }}
+          onMouseDown={(e) => e.stopPropagation()}
+          onMouseUp={(e) => e.stopPropagation()}
+          onTouchStart={(e) => e.stopPropagation()}
+          onTouchEnd={(e) => { e.stopPropagation(); openPromoProduct() }}
+          onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); openPromoProduct() } }}
+          style={{
+            position: 'absolute', bottom: 0, left: 0, right: 0, padding: '0 28px 64px', zIndex: 3,
+            animation: 'slideUp .4s ease both', cursor: 'pointer',
+          }}
+        >
           <div style={{
             display: 'inline-flex', alignItems: 'center', gap: 5,
             fontSize: 14, fontWeight: 700, padding: '5px 12px', borderRadius: 20,

@@ -4,7 +4,7 @@ import { fetchActiveStore, StoreContext, useStore } from './data/config'
 import type { StoreConfig } from './data/config'
 import { useCartStore } from './store/cartStore'
 import { useKanbanStore } from './store/kanbanStore'
-import type { Product, CutType } from './data/products'
+import { PRODUCTS, type Product, type CutType } from './data/products'
 
 import Topbar from './components/Topbar'
 import InactivityOverlay from './components/InactivityOverlay'
@@ -115,6 +115,15 @@ function ClienteView() {
   function handleCategorySelect(filter: string) { setCatalogFilter(filter); go('catalog') }
   function handleProductSelect(p: Product) { setSelectedProduct(p); go('detail') }
 
+  function handleHeroProduct(productId: string) {
+    const product = PRODUCTS.find((p) => p.id === productId)
+    if (!product) return
+    setSelectedProduct(product)
+    setCatalogFilter(product.category)
+    setCounterOnly(false)
+    go('detail')
+  }
+
   function handleSchedule(cut: CutType, weight: number) {
     if (!selectedProduct) return
     setSelectedCut(cut)
@@ -210,7 +219,7 @@ function ClienteView() {
       {!hideTopbar && <Topbar showBack={showBack} onBack={() => go(getBackScreen(screen, pickupMode, counterOnly))} />}
       {stepIndex >= 0 && <StepProgress current={stepIndex} total={STEP_SCREENS.length} />}
 
-      {screen === 'home'        && <HomeScreen key={screenKey} onStart={() => go('pickup-mode')} />}
+      {screen === 'home'        && <HomeScreen key={screenKey} onStart={() => go('pickup-mode')} onProductPromo={handleHeroProduct} />}
       {screen === 'pickup-mode' && <PickupModeScreen key={screenKey} onSelect={handlePickupModeSelect} />}
       {screen === 'flow-choice' && <FlowChoiceScreen key={screenKey} onSelect={handleFlowChoice} />}
       {screen === 'categories'  && <CategoriesScreen key={screenKey} onSelect={handleCategorySelect} />}

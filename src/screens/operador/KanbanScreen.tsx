@@ -65,7 +65,7 @@ export default function KanbanScreen() {
   const dateStr = clock.toLocaleDateString('pt-BR', { weekday: 'short', day: '2-digit', month: '2-digit' })
 
   return (
-    <div style={{ width: '100%', height: '100%', display: 'flex', flexDirection: 'column', background: 'var(--bg)' }}>
+    <div className="kanban-screen">
       {/* Top bar */}
       <div style={{ flexShrink: 0, height: 'auto', minHeight: 52, display: 'flex', alignItems: 'center', padding: '10px 16px', gap: 12, background: 'var(--s1)', borderBottom: '1px solid var(--border)', flexWrap: 'wrap' }}>
         <div style={{ width: 34, height: 34, background: 'linear-gradient(145deg, var(--primary-dark), var(--primary))', borderRadius: 10, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 17 }}>🔪</div>
@@ -108,7 +108,7 @@ export default function KanbanScreen() {
       </div>
 
       {/* Kanban header */}
-      <div style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '10px 16px 8px', flexShrink: 0 }}>
+      <div className="kanban-kb-header" style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
         <div>
           <div style={{ fontFamily: 'var(--font-serif)', fontSize: 16, fontWeight: 700, color: 'var(--t1)' }}>Pedidos do Dia</div>
           <div style={{ fontSize: 10, color: 'var(--t3)' }}>
@@ -117,8 +117,7 @@ export default function KanbanScreen() {
         </div>
       </div>
 
-      {/* Colunas */}
-      <div style={{ flex: 1, display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 10, padding: '0 12px 0', overflow: 'hidden', minHeight: 0 }}>
+      <div className="kanban-cols">
         <KanbanCol
           title="Aguardando Corte"
           color="var(--t3)"
@@ -144,7 +143,6 @@ export default function KanbanScreen() {
         />
       </div>
 
-      {/* Dock */}
       <div className="kanban-dock">
         <button
           type="button"
@@ -185,13 +183,13 @@ function KanbanCol({ title, color, orders, primaryLabel, onPrimary, isGreen, clo
   isGreen?: boolean; clock?: Date
 }) {
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', minHeight: 0, overflow: 'hidden' }}>
+    <div className="kanban-col">
       <div className="kanban-col-head">
         <div className="col-dot" style={{ background: color }} />
         <div className="col-name">{title}</div>
         <div className="col-cnt">{orders.length}</div>
       </div>
-      <div className="scroll" style={{ flex: 1 }}>
+      <div className="scroll">
         {orders.length === 0 ? (
           <div className="empty-col"><strong>Vazio</strong><br />Pedidos aparecem aqui</div>
         ) : (

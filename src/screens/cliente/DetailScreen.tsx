@@ -11,87 +11,84 @@ export default function DetailScreen({ product: p, immediate = false, onSchedule
   const [selectedCut, setSelectedCut] = useState<CutType>(p.cutTypes[0])
   const [weight, setWeight] = useState(1.5)
 
+  const weightLabel = weight % 1 === 0 ? weight.toFixed(0) : weight.toFixed(1).replace('.', ',')
   const estimated = (p.pricePerKg * weight).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })
 
   return (
-    <div className="screen">
-    <div className="scroll" style={{ flex: 1, paddingBottom: 28 }}>
-      {/* Hero */}
-      <div style={{ position: 'relative', height: 248, flexShrink: 0 }}>
-        <img src={p.imageUrl} alt={p.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-        <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to bottom, rgba(13,13,14,.25) 0%, transparent 40%, rgba(13,13,14,1) 100%)' }} />
-      </div>
-
-      <div style={{ padding: '0 24px 24px' }}>
-        <div className="detail-title" style={{ fontFamily: 'var(--font-serif)', fontSize: 38, fontWeight: 700, color: 'var(--accent)', lineHeight: 1.1, marginBottom: 16, marginTop: 12 }}>
-          {p.name}
+    <div className="screen screen--detail">
+      <div className="detail-scroll scroll">
+        <div className="detail-hero">
+          <img src={p.imageUrl} alt={p.name} />
+          <div className="detail-hero-ov" />
         </div>
 
-        {/* Tipo de corte */}
-        <div style={{ marginBottom: 20 }}>
-          <div style={{ fontSize: 14, fontWeight: 700, textTransform: 'uppercase', letterSpacing: 1, color: 'var(--t3)', marginBottom: 10 }}>
-            Tipo de Corte
+        <div className="detail-body">
+          <h1 className="detail-title">{p.name}</h1>
+
+          <div className="detail-cut">
+            <div className="detail-cut-label">Tipo de Corte</div>
+            <div className="detail-cut-grid">
+              {p.cutTypes.map((ct) => (
+                <div
+                  key={ct.id}
+                  className={`detail-cut-opt${selectedCut.id === ct.id ? ' on' : ''}`}
+                  onClick={() => setSelectedCut(ct)}
+                >
+                  <div className="detail-cut-name">{ct.name}</div>
+                  <div className="detail-cut-desc">{ct.desc}</div>
+                </div>
+              ))}
+            </div>
           </div>
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
-            {p.cutTypes.map((ct) => (
-              <div
-                key={ct.id}
-                onClick={() => setSelectedCut(ct)}
-                style={{
-                  padding: '10px 12px', borderRadius: 12,
-                  border: `1px solid ${selectedCut.id === ct.id ? 'var(--primary)' : 'var(--border)'}`,
-                  background: selectedCut.id === ct.id ? 'rgba(192,39,45,.12)' : 'var(--s2)',
-                  cursor: 'pointer', transition: 'all .15s',
-                }}
-              >
-                <div style={{ fontSize: 17, fontWeight: 600, color: selectedCut.id === ct.id ? '#FF9090' : 'var(--t1)' }}>{ct.name}</div>
+
+          <div className="detail-price-row">
+            <div>
+              <div className="detail-price-label">Preço por kg</div>
+              <div className="detail-price">
+                <sup>R$</sup>
+                {p.pricePerKg.toFixed(2).replace('.', ',')}
+                <sub>/kg</sub>
               </div>
-            ))}
-          </div>
-        </div>
-
-        {/* Preço + Quantidade */}
-        <div style={{ display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between', marginBottom: 16 }}>
-          <div>
-            <div style={{ fontSize: 14, color: 'var(--t3)', marginBottom: 3 }}>Preço por kg</div>
-            <div className="detail-price" style={{ fontFamily: 'var(--font-serif)', fontSize: 46, fontWeight: 700, color: 'var(--accent)' }}>
-              <sup style={{ fontSize: 23 }}>R$</sup>
-              {p.pricePerKg.toFixed(2).replace('.', ',')}
-              <sub style={{ fontSize: 18, fontWeight: 400, color: 'var(--t3)' }}>/kg</sub>
+            </div>
+            <div className="detail-qty">
+              <button
+                type="button"
+                className="detail-qty-btn"
+                onClick={() => setWeight((w) => Math.max(0.5, +(w - 0.5).toFixed(1)))}
+              >
+                −
+              </button>
+              <div className="detail-qty-val">{weightLabel} kg</div>
+              <button
+                type="button"
+                className="detail-qty-btn"
+                onClick={() => setWeight((w) => +(w + 0.5).toFixed(1))}
+              >
+                +
+              </button>
             </div>
           </div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 14, background: 'var(--s2)', border: '1px solid var(--border)', borderRadius: 14, padding: '8px 14px' }}>
-            <div onClick={() => setWeight((w) => Math.max(0.5, +(w - 0.5).toFixed(1)))} style={{ width: 28, height: 28, borderRadius: 8, background: 'var(--s3)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 22, cursor: 'pointer', color: 'var(--t1)' }}>−</div>
-            <div style={{ fontSize: 20, fontWeight: 700, minWidth: 52, textAlign: 'center' }}>
-              {weight % 1 === 0 ? weight.toFixed(0) : weight.toFixed(1).replace('.', ',')} kg
+
+          <div className="detail-estimate">
+            <div className="detail-estimate-top">
+              <span className="detail-estimate-label">Estimativa ({weightLabel} kg)</span>
+              <span className="detail-estimate-val">~{estimated}</span>
             </div>
-            <div onClick={() => setWeight((w) => +(w + 0.5).toFixed(1))} style={{ width: 28, height: 28, borderRadius: 8, background: 'var(--s3)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 22, cursor: 'pointer', color: 'var(--t1)' }}>+</div>
+            <div className="detail-estimate-hint">Peso exato pesado na hora · preço definitivo no caixa</div>
           </div>
-        </div>
 
-        {/* Estimativa */}
-        <div style={{ background: 'var(--s2)', border: '1px solid var(--border)', borderRadius: 'var(--r)', padding: '14px 16px', marginBottom: 12 }}>
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 4 }}>
-            <span style={{ fontSize: 15, color: 'var(--t3)' }}>Estimativa ({weight.toFixed(1).replace('.', ',')} kg)</span>
-            <span style={{ fontSize: 20, fontWeight: 700, color: 'var(--accent)' }}>~{estimated}</span>
+          <div className="detail-pay-hint">
+            <span className="detail-pay-icon">🛒</span>
+            <span className="detail-pay-text">
+              <strong>Pagamento no caixa.</strong> Retire seu corte no açougue e dirija-se ao caixa para pagar.
+            </span>
           </div>
-          <div style={{ fontSize: 15, color: 'var(--t3)' }}>Peso exato pesado na hora · preço definitivo no caixa</div>
-        </div>
 
-        {/* Pagamento no caixa */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: 9, background: 'rgba(10,132,255,.08)', border: '1px solid rgba(10,132,255,.2)', borderRadius: 12, padding: '11px 14px', marginBottom: 24 }}>
-          <span style={{ fontSize: 23, flexShrink: 0 }}>🛒</span>
-          <span style={{ fontSize: 15, color: 'var(--t2)', lineHeight: 1.5 }}>
-            <strong style={{ color: 'var(--t1)' }}>Pagamento no caixa.</strong> Retire seu corte no açougue e dirija-se ao caixa para pagar.
-          </span>
+          <button className="btn-primary detail-cta" onClick={() => onSchedule(selectedCut, weight)}>
+            {immediate ? '⚡ Confirmar retirada imediata' : '📅 Agendar este corte'}
+          </button>
         </div>
-
-        {/* CTA */}
-        <button className="btn-primary" onClick={() => onSchedule(selectedCut, weight)}>
-          {immediate ? '⚡ Confirmar retirada imediata' : '📅 Agendar este corte'}
-        </button>
       </div>
-    </div>
     </div>
   )
 }

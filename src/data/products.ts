@@ -581,6 +581,7 @@ export const CATEGORIES = [
 
 export const HERO_SLIDES = [
   {
+    productId: 'picanha-angus',
     imageUrl: productImagePath('bovinos', 'picanha-angus.jpg'),
     badge: '✦ Destaque do dia',
     name: 'Picanha Angus\nPremium',
@@ -588,6 +589,7 @@ export const HERO_SLIDES = [
     price: 'R$ 89,90/kg',
   },
   {
+    productId: 'wagyu-ribeye',
     imageUrl: productImagePath('bovinos', 'wagyu-ribeye.jpg'),
     badge: '⭐ Especial',
     name: 'Wagyu Ribeye\nA5 Japonês',
@@ -595,13 +597,14 @@ export const HERO_SLIDES = [
     price: 'R$ 390,00/kg',
   },
   {
+    productId: 'salmao-posta',
     imageUrl: productImagePath('peixes', 'salmao-posta.jpg'),
     badge: '❄️ Fresco hoje',
     name: 'Salmão\nAtlântico',
     tag: 'Noruega · Fresco',
     price: 'R$ 79,90/kg',
   },
-]
+] as const
 
 export type CategoryCard = {
   id: string

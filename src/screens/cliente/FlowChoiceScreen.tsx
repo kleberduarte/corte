@@ -131,15 +131,6 @@ function FlowChoiceCard({
       <div className="flow-card-body">
         <h2 className="flow-card-title">{card.title}</h2>
         <p className="flow-card-subtitle">{card.subtitle}</p>
-
-        <div className="flow-card-footer">
-          <span
-            className={`flow-card-cta ${isCategories ? 'flow-card-cta--gold' : ''} ${isCounter ? 'flow-card-cta--counter' : ''} ${isPreferential ? 'flow-card-cta--preferential' : ''}`}
-            aria-hidden
-          >
-            →
-          </span>
-        </div>
       </div>
     </button>
   )
@@ -427,44 +418,6 @@ export default function FlowChoiceScreen({ onSelect }: Props) {
           font-weight: 500;
         }
 
-        .flow-card-footer {
-          margin-top: 10px;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-        }
-        .flow-card-cta {
-          width: 50px;
-          height: 50px;
-          border-radius: 50%;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          font-size: 26px;
-          color: #fff;
-          background: rgba(255,255,255,.1);
-          border: 1px solid rgba(255,255,255,.18);
-          backdrop-filter: blur(8px);
-          transition: transform .2s ease, box-shadow .2s ease;
-        }
-        .flow-card-cta--gold {
-          color: #1a0f00;
-          background: linear-gradient(145deg, var(--gold), #e8b85a);
-          border: none;
-          box-shadow: 0 4px 22px rgba(200,151,58,.45);
-        }
-        .flow-card-cta--counter {
-          color: #1a0f00;
-          background: linear-gradient(145deg, #F5F0E6, #D4C9B0);
-          border: 1px solid rgba(255,255,255,.35);
-          box-shadow: 0 4px 24px rgba(232,226,212,.25);
-        }
-        .flow-card-cta--preferential {
-          color: #0a1628;
-          background: linear-gradient(145deg, #A8D4FF, #4A90D9);
-          border: 1px solid rgba(255,255,255,.35);
-          box-shadow: 0 4px 24px rgba(74,144,217,.35);
-        }
         .flow-ticket--priority {
           border: 2px solid #4A90D9;
           box-shadow:
@@ -507,9 +460,6 @@ export default function FlowChoiceScreen({ onSelect }: Props) {
         }
         .flow-card:active {
           transform: scale(.988);
-        }
-        .flow-card:active .flow-card-cta {
-          transform: scale(1.1);
         }
 
         @keyframes flowCardIn {
