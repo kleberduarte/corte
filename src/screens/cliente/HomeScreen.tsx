@@ -28,7 +28,11 @@ export default function HomeScreen({ onStart }: Props) {
   function onDragEnd(x: number) {
     if (dragStart.current === null) return
     const diff = dragStart.current - x
-    if (Math.abs(diff) > 40) jumpTo((slide + (diff > 0 ? 1 : HERO_SLIDES.length - 1)) % HERO_SLIDES.length)
+    if (Math.abs(diff) > 40) {
+      jumpTo((slide + (diff > 0 ? 1 : HERO_SLIDES.length - 1)) % HERO_SLIDES.length)
+    } else {
+      onStart()
+    }
     dragStart.current = null
   }
 
@@ -39,7 +43,7 @@ export default function HomeScreen({ onStart }: Props) {
   return (
     <div
       className="screen"
-      style={{ position: 'relative' }}
+      style={{ position: 'relative', cursor: 'pointer' }}
       onMouseDown={(e) => onDragStart(e.clientX)}
       onMouseUp={(e) => onDragEnd(e.clientX)}
       onTouchStart={(e) => onDragStart(e.touches[0].clientX)}
@@ -96,6 +100,10 @@ export default function HomeScreen({ onStart }: Props) {
             <div
               key={i}
               onClick={(e) => { e.stopPropagation(); jumpTo(i) }}
+              onMouseDown={(e) => e.stopPropagation()}
+              onMouseUp={(e) => e.stopPropagation()}
+              onTouchStart={(e) => e.stopPropagation()}
+              onTouchEnd={(e) => e.stopPropagation()}
               style={{
                 width: i === slide ? 22 : 7, height: 7, borderRadius: 4,
                 background: i === slide ? 'white' : 'rgba(255,255,255,.35)',
@@ -114,7 +122,7 @@ export default function HomeScreen({ onStart }: Props) {
       }}>
         <button
           className="home-cta-btn"
-          onClick={onStart}
+          type="button"
           style={{
             width: '100%', minHeight: 108, padding: '40px 44px',
             background: 'var(--primary)', color: 'white', border: 'none',
