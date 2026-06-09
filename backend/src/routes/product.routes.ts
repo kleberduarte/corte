@@ -2,6 +2,7 @@ import { FastifyInstance } from 'fastify'
 import { authenticate, requireManager } from '../middlewares/auth.middleware'
 import {
   listProductsHandler,
+  syncCatalogHandler,
   syncPricesHandler,
   upsertProductPriceHandler,
 } from '../controllers/product.controller'
@@ -11,5 +12,6 @@ export async function productRoutes(app: FastifyInstance) {
 
   app.get('/', listProductsHandler)                                              // GET  /products
   app.put('/:productId/price', upsertProductPriceHandler)                       // PUT  /products/:productId/price  (manager)
-  app.post('/sync-prices', { onRequest: [authenticate, requireManager] }, syncPricesHandler)  // POST /products/sync-prices (manager)
+  app.post('/sync-prices', { onRequest: [authenticate, requireManager] }, syncPricesHandler)
+  app.post('/sync-catalog', { onRequest: [authenticate, requireManager] }, syncCatalogHandler)
 }

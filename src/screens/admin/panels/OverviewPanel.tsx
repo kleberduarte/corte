@@ -87,7 +87,7 @@ export default function OverviewPanel({ onManageStores }: { onManageStores: () =
         <section className="admin-form-section">
           <h2 className="admin-form-section__title">Pedidos por status</h2>
           {statusTotal === 0 ? (
-            <p style={{ fontSize: 13, color: 'var(--t3)' }}>Nenhum pedido registrado ainda.</p>
+            <p style={{ fontSize: 'calc(13px * var(--font-scale))', color: 'var(--t3)' }}>Nenhum pedido registrado ainda.</p>
           ) : (
             <ul className="admin-bar-list">
               {stats.ordersByStatus
@@ -113,7 +113,7 @@ export default function OverviewPanel({ onManageStores }: { onManageStores: () =
         <section className="admin-form-section">
           <h2 className="admin-form-section__title">Lojas ativas por rede</h2>
           {stats.storesByChain.length === 0 ? (
-            <p style={{ fontSize: 13, color: 'var(--t3)' }}>Nenhuma loja ativa.</p>
+            <p style={{ fontSize: 'calc(13px * var(--font-scale))', color: 'var(--t3)' }}>Nenhuma loja ativa.</p>
           ) : (
             <ul className="admin-chain-list">
               {stats.storesByChain
@@ -135,7 +135,7 @@ export default function OverviewPanel({ onManageStores }: { onManageStores: () =
       <section className="admin-form-section" style={{ marginTop: 16 }}>
         <h2 className="admin-form-section__title">Pedidos recentes</h2>
         {stats.recentOrders.length === 0 ? (
-          <p style={{ fontSize: 13, color: 'var(--t3)' }}>Nenhum pedido recente.</p>
+          <p style={{ fontSize: 'calc(13px * var(--font-scale))', color: 'var(--t3)' }}>Nenhum pedido recente.</p>
         ) : (
           <div className="admin-table-wrap">
             <table className="admin-table">

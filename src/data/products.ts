@@ -1,3 +1,8 @@
+/**
+ * Tipos e conteúdo estático de vitrine (hero, sugestões, cards de categoria).
+ * Catálogo operacional (nome, preço, descrição, cortes) vem do banco via GET /totem/:slug/catalog.
+ * PRODUCTS abaixo é apenas fallback offline quando a API não responde.
+ */
 import { productImagePath } from '../lib/imagePaths'
 
 export type CutType = {
