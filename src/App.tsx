@@ -267,7 +267,6 @@ function ClienteView() {
           cartCount={items.length}
           cartProductIds={items.map((i) => i.product.id)}
           onCart={handleCartCheckout}
-          immediate={pickupMode === 'immediate'}
         />
       )}
       {screen === 'detail' && selectedProduct && (

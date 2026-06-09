@@ -7,10 +7,9 @@ type Props = {
   cartCount: number
   cartProductIds?: string[]
   onCart: () => void
-  immediate?: boolean
 }
 
-export default function CatalogScreen({ initialFilter = 'todos', onProduct, cartCount, cartProductIds = [], onCart, immediate = false }: Props) {
+export default function CatalogScreen({ initialFilter = 'todos', onProduct, cartCount, cartProductIds = [], onCart }: Props) {
   const [filter, setFilter] = useState(initialFilter)
   const [added, setAdded]   = useState<string | null>(null)
 
