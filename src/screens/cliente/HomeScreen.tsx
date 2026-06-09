@@ -1,9 +1,12 @@
 import { useEffect, useRef, useState } from 'react'
 import { HERO_SLIDES } from '../../data/products'
 
-type Props = { onStart: () => void }
+type Props = {
+  onStart: () => void
+  onProduct?: (productId: string) => void
+}
 
-export default function HomeScreen({ onStart }: Props) {
+export default function HomeScreen({ onStart, onProduct }: Props) {
   const [slide, setSlide]   = useState(0)
   const [clock, setClock]   = useState(new Date())
   const autoTimer = useRef<ReturnType<typeof setInterval> | null>(null)
@@ -25,6 +28,15 @@ export default function HomeScreen({ onStart }: Props) {
   }
 
   function onDragStart(x: number) { dragStart.current = x }
+
+  function handleHeroTap(e: React.MouseEvent | React.TouchEvent) {
+    if (!s.productId || !onProduct || dragStart.current === null) return
+    const x = 'changedTouches' in e ? e.changedTouches[0].clientX : e.clientX
+    if (Math.abs(dragStart.current - x) > 40) return
+    e.stopPropagation()
+    onProduct(s.productId)
+  }
+
   function onDragEnd(x: number) {
     if (dragStart.current === null) return
     const diff = dragStart.current - x
@@ -76,8 +88,20 @@ export default function HomeScreen({ onStart }: Props) {
           <div style={{ fontSize: 15, color: 'rgba(255,255,255,.6)', marginTop: 3, textTransform: 'capitalize' }}>{dateStr}</div>
         </div>
 
-        {/* Conteúdo hero */}
-        <div key={slide} style={{ position: 'absolute', bottom: 0, left: 0, right: 0, padding: '0 28px 64px', zIndex: 3, animation: 'slideUp .4s ease both' }}>
+        {/* Conteúdo hero — toque abre o produto em destaque */}
+        <div
+          key={slide}
+          role={s.productId ? 'button' : undefined}
+          tabIndex={s.productId ? 0 : undefined}
+          onMouseUp={handleHeroTap}
+          onTouchEnd={handleHeroTap}
+          style={{
+            position: 'absolute', bottom: 0, left: 0, right: 0,
+            padding: '0 28px 64px', zIndex: 3,
+            animation: 'slideUp .4s ease both',
+            cursor: s.productId ? 'pointer' : undefined,
+          }}
+        >
           <div style={{
             display: 'inline-flex', alignItems: 'center', gap: 5,
             fontSize: 14, fontWeight: 700, padding: '5px 12px', borderRadius: 20,

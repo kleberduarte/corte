@@ -2,6 +2,8 @@ type Props = {
   dataUrl: string
   title?: string
   hint?: string
+  /** Repete a instrução abaixo do QR; desligue quando o hint já aparece acima */
+  showAction?: boolean
 }
 
 /** QR com animação de celular apontando — totem 21" */
@@ -9,6 +11,7 @@ export default function QrScanPrompt({
   dataUrl,
   title = 'Acompanhe seu pedido',
   hint = 'Aponte a câmera do celular para o QR Code',
+  showAction = true,
 }: Props) {
   return (
     <div className="qr-scan-prompt" role="region" aria-label={title}>
@@ -116,10 +119,12 @@ export default function QrScanPrompt({
         <span className="qr-scan-beam" />
       </div>
 
-      <p className="qr-scan-prompt__action">
-        <span className="qr-scan-prompt__pulse-dot" aria-hidden />
-        Aponte a câmera do celular para o QR Code
-      </p>
+      {showAction && (
+        <p className="qr-scan-prompt__action">
+          <span className="qr-scan-prompt__pulse-dot" aria-hidden />
+          {hint}
+        </p>
+      )}
     </div>
   )
 }

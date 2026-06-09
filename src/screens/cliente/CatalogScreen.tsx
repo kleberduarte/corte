@@ -1,17 +1,20 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { PRODUCTS, CATEGORIES, type Product } from '../../data/products'
 
 type Props = {
   initialFilter?: string
   onProduct: (p: Product) => void
   cartCount: number
+  cartProductIds?: string[]
   onCart: () => void
   immediate?: boolean
 }
 
-export default function CatalogScreen({ initialFilter = 'todos', onProduct, cartCount, onCart, immediate = false }: Props) {
+export default function CatalogScreen({ initialFilter = 'todos', onProduct, cartCount, cartProductIds = [], onCart, immediate = false }: Props) {
   const [filter, setFilter] = useState(initialFilter)
   const [added, setAdded]   = useState<string | null>(null)
+
+  useEffect(() => { setFilter(initialFilter) }, [initialFilter])
 
   const visible = filter === 'todos' ? PRODUCTS : PRODUCTS.filter((p) => p.category === filter)
 
@@ -48,6 +51,7 @@ export default function CatalogScreen({ initialFilter = 'todos', onProduct, cart
               key={p.id}
               product={p}
               added={added === p.id}
+              inCart={cartProductIds.includes(p.id)}
               onClick={() => onProduct(p)}
               onAdd={(e) => handleAdd(e, p)}
             />
@@ -59,7 +63,7 @@ export default function CatalogScreen({ initialFilter = 'todos', onProduct, cart
         <div className="fab" onClick={onCart} style={{ animation: 'fabIn .35s cubic-bezier(.34,1.2,.64,1) both' }}>
           <div style={{ display: 'flex', alignItems: 'center' }}>
             <div className="fab-cnt">{cartCount}</div>
-            <span className="fab-label">{immediate ? 'Finalizar pedido' : `Agendar corte${cartCount > 1 ? 's' : ''}`}</span>
+            <span className="fab-label">Ver meu pedido · {cartCount} {cartCount === 1 ? 'item' : 'itens'}</span>
           </div>
           <span className="fab-hint">🛒 Pagar no caixa</span>
         </div>
@@ -70,8 +74,8 @@ export default function CatalogScreen({ initialFilter = 'todos', onProduct, cart
   )
 }
 
-function ProductCard({ product: p, added, onClick, onAdd }: {
-  product: Product; added: boolean
+function ProductCard({ product: p, added, inCart, onClick, onAdd }: {
+  product: Product; added: boolean; inCart?: boolean
   onClick: () => void; onAdd: (e: React.MouseEvent) => void
 }) {
   return (
@@ -81,7 +85,8 @@ function ProductCard({ product: p, added, onClick, onAdd }: {
     >
       <div className="product-card-media">
         <img src={p.imageUrl} alt={p.name} />
-        {p.badge && <div className="product-card-badge">{p.badge}</div>}
+        {inCart && <div className="product-card-badge product-card-badge--cart">✓ No pedido</div>}
+        {!inCart && p.badge && <div className="product-card-badge">{p.badge}</div>}
       </div>
       <div className="product-card-body">
         <div className="product-card-name">{p.name}</div>

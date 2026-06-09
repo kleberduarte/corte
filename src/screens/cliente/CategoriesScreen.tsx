@@ -63,32 +63,33 @@ export default function CategoriesScreen({ onSelect }: Props) {
                   style={{
                     position: 'absolute',
                     inset: 0,
-                    background: 'linear-gradient(165deg, rgba(0,0,0,.08) 0%, rgba(0,0,0,.35) 40%, rgba(0,0,0,.82) 100%)',
+                    background: 'rgba(13,13,14,.45)',
+                    boxShadow: 'inset 0 0 60px rgba(0,0,0,.35)',
                   }}
                 />
                 <div
+                  className="cat-name"
                   style={{
                     position: 'absolute',
                     inset: 0,
+                    zIndex: 2,
                     display: 'flex',
-                    flexDirection: 'column',
-                    justifyContent: 'flex-end',
-                    padding: '14px 16px 16px',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    margin: 0,
+                    padding: '12px 14px',
+                    fontFamily: 'var(--font-serif)',
+                    fontSize: 36,
+                    fontWeight: 800,
+                    color: '#fff',
+                    lineHeight: 1.08,
+                    textAlign: 'center',
+                    letterSpacing: '.3px',
+                    textShadow:
+                      '0 0 20px rgba(255,255,255,.3), 0 2px 18px rgba(0,0,0,.9), 0 4px 36px rgba(0,0,0,.7)',
                   }}
                 >
-                  <div
-                    className="cat-name"
-                    style={{
-                      fontFamily: 'var(--font-serif)',
-                      fontSize: 31,
-                      fontWeight: 700,
-                      color: 'white',
-                      lineHeight: 1.05,
-                      textShadow: '0 2px 16px rgba(0,0,0,.65)',
-                    }}
-                  >
-                    {cat.name}
-                  </div>
+                  {cat.name}
                 </div>
               </div>
             )

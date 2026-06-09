@@ -9,13 +9,13 @@ export default function StepProgress({ current, total, labels }: Props) {
             width: 30, height: 30, borderRadius: '50%',
             display: 'flex', alignItems: 'center', justifyContent: 'center',
             flexShrink: 0,
-            background: i < current ? 'var(--green)' : i === current ? 'var(--primary)' : 'var(--s3)',
-            border: `2px solid ${i < current ? 'var(--green)' : i === current ? 'var(--primary)' : 'var(--border)'}`,
+            background: i < current || (i === current && i === total - 1) ? 'var(--green)' : i === current ? 'var(--primary)' : 'var(--s3)',
+            border: `2px solid ${i < current || (i === current && i === total - 1) ? 'var(--green)' : i === current ? 'var(--primary)' : 'var(--border)'}`,
             fontSize: 16, fontWeight: 700,
             color: i <= current ? 'white' : 'var(--t4)',
             transition: 'all .3s',
           }}>
-            {i < current ? '✓' : i + 1}
+            {i < current || (i === current && i === total - 1) ? '✓' : i + 1}
           </div>
           {labels && (
             <div style={{ fontSize: 13, color: i === current ? 'var(--t2)' : 'var(--t4)', whiteSpace: 'nowrap', display: i < total - 1 ? 'none' : undefined }}>

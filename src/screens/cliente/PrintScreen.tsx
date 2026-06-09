@@ -28,6 +28,41 @@ function receiptTitle(order: Order) {
   return 'PEDIDO AGENDADO'
 }
 
+function doneMessage(order: Order) {
+  if (order.priority || order.slotTime === 'Preferencial') {
+    return 'Comprovante impresso. Atendimento preferencial no balcão.'
+  }
+  if (order.items.length === 0) {
+    return 'Comprovante impresso. Apresente a senha no balcão.'
+  }
+  if (order.customerPhone) {
+    return 'WhatsApp enviado e comprovante impresso.'
+  }
+  if (order.slotTime === 'Imediata') {
+    return 'Comprovante impresso. Dirija-se ao balcão e aguarde.'
+  }
+  return 'Comprovante impresso. Retire no horário agendado.'
+}
+
+function nextSteps(order: Order): string[] {
+  const steps = ['Retire o comprovante na impressora']
+  if (order.priority || order.slotTime === 'Preferencial') {
+    steps.push('Apresente a senha no balcão (fila prioritária)')
+  } else if (order.items.length === 0) {
+    steps.push('Apresente a senha no balcão para ser atendido')
+  } else if (order.slotTime === 'Imediata') {
+    steps.push('Dirija-se ao balcão e aguarde a preparação')
+  } else {
+    steps.push(`Retire às ${order.slotTime} com o código abaixo`)
+  }
+  if (order.customerPhone) {
+    steps.push('Acompanhe o andamento pelo WhatsApp ou QR Code')
+  } else {
+    steps.push('Escaneie o QR Code para acompanhar em tempo real')
+  }
+  return steps
+}
+
 const COUNTER_LINE = 'Atendimento presencial no balcão'
 const PREFERENTIAL_LINE = 'Atendimento preferencial no balcão (fila prioritária)'
 
@@ -209,46 +244,63 @@ export default function PrintScreen({ order, onDone }: Props) {
   const dateStr = new Date().toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit', year: 'numeric' })
   const timeStr = new Date().toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })
 
+  const countdownProgress = ((QR_SCAN_DISPLAY_SECONDS - countdown) / QR_SCAN_DISPLAY_SECONDS) * 100
+  const steps = nextSteps(order)
+
   if (stage === 'done') {
     return (
       <div className="screen print-done-screen">
-        <header className="print-done-top">
-          <div className="print-done-icon" style={{ animation: 'popIn .55s cubic-bezier(.175,.885,.32,1.275) both' }}>
-            ✓
-          </div>
-          <div className="print-done-title">Pedido finalizado!</div>
-          <p className="print-done-msg">
-            {order.priority || order.slotTime === 'Preferencial'
-              ? 'Comprovante impresso. Senha preferencial no balcão.'
-              : order.items.length === 0
-              ? 'Comprovante impresso. Apresente a senha no balcão.'
-              : order.customerPhone
-                ? 'WhatsApp enviado e comprovante impresso.'
-                : order.slotTime === 'Imediata'
-                  ? 'Comprovante impresso. Dirija-se ao balcão.'
-                  : 'Comprovante impresso. Retire no horário agendado.'}
-          </p>
-          <div className="print-done-code-box">
-            <span className="print-done-code-label">Código de retirada</span>
-            <span className="print-done-code">{order.pickupCode}</span>
-          </div>
-        </header>
+        <div className="print-done-glow" aria-hidden />
 
-        {qrDataUrl && (
-          <main className="print-done-qr-center">
-            <div className="print-done-qr-wrap">
-              <QrScanPrompt dataUrl={qrDataUrl} />
-            </div>
-          </main>
-        )}
+        <main className="print-done-body">
+          <article className="print-done-card">
+            <header className="print-done-header">
+              <div className="print-done-icon" aria-hidden>
+                ✓
+              </div>
+              <div className="print-done-header-text">
+                <h1 className="print-done-title">Pedido finalizado!</h1>
+                <p className="print-done-msg">{doneMessage(order)}</p>
+              </div>
+            </header>
+
+            <section className="print-done-code-hero" aria-label="Código de retirada">
+              <span className="print-done-code-label">Código de retirada</span>
+              <span className="print-done-code">{order.pickupCode}</span>
+              <span className="print-done-pickup-badge">{pickupLabel(order.slotTime)}</span>
+            </section>
+
+            <ol className="print-done-steps">
+              {steps.map((step, i) => (
+                <li key={step} className="print-done-step" style={{ animationDelay: `${0.15 + i * 0.1}s` }}>
+                  <span className="print-done-step-num" aria-hidden>{i + 1}</span>
+                  <span className="print-done-step-text">{step}</span>
+                </li>
+              ))}
+            </ol>
+
+            {qrDataUrl && (
+              <section className="print-done-qr-section" aria-label="Acompanhar pedido">
+                <div className="print-done-qr-divider">
+                  <span>ou acompanhe pelo celular</span>
+                </div>
+                <QrScanPrompt dataUrl={qrDataUrl} showAction={false} />
+              </section>
+            )}
+          </article>
+        </main>
 
         <footer className="print-done-footer">
           <button type="button" className="btn-primary print-done-btn" onClick={onDone}>
-            Voltar ao início ({countdown}s)
+            <span className="print-done-btn-label">Voltar ao início</span>
+            <span className="print-done-btn-timer" aria-live="polite">{countdown}s</span>
+            <span
+              className="print-done-btn-progress"
+              style={{ transform: `scaleX(${countdownProgress / 100})` }}
+              aria-hidden
+            />
           </button>
         </footer>
-
-        <style>{`@keyframes popIn { from { transform: scale(.2); opacity: 0; } to { transform: scale(1); opacity: 1; } }`}</style>
       </div>
     )
   }

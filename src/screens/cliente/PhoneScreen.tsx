@@ -1,4 +1,5 @@
 import { useRef } from 'react'
+import CartOrderPanel from '../../components/CartOrderPanel'
 import type { CartItem } from '../../store/cartStore'
 
 type Props = {
@@ -10,8 +11,6 @@ type Props = {
 
 export default function PhoneScreen({ items, slotTime, immediate = false, onConfirm }: Props) {
   const inputRef = useRef<HTMLInputElement>(null)
-  const totalEstimate = items.reduce((sum, i) => sum + i.estimatedPrice, 0)
-
   function handleSubmit() {
     const val = inputRef.current?.value.replace(/\D/g, '') ?? ''
     onConfirm(val)
@@ -28,26 +27,11 @@ export default function PhoneScreen({ items, slotTime, immediate = false, onConf
       </div>
 
       {/* Resumo */}
-      <div style={{ background: 'var(--s2)', border: '1px solid var(--border2)', borderRadius: 'var(--r)', padding: '14px 16px', marginBottom: 22 }}>
-        <div style={{ fontSize: 13, fontWeight: 700, textTransform: 'uppercase', letterSpacing: 1, color: 'var(--t3)', marginBottom: 10 }}>
+      <div className="phone-order-summary" style={{ marginBottom: 22 }}>
+        <div className="phone-order-summary-label">
           Resumo do pedido · {immediate ? 'Escolher e Aguardar' : `Hoje · ${slotTime}`}
         </div>
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
-          {items.map((item) => (
-            <div key={item.product.id} style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-              <img src={item.product.imageUrl} alt="" style={{ width: 40, height: 40, borderRadius: 8, objectFit: 'cover', flexShrink: 0 }} />
-              <div style={{ flex: 1, minWidth: 0 }}>
-                <div style={{ fontSize: 18, fontWeight: 600, color: 'var(--t1)' }}>{item.product.name}</div>
-                <div style={{ fontSize: 15, color: 'var(--t2)' }}>{item.cutType.name} · ~{item.weightKg}kg</div>
-              </div>
-            </div>
-          ))}
-        </div>
-        {items.length > 1 && (
-          <div style={{ marginTop: 12, paddingTop: 10, borderTop: '1px solid var(--border2)', fontSize: 17, fontWeight: 600, color: 'var(--gold)', textAlign: 'right' }}>
-            Estimativa ~R$ {totalEstimate.toFixed(2).replace('.', ',')}
-          </div>
-        )}
+        <CartOrderPanel items={items} variant="compact" />
       </div>
 
       <label style={{ fontSize: 14, fontWeight: 600, textTransform: 'uppercase', letterSpacing: 1, color: 'var(--t3)', display: 'block', marginBottom: 7 }}>

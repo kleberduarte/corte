@@ -22,13 +22,8 @@ export default function ComboSuggestionCard({
 
   if (added) {
     return (
-      <div
-        className="combo-suggest"
-        style={{ margin: '0 24px 20px' }}
-        role="status"
-        aria-live="polite"
-      >
-        <div className="combo-suggest-inner" style={{ padding: '16px 16px 14px' }}>
+      <div className="combo-suggest combo-suggest--added" role="status" aria-live="polite">
+        <div className="combo-suggest-inner">
           <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 12 }}>
             <div style={{
               width: 44, height: 44, borderRadius: '50%', flexShrink: 0,
@@ -59,7 +54,7 @@ export default function ComboSuggestionCard({
   }
 
   return (
-    <div className="combo-suggest" style={{ margin: '0 24px 20px' }} aria-live="polite">
+    <div className="combo-suggest" aria-live="polite">
       <div className="combo-suggest-inner">
         <div className="combo-suggest-row">
           <div className="combo-suggest-thumb">
