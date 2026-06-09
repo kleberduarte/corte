@@ -1,9 +1,12 @@
 import { useEffect, useRef, useState } from 'react'
 import { HERO_SLIDES } from '../../data/products'
 
-type Props = { onStart: () => void }
+type Props = {
+  onStart: () => void
+  onProduct?: (productId: string) => void
+}
 
-export default function HomeScreen({ onStart }: Props) {
+export default function HomeScreen({ onStart, onProduct }: Props) {
   const [slide, setSlide]   = useState(0)
   const [clock, setClock]   = useState(new Date())
   const autoTimer = useRef<ReturnType<typeof setInterval> | null>(null)
@@ -25,10 +28,23 @@ export default function HomeScreen({ onStart }: Props) {
   }
 
   function onDragStart(x: number) { dragStart.current = x }
+
+  function handleHeroTap(e: React.MouseEvent | React.TouchEvent) {
+    if (!s.productId || !onProduct || dragStart.current === null) return
+    const x = 'changedTouches' in e ? e.changedTouches[0].clientX : e.clientX
+    if (Math.abs(dragStart.current - x) > 40) return
+    e.stopPropagation()
+    onProduct(s.productId)
+  }
+
   function onDragEnd(x: number) {
     if (dragStart.current === null) return
     const diff = dragStart.current - x
-    if (Math.abs(diff) > 40) jumpTo((slide + (diff > 0 ? 1 : HERO_SLIDES.length - 1)) % HERO_SLIDES.length)
+    if (Math.abs(diff) > 40) {
+      jumpTo((slide + (diff > 0 ? 1 : HERO_SLIDES.length - 1)) % HERO_SLIDES.length)
+    } else {
+      onStart()
+    }
     dragStart.current = null
   }
 
@@ -39,7 +55,7 @@ export default function HomeScreen({ onStart }: Props) {
   return (
     <div
       className="screen"
-      style={{ position: 'relative' }}
+      style={{ position: 'relative', cursor: 'pointer' }}
       onMouseDown={(e) => onDragStart(e.clientX)}
       onMouseUp={(e) => onDragEnd(e.clientX)}
       onTouchStart={(e) => onDragStart(e.touches[0].clientX)}
@@ -68,25 +84,37 @@ export default function HomeScreen({ onStart }: Props) {
 
         {/* Relógio no topo direito */}
         <div style={{ position: 'absolute', top: 24, right: 24, textAlign: 'right', zIndex: 3 }}>
-          <div style={{ fontSize: 'calc(36px * var(--font-scale))', fontWeight: 700, color: 'white', fontFamily: 'var(--font-serif)', lineHeight: 1 }}>{timeStr}</div>
-          <div style={{ fontSize: 'calc(12px * var(--font-scale))', color: 'rgba(255,255,255,.6)', marginTop: 3, textTransform: 'capitalize' }}>{dateStr}</div>
+          <div className="home-clock" style={{ fontSize: 46, fontWeight: 700, color: 'white', fontFamily: 'var(--font-serif)', lineHeight: 1 }}>{timeStr}</div>
+          <div style={{ fontSize: 15, color: 'rgba(255,255,255,.6)', marginTop: 3, textTransform: 'capitalize' }}>{dateStr}</div>
         </div>
 
-        {/* Conteúdo hero */}
-        <div key={slide} style={{ position: 'absolute', bottom: 0, left: 0, right: 0, padding: '0 28px 64px', zIndex: 3, animation: 'slideUp .4s ease both' }}>
+        {/* Conteúdo hero — toque abre o produto em destaque */}
+        <div
+          key={slide}
+          role={s.productId ? 'button' : undefined}
+          tabIndex={s.productId ? 0 : undefined}
+          onMouseUp={handleHeroTap}
+          onTouchEnd={handleHeroTap}
+          style={{
+            position: 'absolute', bottom: 0, left: 0, right: 0,
+            padding: '0 28px 64px', zIndex: 3,
+            animation: 'slideUp .4s ease both',
+            cursor: s.productId ? 'pointer' : undefined,
+          }}
+        >
           <div style={{
             display: 'inline-flex', alignItems: 'center', gap: 5,
-            fontSize: 'calc(11px * var(--font-scale))', fontWeight: 700, padding: '5px 12px', borderRadius: 20,
+            fontSize: 14, fontWeight: 700, padding: '5px 12px', borderRadius: 20,
             background: 'var(--gold)', color: '#1a0f00', marginBottom: 10,
             textTransform: 'uppercase', letterSpacing: '.5px',
           }}>{s.badge}</div>
-          <div style={{ fontFamily: 'var(--font-serif)', fontSize: 'calc(32px * var(--font-scale))', fontWeight: 700, color: 'white', lineHeight: 1.2, marginBottom: 8, whiteSpace: 'pre-line' }}>
+          <div className="home-hero-title" style={{ fontFamily: 'var(--font-serif)', fontSize: 41, fontWeight: 700, color: 'white', lineHeight: 1.2, marginBottom: 8, whiteSpace: 'pre-line' }}>
             {s.name}
           </div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 12, fontSize: 'calc(20px * var(--font-scale))', color: 'rgba(255,255,255,.7)' }}>
+          <div className="home-hero-tag" style={{ display: 'flex', alignItems: 'center', gap: 10, fontSize: 18, color: 'rgba(255,255,255,.7)' }}>
             <span>{s.tag}</span>
             <span style={{ color: 'rgba(255,255,255,.3)' }}>·</span>
-            <span style={{ fontSize: 'calc(26px * var(--font-scale))', fontWeight: 700, color: 'white' }}>{s.price}</span>
+            <span className="home-hero-price" style={{ fontSize: 22, fontWeight: 700, color: 'white' }}>{s.price}</span>
           </div>
         </div>
 
@@ -96,6 +124,10 @@ export default function HomeScreen({ onStart }: Props) {
             <div
               key={i}
               onClick={(e) => { e.stopPropagation(); jumpTo(i) }}
+              onMouseDown={(e) => e.stopPropagation()}
+              onMouseUp={(e) => e.stopPropagation()}
+              onTouchStart={(e) => e.stopPropagation()}
+              onTouchEnd={(e) => e.stopPropagation()}
               style={{
                 width: i === slide ? 22 : 7, height: 7, borderRadius: 4,
                 background: i === slide ? 'white' : 'rgba(255,255,255,.35)',
@@ -107,21 +139,30 @@ export default function HomeScreen({ onStart }: Props) {
       </div>
 
       {/* CTA */}
-      <div style={{ flexShrink: 0, padding: '22px 28px 36px', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 14, background: 'var(--bg)' }}>
+      <div style={{
+        flexShrink: 0, padding: '24px 32px 40px',
+        display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 18,
+        background: 'var(--bg)',
+      }}>
         <button
-          onClick={onStart}
+          className="home-cta-btn"
+          type="button"
           style={{
-            width: '100%', padding: '36px 40px',
+            width: '100%', minHeight: 108, padding: '40px 44px',
             background: 'var(--primary)', color: 'white', border: 'none',
             borderRadius: 'var(--r-xl)', fontFamily: 'var(--font-sans)',
-            fontSize: 'calc(32px * var(--font-scale))', fontWeight: 700, letterSpacing: '.3px', cursor: 'pointer',
-            boxShadow: '0 10px 36px var(--primary-glow)',
+            fontSize: 44, fontWeight: 700, lineHeight: 1.15,
+            letterSpacing: '.2px', cursor: 'pointer',
+            boxShadow: '0 12px 40px var(--primary-glow)',
             animation: 'totemPulse 2.4s ease-in-out infinite',
           }}
         >
           Toque aqui para iniciar
         </button>
-        <p style={{ fontSize: 'calc(13px * var(--font-scale))', color: 'var(--t3)', textAlign: 'center', lineHeight: 1.55 }}>
+        <p className="home-tagline" style={{
+          fontSize: 19, color: 'var(--t3)', textAlign: 'center',
+          lineHeight: 1.5, maxWidth: 320, letterSpacing: '.1px',
+        }}>
           Escolha seu corte · personalize · retire sem fila
         </p>
       </div>
@@ -129,8 +170,8 @@ export default function HomeScreen({ onStart }: Props) {
       <style>{`
 @keyframes slideUp   { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: none; } }
         @keyframes totemPulse {
-          0%,100% { box-shadow: 0 10px 36px var(--primary-glow); }
-          50%      { box-shadow: 0 14px 48px rgba(192,39,45,.55), 0 0 0 6px rgba(192,39,45,.12); }
+          0%,100% { box-shadow: 0 12px 40px var(--primary-glow); }
+          50%      { box-shadow: 0 16px 52px rgba(192,39,45,.55), 0 0 0 8px rgba(192,39,45,.12); }
         }
       `}</style>
     </div>

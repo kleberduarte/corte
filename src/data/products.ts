@@ -591,6 +591,7 @@ export const HERO_SLIDES = [
     name: 'Picanha Angus\nPremium',
     tag: 'Maturada 21 dias',
     price: 'R$ 89,90/kg',
+    productId: 'picanha-angus',
   },
   {
     imageUrl: productImagePath('bovinos', 'wagyu-ribeye.jpg'),
@@ -598,6 +599,7 @@ export const HERO_SLIDES = [
     name: 'Wagyu Ribeye\nA5 Japonês',
     tag: 'Importado',
     price: 'R$ 390,00/kg',
+    productId: 'wagyu-ribeye',
   },
   {
     imageUrl: productImagePath('peixes', 'salmao-posta.jpg'),
@@ -605,6 +607,7 @@ export const HERO_SLIDES = [
     name: 'Salmão\nAtlântico',
     tag: 'Noruega · Fresco',
     price: 'R$ 79,90/kg',
+    productId: 'salmao-posta',
   },
 ]
 

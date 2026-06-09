@@ -12,41 +12,28 @@ type Props = {
 }
 
 export default function ComboSuggestionCard({
-  product,
   suggestedProduct,
-  suggestion,
   added,
   onAdd,
   onCustomize,
   onDismiss,
 }: Props) {
-  const firstName = product.name.split(' ')[0]
   const priceText = `R$ ${suggestedProduct.pricePerKg.toFixed(2).replace('.', ',')}/kg`
 
   if (added) {
     return (
-      <div
-        className="combo-suggest"
-        style={{ margin: '0 24px 20px' }}
-        role="status"
-        aria-live="polite"
-      >
-        <div className="combo-suggest-inner" style={{ padding: '16px 16px 14px' }}>
+      <div className="combo-suggest combo-suggest--added" role="status" aria-live="polite">
+        <div className="combo-suggest-inner">
           <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 12 }}>
             <div style={{
               width: 44, height: 44, borderRadius: '50%', flexShrink: 0,
               background: 'rgba(52,199,89,.15)', border: '2px solid var(--green)',
-              display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 'calc(22px * var(--font-scale))',
+              display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 28,
             }}>
               ✓
             </div>
-            <div>
-              <div style={{ fontSize: 'calc(15px * var(--font-scale))', fontWeight: 700, color: 'var(--t1)' }}>
-                {suggestedProduct.name} adicionado!
-              </div>
-              <div style={{ fontSize: 'calc(12px * var(--font-scale))', color: 'var(--t3)', marginTop: 2 }}>
-                Mesmo horário e peso do seu pedido principal.
-              </div>
+            <div style={{ fontSize: 19, fontWeight: 700, color: 'var(--t1)' }}>
+              {suggestedProduct.name} adicionado
             </div>
           </div>
           <button
@@ -55,7 +42,7 @@ export default function ComboSuggestionCard({
             style={{
               width: '100%', padding: '10px 14px', borderRadius: 12,
               border: '1px solid var(--border2)', background: 'var(--s2)',
-              color: 'var(--t2)', fontSize: 'calc(12px * var(--font-scale))', fontWeight: 600, cursor: 'pointer',
+              color: 'var(--t2)', fontSize: 15, fontWeight: 600, cursor: 'pointer',
               fontFamily: 'var(--font-sans)',
             }}
           >
@@ -67,11 +54,8 @@ export default function ComboSuggestionCard({
   }
 
   return (
-    <div className="combo-suggest" style={{ margin: '0 24px 20px' }} aria-live="polite">
+    <div className="combo-suggest" aria-live="polite">
       <div className="combo-suggest-inner">
-        <div className="combo-suggest-badge">{suggestion.badge}</div>
-        <div className="combo-suggest-hook">{suggestion.hook}</div>
-        <p className="combo-suggest-msg">{suggestion.message}</p>
         <div className="combo-suggest-row">
           <div className="combo-suggest-thumb">
             <img src={suggestedProduct.imageUrl} alt={suggestedProduct.name} />
@@ -85,7 +69,7 @@ export default function ComboSuggestionCard({
           </button>
         </div>
         <button type="button" className="combo-suggest-skip" onClick={onDismiss}>
-          Só o {firstName} por agora, obrigado
+          Não, obrigado
         </button>
       </div>
     </div>

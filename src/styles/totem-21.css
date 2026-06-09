@@ -1,0 +1,1185 @@
+/**
+ * Totem 21" — referência 1080×1920 (portrait)
+ * Escala uniforme em telas menores (dev/preview); 1:1 no hardware real.
+ */
+
+:root {
+  --totem-ref-w: 1080;
+  --totem-ref-h: 1920;
+  --totem-scale: min(calc(100vw / var(--totem-ref-w)), calc(100dvh / var(--totem-ref-h)));
+}
+
+.totem-viewport {
+  width: 100vw;
+  height: 100dvh;
+  overflow: hidden;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background: var(--bg);
+}
+
+.totem-shell.totem-21 {
+  width: calc(var(--totem-ref-w) * 1px);
+  height: calc(var(--totem-ref-h) * 1px);
+  flex-shrink: 0;
+  transform: scale(var(--totem-scale));
+  transform-origin: top center;
+}
+
+/* ── Tipografia e controles (legibilidade à ~1 m no totem 21") ── */
+.totem-shell.totem-21 .topbar { padding: 28px 32px 18px; }
+.totem-shell.totem-21 .brand-icon { width: 56px; height: 56px; font-size: 30px; border-radius: 18px; }
+.totem-shell.totem-21 .brand-name { font-size: 34px; letter-spacing: 5px; }
+.totem-shell.totem-21 .brand-sub { font-size: 15px; margin-top: 4px; }
+.totem-shell.totem-21 .status-pill { padding: 9px 18px; }
+.totem-shell.totem-21 .status-dot { width: 8px; height: 8px; }
+.totem-shell.totem-21 .status-txt { font-size: 16px; }
+.totem-shell.totem-21 .back-btn { padding: 12px 20px; font-size: 18px; border-radius: 14px; gap: 8px; }
+
+.totem-shell.totem-21 .btn-primary { padding: 24px 32px; font-size: 22px; border-radius: var(--r-lg); min-height: 64px; }
+.totem-shell.totem-21 .btn-secondary { padding: 20px 28px; font-size: 19px; min-height: 56px; }
+.totem-shell.totem-21 .chip { padding: 12px 20px; font-size: 18px; border-radius: 24px; }
+.totem-shell.totem-21 .chips { padding: 0 32px 18px; gap: 12px; }
+
+.totem-shell.totem-21 .fab { bottom: 32px; left: 32px; right: 32px; padding: 22px 28px; border-radius: var(--r-xl); }
+
+.totem-shell.totem-21 .kanban-dock { padding: 14px 16px 18px; padding-left: 168px; gap: 12px; }
+.totem-shell.totem-21 .kanban-dock-btn { padding: 18px 24px; font-size: 20px; border-radius: var(--r-lg); min-height: 64px; }
+.totem-shell.totem-21 .kanban-dock-btn.secondary { padding: 18px 22px; min-width: 64px; }
+.totem-shell.totem-21 .fab-cnt { font-size: 18px; padding: 4px 12px; }
+.totem-shell.totem-21 .fab-label { font-size: 21px; }
+.totem-shell.totem-21 .fab-hint { font-size: 16px; }
+
+.totem-shell.totem-21 .input-prefix { font-size: 21px; padding: 20px 18px 20px 20px; }
+.totem-shell.totem-21 .input-f { font-size: 26px; padding: 20px; }
+.totem-shell.totem-21 .input-wrap { border-radius: 16px; }
+
+.totem-shell.totem-21 .slot { padding: 18px 0; font-size: 20px; border-radius: 14px; }
+.totem-shell.totem-21 .slots-grid--compact .slot { padding: 15px 0; font-size: 19px; }
+
+.totem-shell.totem-21 .combo-suggest-inner { padding: 22px 20px 20px; }
+.totem-shell.totem-21 .combo-suggest-badge { font-size: 14px; padding: 7px 16px; }
+.totem-shell.totem-21 .combo-suggest-hook { font-size: 26px; }
+.totem-shell.totem-21 .combo-suggest-msg { font-size: 18px; }
+.totem-shell.totem-21 .combo-suggest-name { font-size: 19px; }
+.totem-shell.totem-21 .combo-suggest-price { font-size: 16px; }
+.totem-shell.totem-21 .combo-suggest-btn { font-size: 16px; padding: 14px 20px; }
+.totem-shell.totem-21 .combo-suggest-skip { font-size: 16px; }
+
+/* Tela de impressão / conclusão — card unificado */
+.print-done-screen {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  min-height: 0;
+  text-align: center;
+  overflow: hidden;
+  position: relative;
+}
+
+.print-done-glow {
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(ellipse 80% 45% at 50% 12%, rgba(52, 199, 89, 0.14) 0%, transparent 70%),
+    radial-gradient(ellipse 60% 30% at 50% 85%, rgba(192, 39, 45, 0.06) 0%, transparent 70%);
+  pointer-events: none;
+  z-index: 0;
+}
+
+.print-done-body {
+  flex: 1 1 0;
+  min-height: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 12px 24px 8px;
+  position: relative;
+  z-index: 1;
+}
+
+.print-done-card {
+  width: 100%;
+  max-width: 480px;
+  background: var(--s1);
+  border: 1px solid var(--border2);
+  border-radius: var(--r-xl);
+  padding: 20px 22px 18px;
+  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.45);
+  animation: printDoneCardIn 0.55s cubic-bezier(0.175, 0.885, 0.32, 1.275) both;
+}
+
+.print-done-header {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  text-align: left;
+  margin-bottom: 18px;
+}
+
+.print-done-icon {
+  flex-shrink: 0;
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
+  background: rgba(52, 199, 89, 0.15);
+  border: 2px solid var(--green);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 30px;
+  color: var(--green);
+  animation: printDonePopIn 0.55s cubic-bezier(0.175, 0.885, 0.32, 1.275) both;
+}
+
+.print-done-header-text {
+  flex: 1;
+  min-width: 0;
+}
+
+.print-done-title {
+  font-family: var(--font-serif);
+  font-size: 26px;
+  font-weight: 700;
+  color: var(--accent);
+  margin: 0 0 4px;
+  line-height: 1.15;
+}
+
+.print-done-msg {
+  margin: 0;
+  font-size: 14px;
+  color: var(--t2);
+  line-height: 1.4;
+}
+
+.print-done-code-hero {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  padding: 16px 20px 14px;
+  margin-bottom: 16px;
+  background: linear-gradient(180deg, var(--s2) 0%, rgba(30, 30, 33, 0.6) 100%);
+  border: 1px solid var(--border2);
+  border-radius: var(--r-lg);
+  position: relative;
+  overflow: hidden;
+}
+
+.print-done-code-hero::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 4px;
+  background: linear-gradient(180deg, var(--green), rgba(52, 199, 89, 0.4));
+  border-radius: 4px 0 0 4px;
+}
+
+.print-done-code-label {
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 1.4px;
+  color: var(--t3);
+}
+
+.print-done-code {
+  font-family: var(--font-serif);
+  font-size: 40px;
+  font-weight: 700;
+  color: var(--accent);
+  letter-spacing: 8px;
+  line-height: 1;
+  animation: printDoneCodeGlow 2.4s ease-in-out infinite;
+}
+
+.print-done-pickup-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 5px 12px;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--t2);
+  background: var(--s3);
+  border: 1px solid var(--border);
+  border-radius: 20px;
+}
+
+.print-done-steps {
+  list-style: none;
+  margin: 0 0 14px;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  text-align: left;
+}
+
+.print-done-step {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 10px 12px;
+  background: var(--s2);
+  border: 1px solid var(--border);
+  border-radius: var(--r-sm);
+  animation: printDoneStepIn 0.4s ease both;
+}
+
+.print-done-step-num {
+  flex-shrink: 0;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: rgba(192, 39, 45, 0.15);
+  border: 1.5px solid rgba(192, 39, 45, 0.45);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--primary);
+  line-height: 1;
+}
+
+.print-done-step-text {
+  flex: 1;
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--t1);
+  line-height: 1.35;
+  padding-top: 2px;
+}
+
+.print-done-qr-section {
+  padding-top: 4px;
+}
+
+.print-done-qr-divider {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 10px;
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  color: var(--t3);
+}
+
+.print-done-qr-divider::before,
+.print-done-qr-divider::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: var(--border);
+}
+
+.print-done-qr-section .qr-scan-prompt__hint {
+  margin-bottom: 8px;
+}
+
+.print-done-qr-section .qr-scan-prompt__stage {
+  margin-bottom: 0;
+}
+
+.print-done-footer {
+  flex-shrink: 0;
+  padding: 14px 28px 32px;
+  display: flex;
+  justify-content: center;
+  position: relative;
+  z-index: 1;
+}
+
+.print-done-btn {
+  position: relative;
+  width: 100%;
+  max-width: 400px;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+}
+
+.print-done-btn-label {
+  position: relative;
+  z-index: 2;
+}
+
+.print-done-btn-timer {
+  position: relative;
+  z-index: 2;
+  font-size: 0.88em;
+  font-weight: 500;
+  opacity: 0.85;
+  padding: 2px 10px;
+  background: rgba(0, 0, 0, 0.2);
+  border-radius: 12px;
+}
+
+.print-done-btn-progress {
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  width: 100%;
+  height: 4px;
+  background: rgba(255, 255, 255, 0.35);
+  transform-origin: left center;
+  transition: transform 1s linear;
+  z-index: 1;
+}
+
+@keyframes printDoneCardIn {
+  from { opacity: 0; transform: translateY(16px) scale(0.97); }
+  to   { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+@keyframes printDonePopIn {
+  from { transform: scale(0.2); opacity: 0; }
+  to   { transform: scale(1); opacity: 1; }
+}
+
+@keyframes printDoneStepIn {
+  from { opacity: 0; transform: translateX(-8px); }
+  to   { opacity: 1; transform: translateX(0); }
+}
+
+@keyframes printDoneCodeGlow {
+  0%, 100% { text-shadow: 0 0 0 transparent; }
+  50%      { text-shadow: 0 0 24px rgba(245, 237, 219, 0.15); }
+}
+
+.totem-shell.totem-21 .print-done-body { padding: 16px 36px 10px; }
+.totem-shell.totem-21 .print-done-card { max-width: 540px; padding: 24px 28px 20px; }
+.totem-shell.totem-21 .print-done-header { gap: 16px; margin-bottom: 20px; }
+.totem-shell.totem-21 .print-done-icon { width: 58px; height: 58px; font-size: 34px; }
+.totem-shell.totem-21 .print-done-title { font-size: 30px; }
+.totem-shell.totem-21 .print-done-msg { font-size: 16px; }
+.totem-shell.totem-21 .print-done-code { font-size: 46px; letter-spacing: 10px; }
+.totem-shell.totem-21 .print-done-code-label { font-size: 12px; }
+.totem-shell.totem-21 .print-done-pickup-badge { font-size: 13px; padding: 6px 14px; }
+.totem-shell.totem-21 .print-done-step-text { font-size: 15px; }
+.totem-shell.totem-21 .print-done-step-num { width: 26px; height: 26px; font-size: 13px; }
+.totem-shell.totem-21 .print-done-qr-divider { font-size: 12px; margin-bottom: 12px; }
+.totem-shell.totem-21 .print-done-footer { padding: 18px 36px 40px; }
+.totem-shell.totem-21 .print-done-btn { max-width: 440px; }
+
+.totem-shell.totem-21 .print-stage-msg { font-size: 22px !important; margin-bottom: 24px !important; }
+.totem-shell.totem-21 .print-stage-spinner { width: 26px !important; height: 26px !important; }
+.totem-shell.totem-21 .print-receipt-preview { max-width: 380px !important; padding: 20px !important; }
+
+/* ── QR Scan Prompt ── */
+.qr-scan-prompt {
+  --qr-frame: 168px;
+  --qr-code: 132px;
+  --qr-corner: 22px;
+  --qr-phone-w: 64px;
+  --qr-phone-h: 100px;
+  --qr-stage-gap: 6px;
+  width: 100%;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.totem-shell.totem-21 .qr-scan-prompt {
+  --qr-frame: 200px;
+  --qr-code: 158px;
+  --qr-corner: 26px;
+  --qr-phone-w: 76px;
+  --qr-phone-h: 118px;
+  --qr-stage-gap: 8px;
+}
+
+.qr-scan-prompt__title {
+  margin: 0 0 6px;
+  font-size: 13px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 1.4px;
+  color: var(--t3);
+}
+
+.totem-shell.totem-21 .qr-scan-prompt__title { font-size: 15px; }
+
+.qr-scan-prompt__hint {
+  margin: 0 0 12px;
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--t1);
+  line-height: 1.35;
+}
+
+.totem-shell.totem-21 .qr-scan-prompt__hint { font-size: 18px; margin-bottom: 14px; }
+
+.qr-scan-prompt__stage {
+  position: relative;
+  width: var(--qr-frame);
+  height: calc(var(--qr-frame) + var(--qr-phone-h) + var(--qr-stage-gap));
+  margin: 0 auto 12px;
+  overflow: visible;
+}
+
+.qr-scan-prompt__frame {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: var(--qr-frame);
+  height: var(--qr-frame);
+}
+
+.qr-scan-prompt__frame::before {
+  content: '';
+  position: absolute;
+  inset: -8px;
+  border-radius: 16px;
+  border: 2px solid rgba(192, 39, 45, 0.4);
+  animation: qrRingPulse 2.4s ease-in-out infinite;
+  pointer-events: none;
+}
+
+.qr-scan-prompt__code {
+  position: absolute;
+  inset: 14px;
+  background: #fff;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.35);
+}
+
+.qr-scan-prompt__code img {
+  display: block;
+  width: var(--qr-code);
+  height: var(--qr-code);
+}
+
+.qr-scan-corner {
+  position: absolute;
+  width: var(--qr-corner);
+  height: var(--qr-corner);
+  border: 4px solid var(--primary);
+  animation: qrCornerPulse 4.8s ease-in-out infinite;
+}
+
+.qr-scan-corner--tl { top: 0; left: 0; border-right: none; border-bottom: none; border-radius: 8px 0 0 0; }
+.qr-scan-corner--tr { top: 0; right: 0; border-left: none; border-bottom: none; border-radius: 0 8px 0 0; animation-delay: .15s; }
+.qr-scan-corner--bl { bottom: 0; left: 0; border-right: none; border-top: none; border-radius: 0 0 0 8px; animation-delay: .3s; }
+.qr-scan-corner--br { bottom: 0; right: 0; border-left: none; border-top: none; border-radius: 0 0 8px 0; animation-delay: .45s; }
+
+.qr-scan-line {
+  position: absolute;
+  left: 14px;
+  right: 14px;
+  height: 3px;
+  border-radius: 3px;
+  background: linear-gradient(90deg, transparent, var(--primary) 20%, #ff8a8a 50%, var(--primary) 80%, transparent);
+  box-shadow: 0 0 16px rgba(192, 39, 45, 0.8);
+  animation: qrScanSweep 4.8s ease-in-out infinite;
+  z-index: 2;
+  pointer-events: none;
+}
+
+.qr-scan-success-flash {
+  position: absolute;
+  inset: 14px;
+  border-radius: 10px;
+  background: rgba(40, 200, 80, 0.5);
+  z-index: 6;
+  pointer-events: none;
+  opacity: 0;
+  animation: qrSuccessFlash 4.8s ease-in-out infinite;
+}
+
+/* Celular abaixo do QR, centralizado, sobe em direcao ao QR */
+.qr-scan-phone-scene {
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  width: var(--qr-phone-w);
+  height: var(--qr-phone-h);
+  margin-left: calc(var(--qr-phone-w) / -2);
+  pointer-events: none;
+  z-index: 5;
+  animation: qrPhoneApproach 4.8s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+}
+
+.qr-scan-phone-scene > svg {
+  width: 100%;
+  height: 100%;
+  filter: drop-shadow(0 6px 18px rgba(0, 0, 0, 0.5));
+}
+
+/* Seta para cima */
+.qr-scan-arrow {
+  position: absolute;
+  width: 26px;
+  height: 26px;
+  left: 50%;
+  top: -32px;
+  margin-left: -13px;
+  animation: qrArrowPulse 4.8s ease-in-out infinite;
+  pointer-events: none;
+}
+
+.totem-shell.totem-21 .qr-scan-arrow {
+  width: 30px;
+  height: 30px;
+  margin-left: -15px;
+  top: -36px;
+}
+
+/* Feixe vertical camera -> QR */
+.qr-scan-beam {
+  position: absolute;
+  left: 50%;
+  bottom: var(--qr-phone-h);
+  width: 3px;
+  height: 0;
+  margin-left: -1.5px;
+  background: linear-gradient(180deg, rgba(192, 39, 45, 0), var(--primary) 50%, #ff8a8a);
+  box-shadow: 0 0 12px rgba(192, 39, 45, 0.7);
+  border-radius: 3px;
+  animation: qrBeamShoot 4.8s ease-in-out infinite;
+  z-index: 4;
+  pointer-events: none;
+  transform-origin: bottom center;
+}
+
+.qr-scan-beam-glow {
+  position: absolute;
+  left: 50%;
+  top: calc(var(--qr-frame) / 2);
+  width: calc(var(--qr-frame) * 0.55);
+  height: calc(var(--qr-frame) * 0.55);
+  margin: calc(var(--qr-frame) * -0.275) 0 0 calc(var(--qr-frame) * -0.275);
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(192, 39, 45, 0.2) 0%, transparent 70%);
+  animation: qrBeamGlow 4.8s ease-in-out infinite;
+  pointer-events: none;
+  z-index: 1;
+}
+
+.qr-scan-prompt__action {
+  margin: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--t2);
+}
+
+.totem-shell.totem-21 .qr-scan-prompt__action { font-size: 15px; }
+
+.qr-scan-prompt__pulse-dot {
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: var(--primary);
+  flex-shrink: 0;
+  animation: qrDotPulse 1.2s ease-in-out infinite;
+}
+
+@keyframes qrScanSweep {
+  0%, 43%  { top: 14px; opacity: 0; }
+  45%      { top: 14px; opacity: 0.7; }
+  64%      { top: calc(100% - 16px); opacity: 1; }
+  67%, 100%{ top: calc(100% - 16px); opacity: 0; }
+}
+
+@keyframes qrCornerPulse {
+  0%, 43%  { opacity: 0.5; border-color: var(--primary); }
+  50%      { opacity: 1;   border-color: var(--primary); }
+  64%      { opacity: 1;   border-color: var(--primary); }
+  68%      { opacity: 1;   border-color: #28c850; box-shadow: 0 0 12px rgba(40,200,80,0.8); }
+  76%      { opacity: 0.6; border-color: var(--primary); box-shadow: none; }
+  100%     { opacity: 0.5; border-color: var(--primary); }
+}
+
+@keyframes qrRingPulse {
+  0%, 100% { opacity: 0.3; transform: scale(1); }
+  50%      { opacity: 0.75; transform: scale(1.02); }
+}
+
+@keyframes qrPhoneApproach {
+  0%, 16%  { transform: translateY(0); opacity: 0.7; }
+  42%, 70% { transform: translateY(calc(-1 * (var(--qr-frame) / 2 + var(--qr-phone-h) / 2 - 8px))); opacity: 1; }
+  86%, 100%{ transform: translateY(0); opacity: 0.7; }
+}
+
+@keyframes qrArrowPulse {
+  0%, 16%  { opacity: 0.9; transform: translateY(0); }
+  28%      { opacity: 0.6; transform: translateY(-6px); }
+  42%, 72% { opacity: 0;   transform: translateY(-14px); }
+  84%, 100%{ opacity: 0.9; transform: translateY(0); }
+}
+
+@keyframes qrBeamShoot {
+  0%, 40%   { height: 0;    opacity: 0; }
+  48%, 64%  { height: calc(var(--qr-frame) * 0.28); opacity: 1; }
+  72%, 100% { height: 0;    opacity: 0; }
+}
+
+@keyframes qrBeamGlow {
+  0%, 40%  { opacity: 0; transform: scale(0.5); }
+  50%, 62% { opacity: 1; transform: scale(1); }
+  72%      { opacity: 0; transform: scale(0.7); }
+  100%     { opacity: 0; transform: scale(0.5); }
+}
+
+@keyframes qrSuccessFlash {
+  0%, 65%  { opacity: 0; }
+  69%      { opacity: 0.65; }
+  74%      { opacity: 0; }
+  100%     { opacity: 0; }
+}
+
+@keyframes qrDotPulse {
+  0%, 100% { transform: scale(1); opacity: 0.5; }
+  50%      { transform: scale(1.35); opacity: 1; }
+}
+
+/* ── Telas do fluxo cliente (totem 21") ── */
+.totem-shell.totem-21 .flow-choice-header { padding: 12px 28px 16px; }
+.totem-shell.totem-21 .flow-choice-heading { font-size: 42px; }
+.totem-shell.totem-21 .flow-choice-lead { font-size: 19px; margin-top: 8px; }
+.totem-shell.totem-21 .flow-choice-scroll { padding: 0 16px 10px; }
+.totem-shell.totem-21 .flow-choice-list { gap: 16px; }
+.totem-shell.totem-21 .flow-card { min-height: 280px; border-radius: 24px; }
+.totem-shell.totem-21 .flow-card-title { font-size: 56px; padding: 28px; }
+
+.totem-shell.totem-21 .pickup-heading { font-size: 40px !important; }
+.totem-shell.totem-21 .pickup-lead { font-size: 19px !important; }
+.totem-shell.totem-21 .pickup-card { min-height: 280px !important; border-radius: 22px !important; }
+.totem-shell.totem-21 .pickup-card-title { font-size: 56px; padding: 28px; }
+
+.totem-shell.totem-21 .home-cta-btn {
+  min-height: 116px !important;
+  padding: 44px 48px !important;
+  font-size: 46px !important;
+  border-radius: var(--r-xl) !important;
+}
+.totem-shell.totem-21 .home-hero-title { font-size: 44px !important; }
+.totem-shell.totem-21 .home-hero-price { font-size: 24px !important; }
+.totem-shell.totem-21 .home-hero-tag { font-size: 20px !important; }
+.totem-shell.totem-21 .home-clock { font-size: 50px !important; }
+.totem-shell.totem-21 .home-tagline { font-size: 20px !important; max-width: 380px !important; }
+
+.totem-shell.totem-21 .cat-heading { font-size: 34px !important; }
+.totem-shell.totem-21 .cat-hint { font-size: 17px !important; }
+.totem-shell.totem-21 .cat-name { font-size: 42px !important; padding: 14px 18px !important; }
+.totem-shell.totem-21 .cat-grid { grid-auto-rows: minmax(148px, 1fr) !important; gap: 10px !important; }
+
+.totem-shell.totem-21 .screen--catalog .catalog-header {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 4px 16px 6px;
+}
+.totem-shell.totem-21 .catalog-heading { font-size: 36px !important; }
+.totem-shell.totem-21 .catalog-count { font-size: 16px !important; margin-top: 0 !important; }
+.totem-shell.totem-21 .screen--catalog .chips { padding: 0 16px 10px; }
+.totem-shell.totem-21 .catalog-grid {
+  gap: 10px;
+  padding: 0 12px 10px;
+  grid-auto-rows: minmax(200px, 1fr);
+}
+.totem-shell.totem-21 .catalog-scroll--fab { padding-bottom: 116px; }
+
+.totem-shell.totem-21 .product-card { border-radius: var(--r-lg); }
+.totem-shell.totem-21 .product-card-media { min-height: 0; }
+.totem-shell.totem-21 .product-card-badge {
+  top: 14px;
+  left: 14px;
+  font-size: 15px;
+  font-weight: 700;
+  padding: 6px 12px;
+}
+.totem-shell.totem-21 .product-card-body { padding: 14px 16px 16px; }
+.totem-shell.totem-21 .product-card-name { font-size: 26px; }
+.totem-shell.totem-21 .product-card-footer { margin-top: 10px; }
+.totem-shell.totem-21 .product-card-price { font-size: 30px; }
+.totem-shell.totem-21 .product-card-price sup { font-size: 19px; }
+.totem-shell.totem-21 .product-card-price sub { font-size: 18px; }
+.totem-shell.totem-21 .product-card-add {
+  width: 56px;
+  height: 56px;
+  border-radius: 16px;
+  font-size: 30px;
+}
+.totem-shell.totem-21 .product-card-add--added { font-size: 24px; }
+
+/* ── Detail (produto) — totem 21" tela cheia ── */
+.totem-shell.totem-21 .screen--detail .detail-hero {
+  flex: 0 0 22%;
+  min-height: 200px;
+  max-height: 26%;
+}
+
+.totem-shell.totem-21 .detail-body {
+  flex: 1 1 0;
+  padding: 12px 20px 20px;
+  gap: 16px;
+}
+
+.totem-shell.totem-21 .detail-title {
+  font-size: 60px !important;
+  line-height: 1;
+}
+
+.totem-shell.totem-21 .detail-section {
+  flex: 1 1 0;
+  min-height: 200px;
+  max-height: 42%;
+}
+
+.totem-shell.totem-21 .detail-section-label {
+  font-size: 18px;
+  letter-spacing: 1.6px;
+  margin-bottom: 14px;
+}
+
+.totem-shell.totem-21 .detail-cuts {
+  gap: 16px;
+}
+
+.totem-shell.totem-21 .detail-cut {
+  font-size: 32px;
+  border-radius: 20px;
+  min-height: 0;
+  padding: 20px 16px;
+}
+
+.totem-shell.totem-21 .detail-checkout {
+  flex: 1 1 0;
+  min-height: 0;
+  justify-content: flex-end;
+  gap: 20px;
+  padding-top: 8px;
+}
+
+.totem-shell.totem-21 .detail-price-row {
+  align-items: center;
+  padding: 8px 0 4px;
+}
+
+.totem-shell.totem-21 .detail-price-label {
+  font-size: 24px;
+  margin-bottom: 8px;
+  font-weight: 600;
+}
+
+.totem-shell.totem-21 .detail-price {
+  font-size: 82px !important;
+}
+
+.totem-shell.totem-21 .detail-price sup {
+  font-size: 42px;
+}
+
+.totem-shell.totem-21 .detail-price sub {
+  font-size: 30px;
+}
+
+.totem-shell.totem-21 .detail-qty {
+  gap: 22px;
+  padding: 18px 28px;
+  border-radius: 24px;
+  border-width: 2px;
+}
+
+.totem-shell.totem-21 .detail-qty-btn {
+  width: 72px;
+  height: 72px;
+  font-size: 42px;
+  border-radius: 18px;
+}
+
+.totem-shell.totem-21 .detail-qty-val {
+  font-size: 36px;
+  min-width: 110px;
+}
+
+.totem-shell.totem-21 .detail-estimate {
+  padding: 28px 28px;
+  border-radius: var(--r-xl);
+  border-width: 2px;
+}
+
+.totem-shell.totem-21 .detail-estimate-row {
+  margin-bottom: 8px;
+  align-items: baseline;
+}
+
+.totem-shell.totem-21 .detail-estimate-label {
+  font-size: 26px;
+  font-weight: 600;
+}
+
+.totem-shell.totem-21 .detail-estimate-val {
+  font-size: 44px;
+  font-weight: 800;
+}
+
+.totem-shell.totem-21 .detail-estimate-hint {
+  font-size: 22px;
+  margin-top: 6px;
+  line-height: 1.35;
+}
+
+.totem-shell.totem-21 .detail-pay-note {
+  padding: 26px 28px;
+  border-radius: 20px;
+  font-size: 24px;
+  gap: 18px;
+  line-height: 1.45;
+  border-width: 2px;
+}
+
+.totem-shell.totem-21 .detail-pay-icon {
+  font-size: 40px;
+}
+
+.totem-shell.totem-21 .detail-cta {
+  min-height: 112px !important;
+  font-size: 34px !important;
+  font-weight: 700 !important;
+  border-radius: var(--r-xl) !important;
+  padding: 32px 40px !important;
+  margin-top: 0;
+  letter-spacing: 0.3px;
+  box-shadow: 0 10px 36px var(--primary-glow) !important;
+}
+
+/* ── Carrinho — totem 21" tela cheia ── */
+.totem-shell.totem-21 .cart-header {
+  padding: 6px 20px 14px;
+}
+
+.totem-shell.totem-21 .cart-title {
+  font-size: 52px;
+}
+
+.totem-shell.totem-21 .cart-lead {
+  font-size: 22px;
+  max-width: none;
+}
+
+.totem-shell.totem-21 .cart-count-badge {
+  padding: 10px 20px;
+  margin-top: 14px;
+}
+
+.totem-shell.totem-21 .cart-count-num {
+  font-size: 32px;
+}
+
+.totem-shell.totem-21 .cart-count-label {
+  font-size: 18px;
+}
+
+.totem-shell.totem-21 .cart-body {
+  padding: 0 20px;
+}
+
+.totem-shell.totem-21 .cart-panel--full .cart-panel-list {
+  gap: 16px;
+}
+
+.totem-shell.totem-21 .cart-panel-item {
+  padding: 18px 20px;
+  border-width: 2px;
+}
+
+.totem-shell.totem-21 .cart-panel-item-index {
+  width: 44px;
+  height: 44px;
+  font-size: 22px;
+}
+
+.totem-shell.totem-21 .cart-panel-item-img {
+  width: 96px;
+  height: 96px;
+  border-radius: 18px;
+}
+
+.totem-shell.totem-21 .cart-panel-item-name {
+  font-size: 30px;
+  margin-bottom: 6px;
+}
+
+.totem-shell.totem-21 .cart-panel-item-meta {
+  font-size: 22px;
+  margin-bottom: 6px;
+}
+
+.totem-shell.totem-21 .cart-panel-item-price {
+  font-size: 26px;
+}
+
+.totem-shell.totem-21 .cart-panel-total {
+  padding: 20px 22px;
+}
+
+.totem-shell.totem-21 .cart-panel-total-label {
+  font-size: 22px;
+}
+
+.totem-shell.totem-21 .cart-panel-total-val {
+  font-size: 38px;
+}
+
+.totem-shell.totem-21 .cart-checkout {
+  padding: 20px 20px 24px;
+  gap: 16px;
+}
+
+.totem-shell.totem-21 .cart-pay-note {
+  padding: 20px 22px;
+  font-size: 20px;
+  border-radius: 16px;
+  border-width: 2px;
+}
+
+.totem-shell.totem-21 .cart-pay-icon {
+  font-size: 34px;
+}
+
+.totem-shell.totem-21 .cart-add-btn {
+  min-height: 80px !important;
+  font-size: 26px !important;
+  border-radius: var(--r-xl) !important;
+  padding: 22px 28px !important;
+}
+
+.totem-shell.totem-21 .cart-continue-btn {
+  min-height: 112px !important;
+  font-size: 32px !important;
+  font-weight: 700 !important;
+  border-radius: var(--r-xl) !important;
+  padding: 30px 36px !important;
+  box-shadow: 0 10px 36px var(--primary-glow) !important;
+}
+
+.totem-shell.totem-21 .cart-panel--compact .cart-panel-item {
+  padding: 14px 16px;
+}
+
+.totem-shell.totem-21 .cart-panel--compact .cart-panel-item-index {
+  width: 36px;
+  height: 36px;
+  font-size: 18px;
+}
+
+.totem-shell.totem-21 .cart-panel--compact .cart-panel-item-img {
+  width: 64px;
+  height: 64px;
+}
+
+.totem-shell.totem-21 .cart-panel--compact .cart-panel-item-name {
+  font-size: 24px;
+}
+
+.totem-shell.totem-21 .cart-panel--compact .cart-panel-item-meta {
+  font-size: 19px;
+}
+
+.totem-shell.totem-21 .cart-panel--compact .cart-panel-item-price {
+  font-size: 22px;
+}
+
+.totem-shell.totem-21 .cart-panel--compact .cart-panel-total-label {
+  font-size: 20px;
+}
+
+.totem-shell.totem-21 .cart-panel--compact .cart-panel-total-val {
+  font-size: 30px;
+}
+
+.totem-shell.totem-21 .schedule-add-more-btn {
+  min-height: 72px !important;
+  font-size: 24px !important;
+  border-radius: var(--r-xl) !important;
+  padding: 20px 24px !important;
+}
+
+/* ── Schedule (agendamento) — totem 21" tela cheia ── */
+.totem-shell.totem-21 .schedule-header {
+  padding: 6px 20px 12px;
+}
+
+.totem-shell.totem-21 .schedule-title {
+  font-size: 52px;
+}
+
+.totem-shell.totem-21 .schedule-lead {
+  font-size: 22px;
+  margin-top: 6px;
+}
+
+.totem-shell.totem-21 .schedule-body {
+  gap: 16px;
+  padding: 0 20px;
+}
+
+.totem-shell.totem-21 .schedule-section-label {
+  font-size: 17px;
+  letter-spacing: 1.4px;
+  margin-bottom: 10px;
+}
+
+.totem-shell.totem-21 .schedule-section-title {
+  font-size: 26px;
+  margin-bottom: 12px;
+}
+
+.totem-shell.totem-21 .schedule-cart-item {
+  padding: 14px 16px;
+  border-radius: var(--r-lg);
+}
+
+.totem-shell.totem-21 .schedule-cart-item img {
+  width: 64px;
+  height: 64px;
+  border-radius: 14px;
+}
+
+.totem-shell.totem-21 .schedule-cart-name {
+  font-size: 28px;
+}
+
+.totem-shell.totem-21 .screen--schedule .combo-suggest-inner {
+  padding: 22px 20px 18px !important;
+}
+
+.totem-shell.totem-21 .screen--schedule .combo-suggest-name {
+  font-size: 26px !important;
+}
+
+.totem-shell.totem-21 .screen--schedule .combo-suggest-price {
+  font-size: 22px !important;
+}
+
+.totem-shell.totem-21 .screen--schedule .combo-suggest-btn {
+  font-size: 20px !important;
+  padding: 16px 22px !important;
+  border-radius: 14px;
+}
+
+.totem-shell.totem-21 .screen--schedule .combo-suggest-skip {
+  font-size: 18px !important;
+}
+
+.totem-shell.totem-21 .screen--schedule .combo-suggest-thumb {
+  width: 72px;
+  height: 72px;
+}
+
+.totem-shell.totem-21 .schedule-weight-grid {
+  gap: 12px;
+}
+
+.totem-shell.totem-21 .schedule-weight-btn {
+  min-height: 76px;
+  font-size: 28px;
+  border-radius: 18px;
+  border-width: 2px;
+}
+
+.totem-shell.totem-21 .schedule-pickup-bar {
+  padding: 22px 24px;
+  border-radius: 18px;
+  border-width: 2px;
+}
+
+.totem-shell.totem-21 .schedule-pickup-dot {
+  width: 12px;
+  height: 12px;
+}
+
+.totem-shell.totem-21 .schedule-pickup-text {
+  font-size: 28px;
+}
+
+.totem-shell.totem-21 .schedule-section--slots .schedule-section-title {
+  margin-bottom: 14px;
+}
+
+.totem-shell.totem-21 .schedule-slots-grid {
+  gap: 12px;
+}
+
+.totem-shell.totem-21 .schedule-slots-grid .slot {
+  font-size: 26px !important;
+  padding: 20px 0 !important;
+  border-radius: 16px !important;
+  border-width: 2px;
+  min-height: 68px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.totem-shell.totem-21 .schedule-checkout {
+  padding: 22px 20px 24px;
+  border-radius: 0;
+}
+
+.totem-shell.totem-21 .schedule-summary {
+  font-size: 32px;
+  margin-bottom: 8px;
+  line-height: 1.2;
+}
+
+.totem-shell.totem-21 .schedule-summary-total {
+  font-size: 22px;
+  margin-bottom: 14px;
+}
+
+.totem-shell.totem-21 .schedule-cta {
+  min-height: 112px !important;
+  font-size: 34px !important;
+  font-weight: 700 !important;
+  border-radius: var(--r-xl) !important;
+  padding: 32px 40px !important;
+  box-shadow: 0 10px 36px var(--primary-glow) !important;
+}
+
+.totem-shell.totem-21 .schedule-pay-hint {
+  font-size: 22px;
+  margin-top: 14px;
+}
+
+.totem-shell.totem-21 .phone-order-summary {
+  padding: 20px 22px;
+  border-radius: var(--r-xl);
+  border-width: 2px;
+}
+
+.totem-shell.totem-21 .phone-order-summary-label {
+  font-size: 18px;
+  margin-bottom: 14px;
+}
+
+.totem-shell.totem-21 .phone-heading { font-size: 40px !important; }
+.totem-shell.totem-21 .phone-lead { font-size: 20px !important; }
+
+.totem-shell.totem-21 .inactivity-ring { width: 140px !important; height: 140px !important; margin-bottom: 32px !important; }
+.totem-shell.totem-21 .inactivity-count { font-size: 60px !important; }
+.totem-shell.totem-21 .inactivity-title { font-size: 36px !important; }
+.totem-shell.totem-21 .inactivity-msg { font-size: 21px !important; margin-bottom: 40px !important; }
+.totem-shell.totem-21 .inactivity-btn-primary { font-size: 24px !important; padding: 20px 52px !important; }
+.totem-shell.totem-21 .inactivity-btn-secondary { font-size: 19px !important; padding: 14px 36px !important; }
+
+.totem-shell.totem-21 .step-dot { width: 34px !important; height: 34px !important; font-size: 17px !important; }

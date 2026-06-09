@@ -15,6 +15,7 @@ export type Order = {
   pickupCode: string
   slotTime: string
   customerPhone: string
+  priority?: boolean
   status: 'aguardando' | 'em_preparo' | 'pronto' | 'retirado'
   createdAt: Date
 }
@@ -37,7 +38,7 @@ type CartStore = {
   updateAllWeights: (weightKg: number) => void
   clearItems: () => void
   confirmOrder: (storeSlug: string, slotTime: string, customerPhone: string) => Promise<Order>
-  createCounterTicket: (storeSlug: string, slotTime: string) => Promise<Order>
+  createCounterTicket: (storeSlug: string, slotTime: string, options?: { priority?: boolean }) => Promise<Order>
   updateOrderStatus: (status: Order['status']) => void
   reset: () => void
 }
@@ -117,7 +118,8 @@ export const useCartStore = create<CartStore>((set, get) => ({
     return order
   },
 
-  createCounterTicket: async (storeSlug, slotTime) => {
+  createCounterTicket: async (storeSlug, slotTime, options) => {
+    const priority = options?.priority ?? false
     let pickupCode = generateCode()
     let orderId: string = crypto.randomUUID()
 
@@ -125,6 +127,8 @@ export const useCartStore = create<CartStore>((set, get) => ({
       const apiOrder = await api.post<ApiOrder>(`/totem/${storeSlug}/orders`, {
         pickupMode: 'IMMEDIATE',
         items: [],
+        priority,
+        notes: priority ? 'Atendimento preferencial' : undefined,
       })
       pickupCode = apiOrder.pickupCode
       orderId = apiOrder.id
@@ -138,6 +142,7 @@ export const useCartStore = create<CartStore>((set, get) => ({
       pickupCode,
       slotTime,
       customerPhone: '',
+      priority,
       status: 'aguardando',
       createdAt: new Date(),
     }
@@ -161,6 +166,7 @@ export function normalizeOrder(raw: Order & Partial<CartItem>): Order {
     pickupCode: legacy.pickupCode,
     slotTime: legacy.slotTime,
     customerPhone: legacy.customerPhone,
+    priority: legacy.priority,
     status: legacy.status,
     createdAt: legacy.createdAt,
     items: [{

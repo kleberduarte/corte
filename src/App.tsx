@@ -1,21 +1,21 @@
 import { useEffect, useRef, useState, useCallback } from 'react'
 import { applyStoreTheme } from './data/theme'
 import { fetchActiveStore, StoreContext, useStore } from './data/config'
-import { fetchCatalog, CatalogContext, type TotemCatalog } from './data/catalog'
 import type { StoreConfig } from './data/config'
 import { useCartStore } from './store/cartStore'
 import { useKanbanStore } from './store/kanbanStore'
-import type { Product, CutType } from './data/products'
+import { PRODUCTS, type Product, type CutType } from './data/products'
 
 import Topbar from './components/Topbar'
 import InactivityOverlay from './components/InactivityOverlay'
 import StepProgress from './components/StepProgress'
 import HomeScreen from './screens/cliente/HomeScreen'
 import PickupModeScreen, { type PickupMode } from './screens/cliente/PickupModeScreen'
-import FlowChoiceScreen from './screens/cliente/FlowChoiceScreen'
+import FlowChoiceScreen, { type FlowChoice } from './screens/cliente/FlowChoiceScreen'
 import CategoriesScreen from './screens/cliente/CategoriesScreen'
 import CatalogScreen from './screens/cliente/CatalogScreen'
 import DetailScreen from './screens/cliente/DetailScreen'
+import CartScreen from './screens/cliente/CartScreen'
 import ScheduleScreen from './screens/cliente/ScheduleScreen'
 import PhoneScreen from './screens/cliente/PhoneScreen'
 import PrintScreen from './screens/cliente/PrintScreen'
@@ -23,22 +23,24 @@ import OrderTrackingScreen from './screens/cliente/OrderTrackingScreen'
 import KanbanScreen from './screens/operador/KanbanScreen'
 import AdminApp from './screens/admin/AdminApp'
 
-type ClienteScreen = 'home' | 'pickup-mode' | 'flow-choice' | 'categories' | 'catalog' | 'detail' | 'schedule' | 'phone' | 'print'
+type ClienteScreen = 'home' | 'pickup-mode' | 'flow-choice' | 'categories' | 'catalog' | 'detail' | 'cart' | 'schedule' | 'phone' | 'print'
 
 const INACTIVITY_MS = 90_000
 const COUNTDOWN_S   = 15
 const IMMEDIATE_SLOT = 'Imediata'
+const PREFERENTIAL_SLOT = 'Preferencial'
 
 function getBackScreen(screen: ClienteScreen, pickupMode: PickupMode, counterOnly: boolean): ClienteScreen {
   const map: Record<ClienteScreen, ClienteScreen> = {
     home: 'home',
     'pickup-mode': 'home',
     'flow-choice': 'pickup-mode',
-    categories: 'flow-choice',
+    categories: pickupMode === 'scheduled' ? 'pickup-mode' : 'flow-choice',
     catalog: 'categories',
     detail: 'catalog',
-    schedule: 'detail',
-    phone: pickupMode === 'immediate' ? 'detail' : 'schedule',
+    cart: 'catalog',
+    schedule: 'cart',
+    phone: pickupMode === 'immediate' ? 'cart' : 'schedule',
     print: counterOnly ? 'flow-choice' : 'phone',
   }
   return map[screen]
@@ -95,6 +97,7 @@ function ClienteView() {
   const [counterOnly, setCounterOnly]     = useState(false)
   const [scheduleWeight, setScheduleWeight] = useState(1.5)
   const [scheduleSlot, setScheduleSlot]   = useState('')
+  const [fromHeroProduct, setFromHeroProduct] = useState(false)
 
   const { items, setPrimaryItem, setItems, addItem, hasProduct, updateAllWeights, confirmOrder, createCounterTicket, currentOrder, reset } = useCartStore()
   const { addOrder } = useKanbanStore()
@@ -104,6 +107,7 @@ function ClienteView() {
     setSelectedProduct(null)
     setPickupMode('scheduled')
     setCounterOnly(false)
+    setFromHeroProduct(false)
     setScreen('home')
     setScreenKey((k) => k + 1)
   }, [reset])
@@ -114,6 +118,29 @@ function ClienteView() {
 
   function handleCategorySelect(filter: string) { setCatalogFilter(filter); go('catalog') }
   function handleProductSelect(p: Product) { setSelectedProduct(p); go('detail') }
+
+  function handleHeroProduct(productId: string) {
+    const product = PRODUCTS.find((p) => p.id === productId)
+    if (!product) return
+    setFromHeroProduct(true)
+    setCatalogFilter('todos')
+    setSelectedProduct(product)
+    go('detail')
+  }
+
+  function handleBack() {
+    const prev = getBackScreen(screen, pickupMode, counterOnly)
+
+    if (fromHeroProduct && screen === 'detail') {
+      setFromHeroProduct(false)
+      setSelectedProduct(null)
+      setCatalogFilter('todos')
+      go('catalog')
+      return
+    }
+
+    go(prev)
+  }
 
   function handleSchedule(cut: CutType, weight: number) {
     if (!selectedProduct) return
@@ -129,31 +156,48 @@ function ClienteView() {
     }
     if (pickupMode === 'immediate') {
       setScheduleSlot(IMMEDIATE_SLOT)
-      go('phone')
-    } else {
-      go('schedule')
     }
+    go('cart')
   }
 
   function handlePickupModeSelect(mode: PickupMode) {
     setPickupMode(mode)
-    go('flow-choice')
+    if (mode === 'scheduled') {
+      setCounterOnly(false)
+      go('categories')
+    } else {
+      go('flow-choice')
+    }
   }
 
-  async function handleFlowChoice(choice: 'categories' | 'counter') {
+  async function handleFlowChoice(choice: FlowChoice) {
     if (choice === 'categories') {
       setCounterOnly(false)
       go('categories')
       return
     }
     setCounterOnly(true)
-    const slot = pickupMode === 'immediate' ? IMMEDIATE_SLOT : 'Balcão'
-    const order = await createCounterTicket(store.id, slot)
+    const isPreferential = choice === 'preferential'
+    const slot = isPreferential
+      ? PREFERENTIAL_SLOT
+      : pickupMode === 'immediate'
+        ? IMMEDIATE_SLOT
+        : 'Balcão'
+    const order = await createCounterTicket(store.id, slot, { priority: isPreferential })
     addOrder(order)
     go('print')
   }
 
   function handleCartCheckout() {
+    go('cart')
+  }
+
+  function handleAddMoreItems() {
+    setCatalogFilter('todos')
+    go('catalog')
+  }
+
+  function handleCartContinue() {
     if (pickupMode === 'immediate') {
       setScheduleSlot(IMMEDIATE_SLOT)
       go('phone')
@@ -190,23 +234,30 @@ function ClienteView() {
   const showBack   = screen !== 'home'
   const hideTopbar = screen === 'home' || screen === 'print'
   const STEP_SCREENS: ClienteScreen[] = pickupMode === 'immediate'
-    ? ['catalog', 'detail', 'phone', 'print']
-    : ['catalog', 'detail', 'schedule', 'phone', 'print']
+    ? ['catalog', 'detail', 'cart', 'phone', 'print']
+    : ['catalog', 'detail', 'cart', 'schedule', 'phone', 'print']
   const stepIndex  = STEP_SCREENS.indexOf(screen)
 
   return (
-    <div className="totem-shell">
+    <div className="totem-viewport">
+    <div className="totem-shell totem-21">
       {screen === 'home' && (
         <div style={{ position: 'absolute', top: 0, left: 0, right: 0, zIndex: 30 }}>
           <Topbar hideStatus />
         </div>
       )}
-      {!hideTopbar && <Topbar showBack={showBack} onBack={() => go(getBackScreen(screen, pickupMode, counterOnly))} />}
+      {!hideTopbar && <Topbar showBack={showBack} onBack={handleBack} />}
       {stepIndex >= 0 && <StepProgress current={stepIndex} total={STEP_SCREENS.length} />}
 
-      {screen === 'home'        && <HomeScreen key={screenKey} onStart={() => go('pickup-mode')} />}
+      {screen === 'home'        && <HomeScreen key={screenKey} onStart={() => go('pickup-mode')} onProduct={handleHeroProduct} />}
       {screen === 'pickup-mode' && <PickupModeScreen key={screenKey} onSelect={handlePickupModeSelect} />}
-      {screen === 'flow-choice' && <FlowChoiceScreen key={screenKey} onSelect={handleFlowChoice} />}
+      {screen === 'flow-choice' && (
+        <FlowChoiceScreen
+          key={screenKey}
+          immediate={pickupMode === 'immediate'}
+          onSelect={handleFlowChoice}
+        />
+      )}
       {screen === 'categories'  && <CategoriesScreen key={screenKey} onSelect={handleCategorySelect} />}
       {screen === 'catalog'     && (
         <CatalogScreen
@@ -214,6 +265,7 @@ function ClienteView() {
           initialFilter={catalogFilter}
           onProduct={handleProductSelect}
           cartCount={items.length}
+          cartProductIds={items.map((i) => i.product.id)}
           onCart={handleCartCheckout}
           immediate={pickupMode === 'immediate'}
         />
@@ -223,7 +275,17 @@ function ClienteView() {
           key={selectedProduct.id}
           product={selectedProduct}
           immediate={pickupMode === 'immediate'}
+          cartCount={items.length}
           onSchedule={handleSchedule}
+        />
+      )}
+      {screen === 'cart' && items.length > 0 && (
+        <CartScreen
+          key={`cart-${screenKey}`}
+          items={items}
+          immediate={pickupMode === 'immediate'}
+          onAddMore={handleAddMoreItems}
+          onContinue={handleCartContinue}
         />
       )}
       {screen === 'schedule'   && selectedProduct && selectedCut && (
@@ -236,6 +298,7 @@ function ClienteView() {
           onConfirm={handleConfirmSchedule}
           onAddCombo={handleAddCombo}
           onCustomizeCombo={handleCustomizeCombo}
+          onAddMore={handleAddMoreItems}
         />
       )}
       {screen === 'phone' && items.length > 0 && (
@@ -253,15 +316,18 @@ function ClienteView() {
       )}
       <ModeBadge label="Cliente" />
     </div>
+    </div>
   )
 }
 
 // ─── View do Operador ─────────────────────────────────────────────────────────
 function OperadorView() {
   return (
-    <div className="totem-shell">
+    <div className="totem-viewport">
+    <div className="totem-shell totem-21">
       <KanbanScreen />
       <ModeBadge label="Operador" />
+    </div>
     </div>
   )
 }
@@ -269,8 +335,8 @@ function OperadorView() {
 function ModeBadge({ label }: { label: string }) {
   return (
     <div style={{
-      position: 'fixed', bottom: 10, left: 10, zIndex: 9999,
-      fontSize: 'calc(10px * var(--font-scale))', fontWeight: 600, textTransform: 'uppercase',
+      position: 'absolute', bottom: 10, left: 10, zIndex: 9999,
+      fontSize: 10, fontWeight: 600, textTransform: 'uppercase',
       padding: '5px 10px', borderRadius: 8,
       background: 'rgba(0,0,0,.55)', color: 'rgba(255,255,255,.75)',
       border: '1px solid rgba(255,255,255,.12)', backdropFilter: 'blur(8px)',
@@ -290,29 +356,25 @@ export default function App() {
 
 function TotemApp({ view }: { view: string | null }) {
   const [store, setStore] = useState<StoreConfig | null>(null)
-  const [catalog, setCatalog] = useState<TotemCatalog | null>(null)
 
   useEffect(() => {
-    void (async () => {
-      const s = await fetchActiveStore()
+    fetchActiveStore().then((s) => {
       applyStoreTheme(s)
       setStore(s)
-      const cat = await fetchCatalog(s.id)
-      setCatalog(cat)
-    })()
+    })
   }, [])
 
-  if (!store || !catalog) return (
-    <div style={{ height: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#0d0d0e', color: 'rgba(255,255,255,.4)', fontSize: 'calc(14px * var(--font-scale))' }}>
+  if (!store) return (
+    <div style={{ height: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#0d0d0e', color: 'rgba(255,255,255,.4)', fontSize: 14 }}>
       Carregando...
     </div>
   )
 
   if (store.active === false) return (
     <div style={{ height: '100vh', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', background: '#0d0d0e', padding: 32, textAlign: 'center' }}>
-      <div style={{ fontSize: 'calc(48px * var(--font-scale))', marginBottom: 20 }}>🔪</div>
-      <div style={{ fontSize: 'calc(22px * var(--font-scale))', fontWeight: 700, color: '#fff', marginBottom: 10 }}>{store.name}</div>
-      <div style={{ fontSize: 'calc(16px * var(--font-scale))', color: 'rgba(255,255,255,.5)', maxWidth: 340, lineHeight: 1.6 }}>
+      <div style={{ fontSize: 48, marginBottom: 20 }}>🔪</div>
+      <div style={{ fontSize: 22, fontWeight: 700, color: '#fff', marginBottom: 10 }}>{store.name}</div>
+      <div style={{ fontSize: 16, color: 'rgba(255,255,255,.5)', maxWidth: 340, lineHeight: 1.6 }}>
         Este serviço está temporariamente indisponível.<br />Por favor, procure um funcionário do açougue.
       </div>
     </div>
@@ -322,7 +384,6 @@ function TotemApp({ view }: { view: string | null }) {
 
   return (
     <StoreContext.Provider value={store}>
-      <CatalogContext.Provider value={catalog}>
       {view === 'operador' ? (
         <OperadorView />
       ) : view === 'pedido' && trackingOrderId ? (
@@ -330,7 +391,6 @@ function TotemApp({ view }: { view: string | null }) {
       ) : (
         <ClienteView />
       )}
-      </CatalogContext.Provider>
     </StoreContext.Provider>
   )
 }

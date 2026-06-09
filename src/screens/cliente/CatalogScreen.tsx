@@ -1,21 +1,22 @@
-import { useState } from 'react'
-import { useCatalog } from '../../data/catalog'
-import type { Product } from '../../data/products'
+import { useEffect, useState } from 'react'
+import { PRODUCTS, CATEGORIES, type Product } from '../../data/products'
 
 type Props = {
   initialFilter?: string
   onProduct: (p: Product) => void
   cartCount: number
+  cartProductIds?: string[]
   onCart: () => void
   immediate?: boolean
 }
 
-export default function CatalogScreen({ initialFilter = 'todos', onProduct, cartCount, onCart, immediate = false }: Props) {
-  const { products, categories } = useCatalog()
+export default function CatalogScreen({ initialFilter = 'todos', onProduct, cartCount, cartProductIds = [], onCart, immediate = false }: Props) {
   const [filter, setFilter] = useState(initialFilter)
   const [added, setAdded]   = useState<string | null>(null)
 
-  const visible = filter === 'todos' ? products : products.filter((p) => p.category === filter)
+  useEffect(() => { setFilter(initialFilter) }, [initialFilter])
+
+  const visible = filter === 'todos' ? PRODUCTS : PRODUCTS.filter((p) => p.category === filter)
 
   function handleAdd(e: React.MouseEvent, p: Product) {
     e.stopPropagation()
@@ -25,29 +26,32 @@ export default function CatalogScreen({ initialFilter = 'todos', onProduct, cart
   }
 
   return (
-    <div className="screen" style={{ position: 'relative' }}>
-      <div style={{ flexShrink: 0, padding: '8px 24px 10px' }}>
-        <div style={{ fontFamily: 'var(--font-serif)', fontSize: 'calc(28px * var(--font-scale))', fontWeight: 600, color: 'var(--accent)' }}>
+    <div className="screen screen--catalog" style={{ position: 'relative' }}>
+      <div className="catalog-header">
+        <div className="catalog-heading" style={{ fontFamily: 'var(--font-serif)', fontSize: 36, fontWeight: 600, color: 'var(--accent)' }}>
           Nossos Cortes
         </div>
-        <div style={{ fontSize: 'calc(12px * var(--font-scale))', color: 'var(--t3)', marginTop: 3 }}>{visible.length} produto{visible.length !== 1 ? 's' : ''} disponíve{visible.length !== 1 ? 'is' : 'l'}</div>
+        <div className="catalog-count" style={{ fontSize: 15, color: 'var(--t3)', marginTop: 3 }}>
+          {visible.length} produto{visible.length !== 1 ? 's' : ''} disponíve{visible.length !== 1 ? 'is' : 'l'}
+        </div>
       </div>
 
       <div className="chips">
-        {categories.map((c) => (
+        {CATEGORIES.map((c) => (
           <div key={c.id} className={`chip${filter === c.id ? ' on' : ''}`} onClick={() => setFilter(c.id)}>
             {c.label}
           </div>
         ))}
       </div>
 
-      <div className="scroll" style={{ flex: 1, paddingBottom: cartCount > 0 ? 100 : 16 }}>
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12, padding: '0 24px' }}>
+      <div className={`catalog-scroll scroll${cartCount > 0 ? ' catalog-scroll--fab' : ''}`}>
+        <div className="catalog-grid">
           {visible.map((p) => (
             <ProductCard
               key={p.id}
               product={p}
               added={added === p.id}
+              inCart={cartProductIds.includes(p.id)}
               onClick={() => onProduct(p)}
               onAdd={(e) => handleAdd(e, p)}
             />
@@ -59,7 +63,7 @@ export default function CatalogScreen({ initialFilter = 'todos', onProduct, cart
         <div className="fab" onClick={onCart} style={{ animation: 'fabIn .35s cubic-bezier(.34,1.2,.64,1) both' }}>
           <div style={{ display: 'flex', alignItems: 'center' }}>
             <div className="fab-cnt">{cartCount}</div>
-            <span className="fab-label">{immediate ? 'Finalizar pedido' : `Agendar corte${cartCount > 1 ? 's' : ''}`}</span>
+            <span className="fab-label">Ver meu pedido · {cartCount} {cartCount === 1 ? 'item' : 'itens'}</span>
           </div>
           <span className="fab-hint">🛒 Pagar no caixa</span>
         </div>
@@ -70,63 +74,31 @@ export default function CatalogScreen({ initialFilter = 'todos', onProduct, cart
   )
 }
 
-function ProductCard({ product: p, added, onClick, onAdd }: {
-  product: Product; added: boolean
+function ProductCard({ product: p, added, inCart, onClick, onAdd }: {
+  product: Product; added: boolean; inCart?: boolean
   onClick: () => void; onAdd: (e: React.MouseEvent) => void
 }) {
   return (
     <div
+      className={`product-card${added ? ' product-card--added' : ''}`}
       onClick={onClick}
-      style={{
-        background: 'var(--s1)', borderRadius: 'var(--r)',
-        border: `1px solid ${added ? 'var(--green)' : 'var(--border)'}`,
-        overflow: 'hidden', cursor: 'pointer',
-        display: 'flex', flexDirection: 'column',
-        transition: 'border-color .25s, box-shadow .25s',
-        boxShadow: added ? '0 0 0 2px rgba(52,199,89,.25)' : 'none',
-      }}
     >
-      <div style={{ width: '100%', height: 140, position: 'relative', background: 'var(--s3)', overflow: 'hidden' }}>
-        <img
-          src={p.imageUrl} alt={p.name}
-          style={{ width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'center 42%', display: 'block', transition: 'transform .4s' }}
-        />
-        {p.badge && (
-          <div style={{ position: 'absolute', top: 8, left: 8, background: 'rgba(0,0,0,.65)', backdropFilter: 'blur(4px)', color: 'var(--t1)', fontSize: 'calc(9.5px * var(--font-scale))', fontWeight: 600, padding: '3px 7px', borderRadius: 20, border: '1px solid rgba(255,255,255,.1)' }}>
-            {p.badge}
-          </div>
-        )}
+      <div className="product-card-media">
+        <img src={p.imageUrl} alt={p.name} />
+        {inCart && <div className="product-card-badge product-card-badge--cart">✓ No pedido</div>}
+        {!inCart && p.badge && <div className="product-card-badge">{p.badge}</div>}
       </div>
-      <div style={{ flex: 1, padding: '12px 14px 14px', display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
-        <div>
-          <div style={{ fontSize: 'calc(15px * var(--font-scale))', fontWeight: 600, color: 'var(--t1)', marginBottom: 3 }}>{p.name}</div>
-          <div style={{ fontSize: 'calc(11.5px * var(--font-scale))', color: 'var(--t3)', lineHeight: 1.45, marginBottom: 8, display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>
-            {p.description}
-          </div>
-        </div>
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-          <div>
-            <div style={{ fontSize: 'calc(16px * var(--font-scale))', fontWeight: 700, color: 'var(--accent)' }}>
-              <sup style={{ fontSize: 'calc(11px * var(--font-scale))', fontWeight: 600 }}>R$</sup>
-              {p.pricePerKg.toFixed(2).replace('.', ',')}
-              <sub style={{ fontSize: 'calc(11px * var(--font-scale))', fontWeight: 400, color: 'var(--t3)' }}>/kg</sub>
-            </div>
-            <div className="stars" style={{ fontSize: 'calc(10.5px * var(--font-scale))', display: 'flex', alignItems: 'center', gap: 3 }}>
-              {'★'.repeat(Math.round(p.rating))}{'☆'.repeat(5 - Math.round(p.rating))}
-              <span style={{ color: 'var(--t3)' }}>({p.reviews})</span>
-            </div>
+      <div className="product-card-body">
+        <div className="product-card-name">{p.name}</div>
+        <div className="product-card-footer">
+          <div className="product-card-price">
+            <sup>R$</sup>
+            {p.pricePerKg.toFixed(2).replace('.', ',')}
+            <sub>/kg</sub>
           </div>
           <div
+            className={`product-card-add${added ? ' product-card-add--added' : ''}`}
             onClick={onAdd}
-            style={{
-              width: 36, height: 36,
-              background: added ? 'var(--green)' : 'var(--primary)',
-              borderRadius: 11, display: 'flex', alignItems: 'center', justifyContent: 'center',
-              fontSize: added ? 18 : 22, color: 'white', flexShrink: 0,
-              boxShadow: `0 3px 10px ${added ? 'rgba(52,199,89,.35)' : 'var(--primary-glow)'}`,
-              transition: 'background .25s, box-shadow .25s, transform .15s',
-              transform: added ? 'scale(1.15)' : 'scale(1)',
-            }}
           >
             {added ? '✓' : '+'}
           </div>

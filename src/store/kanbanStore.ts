@@ -23,13 +23,17 @@ const STATUS_MAP_REVERSE: Record<Order['status'], string> = {
 }
 
 function apiOrderToLocal(o: Record<string, unknown>): Order {
+  const priority = Boolean(o.priority)
   return {
     id: o.id as string,
     pickupCode: (o.pickupCode ?? o.orderNumber) as string,
-    slotTime: o.scheduledAt
-      ? new Date(o.scheduledAt as string).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })
-      : o.pickupMode === 'IMMEDIATE' ? 'Imediata' : 'Balcão',
+    slotTime: priority
+      ? 'Preferencial'
+      : o.scheduledAt
+        ? new Date(o.scheduledAt as string).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })
+        : o.pickupMode === 'IMMEDIATE' ? 'Imediata' : 'Balcão',
     customerPhone: (o.customerPhone as string) ?? '',
+    priority,
     status: STATUS_MAP[o.status as string] ?? 'aguardando',
     createdAt: new Date(o.createdAt as string),
     items: ((o.items as unknown[]) ?? []).map((item) => {

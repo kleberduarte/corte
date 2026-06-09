@@ -5,6 +5,7 @@ export const createOrderSchema = z.object({
   pickupMode: z.enum(['SCHEDULED', 'IMMEDIATE']),
   scheduledAt: z.string().optional(),
   notes: z.string().max(500).optional(),
+  priority: z.boolean().optional(),
   items: z.array(
     z.object({
       productId: z.string().min(1, 'ID de produto obrigatório'),

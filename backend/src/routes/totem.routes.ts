@@ -121,6 +121,7 @@ export async function totemRoutes(app: FastifyInstance) {
         status: order.status,
         scheduledAt: order.scheduledAt,
         pickupMode: order.pickupMode,
+        priority: order.priority,
         items: order.items.map((i) => ({
           productName: i.productName,
           cutType: i.cutType,

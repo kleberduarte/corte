@@ -17,7 +17,7 @@ export default function Topbar({ storeName, showBack, onBack, hideStatus }: Prop
   const logoUrl = useTenantLogo()
 
   return (
-    <div style={{ flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '18px 24px 12px', position: 'relative', zIndex: 20 }}>
+    <div className="topbar" style={{ flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'space-between', position: 'relative', zIndex: 20 }}>
       {showBack
         ? <button className="back-btn" onClick={onBack}>← Voltar</button>
         : <div style={{ width: 80 }} />
@@ -28,7 +28,7 @@ export default function Topbar({ storeName, showBack, onBack, hideStatus }: Prop
           <img
             src={logoUrl}
             alt={displayName}
-            style={{ height: 40, maxWidth: 140, objectFit: 'contain', display: 'block' }}
+            style={{ height: 50, maxWidth: 168, objectFit: 'contain', display: 'block' }}
           />
         ) : (
           <>

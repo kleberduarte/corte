@@ -12,7 +12,7 @@ export default function InactivityOverlay({ secondsLeft, onContinue, onReset }: 
   return (
     <div
       style={{
-        position: 'fixed', inset: 0, zIndex: 9000,
+        position: 'absolute', inset: 0, zIndex: 9000,
         background: 'rgba(0,0,0,0.78)',
         backdropFilter: 'blur(12px)',
         display: 'flex', flexDirection: 'column',
@@ -23,8 +23,8 @@ export default function InactivityOverlay({ secondsLeft, onContinue, onReset }: 
       onClick={onContinue}
     >
       {/* Anel de progresso SVG */}
-      <div style={{ position: 'relative', width: 120, height: 120, marginBottom: 28 }}>
-        <svg viewBox="0 0 120 120" style={{ width: 120, height: 120, transform: 'rotate(-90deg)' }}>
+      <div className="inactivity-ring" style={{ position: 'relative', width: 120, height: 120, marginBottom: 28 }}>
+        <svg viewBox="0 0 120 120" style={{ width: '100%', height: '100%', transform: 'rotate(-90deg)' }}>
           <circle cx="60" cy="60" r="52" fill="none" stroke="rgba(255,255,255,.1)" strokeWidth="8" />
           <circle
             cx="60" cy="60" r="52" fill="none"
@@ -35,30 +35,31 @@ export default function InactivityOverlay({ secondsLeft, onContinue, onReset }: 
             style={{ transition: 'stroke-dashoffset 1s linear' }}
           />
         </svg>
-        <div style={{
+        <div className="inactivity-count" style={{
           position: 'absolute', inset: 0,
           display: 'flex', alignItems: 'center', justifyContent: 'center',
-          fontFamily: 'var(--font-serif)', fontSize: 'calc(42px * var(--font-scale))', fontWeight: 700,
+          fontFamily: 'var(--font-serif)', fontSize: 54, fontWeight: 700,
           color: 'white',
         }}>
           {secondsLeft}
         </div>
       </div>
 
-      <div style={{ fontFamily: 'var(--font-serif)', fontSize: 'calc(26px * var(--font-scale))', fontWeight: 700, color: 'white', textAlign: 'center', marginBottom: 10 }}>
+      <div className="inactivity-title" style={{ fontFamily: 'var(--font-serif)', fontSize: 33, fontWeight: 700, color: 'white', textAlign: 'center', marginBottom: 10 }}>
         Ainda está aí?
       </div>
-      <div style={{ fontSize: 'calc(15px * var(--font-scale))', color: 'rgba(255,255,255,.65)', textAlign: 'center', marginBottom: 36, lineHeight: 1.5 }}>
+      <div className="inactivity-msg" style={{ fontSize: 19, color: 'rgba(255,255,255,.65)', textAlign: 'center', marginBottom: 36, lineHeight: 1.5 }}>
         A sessão será reiniciada em <strong style={{ color: 'white' }}>{secondsLeft} segundo{secondsLeft !== 1 ? 's' : ''}</strong>
       </div>
 
       <button
+        className="inactivity-btn-primary"
         onClick={(e) => { e.stopPropagation(); onContinue() }}
         style={{
           padding: '18px 48px',
           background: 'var(--primary)', color: 'white',
           border: 'none', borderRadius: 'var(--r-lg)',
-          fontSize: 'calc(17px * var(--font-scale))', fontWeight: 700,
+          fontSize: 22, fontWeight: 700,
           fontFamily: 'var(--font-sans)',
           cursor: 'pointer',
           boxShadow: '0 8px 28px var(--primary-glow)',
@@ -68,13 +69,14 @@ export default function InactivityOverlay({ secondsLeft, onContinue, onReset }: 
         Continuar navegando
       </button>
       <button
+        className="inactivity-btn-secondary"
         onClick={(e) => { e.stopPropagation(); onReset() }}
         style={{
           padding: '12px 32px',
           background: 'transparent', color: 'rgba(255,255,255,.5)',
           border: '1px solid rgba(255,255,255,.2)',
           borderRadius: 'var(--r)',
-          fontSize: 'calc(14px * var(--font-scale))', fontWeight: 500,
+          fontSize: 18, fontWeight: 500,
           fontFamily: 'var(--font-sans)',
           cursor: 'pointer',
         }}

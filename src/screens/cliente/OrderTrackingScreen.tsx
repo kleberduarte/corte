@@ -158,48 +158,48 @@ export default function OrderTrackingScreen({ orderId }: Props) {
       <style>{`
         .tracking-shell { min-height:100vh; min-height:100dvh; background:var(--bg); color:var(--t1); }
         .tracking-header { display:flex; align-items:center; gap:12px; padding:16px 20px; background:var(--s1); border-bottom:1px solid var(--border); }
-        .tracking-logo { width:40px; height:40px; border-radius:12px; background:linear-gradient(145deg,var(--primary-dark),var(--primary)); display:flex; align-items:center; justify-content:center; font-size: calc(20px * var(--font-scale)); }
-        .tracking-brand { font-family:var(--font-serif); font-size: calc(18px * var(--font-scale)); font-weight:700; color:var(--accent); letter-spacing:2px; }
-        .tracking-store { font-size: calc(12px * var(--font-scale)); color:var(--t3); }
-        .tracking-clock { margin-left:auto; text-align:right; font-size: calc(13px * var(--font-scale)); font-weight:600; color:var(--t2); }
-        .tracking-clock div:last-child { font-size: calc(10px * var(--font-scale)); color:var(--t3); font-weight:500; }
+        .tracking-logo { width:40px; height:40px; border-radius:12px; background:linear-gradient(145deg,var(--primary-dark),var(--primary)); display:flex; align-items:center; justify-content:center; font-size: 26px; }
+        .tracking-brand { font-family:var(--font-serif); font-size: 23px; font-weight:700; color:var(--accent); letter-spacing:2px; }
+        .tracking-store { font-size: 15px; color:var(--t3); }
+        .tracking-clock { margin-left:auto; text-align:right; font-size: 17px; font-weight:600; color:var(--t2); }
+        .tracking-clock div:last-child { font-size: 13px; color:var(--t3); font-weight:500; }
         .tracking-main { max-width:480px; margin:0 auto; padding:24px 20px 40px; }
         .tracking-hero { text-align:center; margin-bottom:24px; }
-        .tracking-hero-label { font-size: calc(11px * var(--font-scale)); font-weight:700; text-transform:uppercase; letter-spacing:1.2px; color:var(--t3); margin-bottom:10px; }
-        .tracking-code { font-family:var(--font-serif); font-size: calc(52px * var(--font-scale)); font-weight:700; color:var(--accent); letter-spacing:8px; line-height:1; margin-bottom:12px; }
-        .tracking-summary { font-size: calc(15px * var(--font-scale)); color:var(--t2); margin-bottom:6px; }
-        .tracking-meta { font-size: calc(13px * var(--font-scale)); color:var(--t3); }
+        .tracking-hero-label { font-size: 14px; font-weight:700; text-transform:uppercase; letter-spacing:1.2px; color:var(--t3); margin-bottom:10px; }
+        .tracking-code { font-family:var(--font-serif); font-size: 67px; font-weight:700; color:var(--accent); letter-spacing:8px; line-height:1; margin-bottom:12px; }
+        .tracking-summary { font-size: 19px; color:var(--t2); margin-bottom:6px; }
+        .tracking-meta { font-size: 17px; color:var(--t3); }
         .tracking-status-banner { border-radius:var(--r); padding:16px 18px; margin-bottom:24px; border:1px solid var(--border2); background:var(--s2); }
         .tracking-status-banner.status-PENDING { border-color:rgba(255,255,255,.08); }
         .tracking-status-banner.status-PREPARING { border-color:rgba(255,149,0,.35); background:rgba(255,149,0,.08); }
         .tracking-status-banner.status-READY { border-color:rgba(52,199,89,.35); background:rgba(52,199,89,.08); }
         .tracking-status-banner.status-DELIVERED,.tracking-status-banner.status-CANCELLED { border-color:rgba(255,255,255,.08); opacity:.85; }
-        .tracking-status-title { font-size: calc(18px * var(--font-scale)); font-weight:700; color:var(--t1); margin-bottom:4px; }
-        .tracking-status-hint { font-size: calc(13px * var(--font-scale)); color:var(--t2); line-height:1.45; }
-        .tracking-pipeline-title { font-size: calc(11px * var(--font-scale)); font-weight:700; text-transform:uppercase; letter-spacing:1.2px; color:var(--t3); margin-bottom:14px; }
+        .tracking-status-title { font-size: 23px; font-weight:700; color:var(--t1); margin-bottom:4px; }
+        .tracking-status-hint { font-size: 17px; color:var(--t2); line-height:1.45; }
+        .tracking-pipeline-title { font-size: 14px; font-weight:700; text-transform:uppercase; letter-spacing:1.2px; color:var(--t3); margin-bottom:14px; }
         .tracking-steps { display:flex; flex-direction:column; gap:0; }
         .tracking-step { display:flex; gap:14px; }
         .tracking-step-marker { display:flex; flex-direction:column; align-items:center; width:28px; flex-shrink:0; }
-        .tracking-step-dot { width:28px; height:28px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size: calc(12px * var(--font-scale)); font-weight:700; background:var(--s2); border:2px solid var(--border2); color:var(--t3); }
+        .tracking-step-dot { width:28px; height:28px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size: 15px; font-weight:700; background:var(--s2); border:2px solid var(--border2); color:var(--t3); }
         .tracking-step.done .tracking-step-dot { background:rgba(52,199,89,.15); border-color:var(--green); color:var(--green); }
         .tracking-step.active .tracking-step-dot { background:linear-gradient(145deg,var(--primary-dark),var(--primary)); border-color:var(--primary); color:#fff; box-shadow:0 0 0 4px rgba(192,39,45,.2); }
         .tracking-step-line { width:2px; flex:1; min-height:24px; background:var(--border2); margin:4px 0; }
         .tracking-step.done .tracking-step-line { background:var(--green); }
         .tracking-step-body { padding:2px 0 22px; }
-        .tracking-step-label { font-size: calc(15px * var(--font-scale)); font-weight:600; color:var(--t2); }
+        .tracking-step-label { font-size: 19px; font-weight:600; color:var(--t2); }
         .tracking-step.active .tracking-step-label { color:var(--t1); }
         .tracking-step.pending .tracking-step-label { color:var(--t3); }
-        .tracking-step-caption { font-size: calc(12px * var(--font-scale)); color:var(--t3); margin-top:4px; line-height:1.4; }
+        .tracking-step-caption { font-size: 15px; color:var(--t3); margin-top:4px; line-height:1.4; }
         .tracking-items { margin-top:8px; padding-top:20px; border-top:1px solid var(--border); }
         .tracking-item { padding:12px 0; border-bottom:1px solid var(--border); }
         .tracking-item:last-child { border-bottom:none; }
-        .tracking-item-name { font-size: calc(14px * var(--font-scale)); font-weight:600; color:var(--t1); margin-bottom:4px; }
-        .tracking-item-detail { font-size: calc(12px * var(--font-scale)); color:var(--t3); }
-        .tracking-footer { margin-top:28px; text-align:center; font-size: calc(11px * var(--font-scale)); color:var(--t3); }
+        .tracking-item-name { font-size: 18px; font-weight:600; color:var(--t1); margin-bottom:4px; }
+        .tracking-item-detail { font-size: 15px; color:var(--t3); }
+        .tracking-footer { margin-top:28px; text-align:center; font-size: 14px; color:var(--t3); }
         .tracking-empty { text-align:center; padding:48px 12px; }
-        .tracking-empty-icon { width:64px; height:64px; border-radius:50%; margin:0 auto 16px; background:var(--s2); border:1px solid var(--border2); display:flex; align-items:center; justify-content:center; font-size: calc(28px * var(--font-scale)); color:var(--t3); }
-        .tracking-empty h1 { font-family:var(--font-serif); font-size: calc(22px * var(--font-scale)); margin-bottom:8px; color:var(--accent); }
-        .tracking-empty p { font-size: calc(14px * var(--font-scale)); color:var(--t2); line-height:1.5; }
+        .tracking-empty-icon { width:64px; height:64px; border-radius:50%; margin:0 auto 16px; background:var(--s2); border:1px solid var(--border2); display:flex; align-items:center; justify-content:center; font-size: 36px; color:var(--t3); }
+        .tracking-empty h1 { font-family:var(--font-serif); font-size: 28px; margin-bottom:8px; color:var(--accent); }
+        .tracking-empty p { font-size: 18px; color:var(--t2); line-height:1.5; }
       `}</style>
     </div>
   )
