@@ -144,25 +144,24 @@ export default function KanbanScreen() {
         />
       </div>
 
-      {/* Dock */}
-      <div className="kanban-dock">
-        <button
-          type="button"
-          className="kanban-dock-btn primary"
-          onClick={() => { const next = waiting[0]; if (next) moveOrder(next.id, 'em_preparo') }}
-          disabled={waiting.length === 0}
-        >
-          ▶ Iniciar próximo
-        </button>
-        <button
-          type="button"
-          className="kanban-dock-btn secondary"
-          onClick={resetOrders}
-          title="Zerar fila"
-        >
-          ↺
-        </button>
-      </div>
+      {/* Botão Zerar — fixo no canto inferior direito */}
+      <button
+        type="button"
+        onClick={resetOrders}
+        title="Zerar fila"
+        style={{
+          position: 'fixed', bottom: 20, right: 20,
+          fontSize: 12, padding: '7px 18px',
+          background: 'transparent', color: 'var(--primary)',
+          border: '1px solid var(--primary)', borderRadius: 8,
+          cursor: 'pointer', opacity: 0.6, transition: 'opacity .2s',
+          zIndex: 100,
+        }}
+        onMouseEnter={e => (e.currentTarget.style.opacity = '1')}
+        onMouseLeave={e => (e.currentTarget.style.opacity = '0.6')}
+      >
+        Zerar fila
+      </button>
     </div>
   )
 }

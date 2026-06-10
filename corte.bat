@@ -31,11 +31,18 @@ goto menu
 :setup
 echo.
 docker ps -a --filter name=cortes-app-postgres --format "{{.Names}}" 2>nul | findstr /i "cortes-app-postgres" >nul
-if %errorlevel%==0 (
+if %errorlevel% NEQ 0 (
+  echo [setup] Criando container PostgreSQL...
+  docker run -d --name cortes-app-postgres -e POSTGRES_USER=cortes -e POSTGRES_PASSWORD=cortes123 -e POSTGRES_DB=cortes_app -p 5435:5432 postgres:16 >nul 2>&1
+  if errorlevel 1 (
+    echo ERRO: Nao foi possivel criar cortes-app-postgres. Verifique se o Docker Desktop esta rodando.
+    pause & exit /b 1
+  )
+) else (
   echo [setup] Iniciando PostgreSQL...
   docker start cortes-app-postgres >nul 2>&1
-  timeout /t 2 /nobreak >nul
 )
+call :aguarda_postgres
 if not exist ".env"         copy /Y .env.example .env >nul
 if not exist "backend\.env" copy /Y backend\.env.example backend\.env >nul
 goto :eof
@@ -52,7 +59,7 @@ start /min "CORTE Print" cmd /k "cd /d %~dp0print-server & set SAVE_PDF_DIR=%~dp
 call :aguarda_print_server
 echo [dev] Iniciando API em http://localhost:3333 ...
 start /min "CORTE API" cmd /k "cd /d %~dp0backend && npm run dev"
-timeout /t 3 /nobreak >nul
+call :aguarda_api
 echo [dev] Iniciando frontend em http://localhost:5173 ...
 start /min "CORTE Frontend" cmd /k "cd /d %~dp0 && npm run dev"
 
@@ -90,6 +97,22 @@ powershell -Command "try{Invoke-WebRequest -Uri 'http://127.0.0.1:3334/health' -
 if %errorlevel% NEQ 0 goto aguarda_print_loop
 goto :eof
 
+:aguarda_postgres
+echo [aguarda] Esperando PostgreSQL em localhost:5435 ...
+:aguarda_postgres_loop
+timeout /t 1 /nobreak >nul
+powershell -Command "try{$tcp=New-Object System.Net.Sockets.TcpClient;$tcp.Connect('127.0.0.1',5435);$tcp.Close();exit 0}catch{exit 1}" >nul 2>&1
+if %errorlevel% NEQ 0 goto aguarda_postgres_loop
+goto :eof
+
+:aguarda_api
+echo [aguarda] Esperando API em http://localhost:3333 ...
+:aguarda_api_loop
+timeout /t 1 /nobreak >nul
+powershell -Command "try{Invoke-WebRequest -Uri 'http://127.0.0.1:3333/health' -UseBasicParsing -TimeoutSec 2|Out-Null;exit 0}catch{exit 1}" >nul 2>&1
+if %errorlevel% NEQ 0 goto aguarda_api_loop
+goto :eof
+
 :: ═══════════════════════════════════════════════════════════════════
 ::  Rotina compartilhada: build + API + serve dist + print-server
 :: ═══════════════════════════════════════════════════════════════════
@@ -111,7 +134,7 @@ if errorlevel 1 ( echo ERRO no build. & pause & exit /b 1 )
 
 echo [api] Iniciando API em http://localhost:3333 ...
 start /min "CORTE API" cmd /k "cd /d %~dp0backend && npm run dev"
-timeout /t 3 /nobreak >nul
+call :aguarda_api
 
 echo [serve] Servindo frontend em http://localhost:4173 ...
 start /min "CORTE Frontend" cmd /k "cd /d %~dp0 && npx serve dist -l 4173 --no-clipboard"
