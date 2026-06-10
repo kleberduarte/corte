@@ -69,6 +69,7 @@ enum Chain {
   COOP
   HIROTA
   REDE_SMART
+  ST_MARCHE
   // Plataforma
   CORTE_SUPERMERCADO
   OUTROS

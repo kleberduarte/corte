@@ -19,6 +19,7 @@ export const CHAIN_OPTIONS = [
   { value: 'COOP',                 label: 'Coop' },
   { value: 'HIROTA',               label: 'Hirota' },
   { value: 'REDE_SMART',           label: 'Rede Smart' },
+  { value: 'ST_MARCHE',            label: 'St Marche' },
   { value: 'OUTROS',               label: 'Outros' },
 ] as const
 
@@ -41,6 +42,7 @@ export const CHAIN_LABELS: Record<string, string> = {
   COOP:                 'Coop',
   HIROTA:               'Hirota',
   REDE_SMART:           'Rede Smart',
+  ST_MARCHE:            'St Marche',
   CORTE_SUPERMERCADO:   'Corte Supermercado',
   OUTROS:               'Outros',
 }
