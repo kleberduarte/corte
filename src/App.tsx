@@ -246,7 +246,7 @@ function ClienteView() {
           <Topbar hideStatus />
         </div>
       )}
-      {!hideTopbar && <Topbar showBack={showBack} onBack={handleBack} />}
+      {!hideTopbar && <Topbar showBack={showBack} onBack={handleBack} hideStatus />}
       {stepIndex >= 0 && <StepProgress current={stepIndex} total={STEP_SCREENS.length} />}
 
       {screen === 'home'        && <HomeScreen key={screenKey} onStart={() => go('pickup-mode')} onProduct={handleHeroProduct} />}

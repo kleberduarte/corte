@@ -35,7 +35,7 @@
 .totem-shell.totem-21 .status-pill { padding: 9px 18px; }
 .totem-shell.totem-21 .status-dot { width: 8px; height: 8px; }
 .totem-shell.totem-21 .status-txt { font-size: 16px; }
-.totem-shell.totem-21 .back-btn { padding: 12px 20px; font-size: 18px; border-radius: 14px; gap: 8px; }
+.totem-shell.totem-21 .back-btn { padding: 14px 24px; font-size: 19px; border-radius: 16px; gap: 10px; min-height: 56px; border-width: 2px; }
 
 .totem-shell.totem-21 .btn-primary { padding: 24px 32px; font-size: 22px; border-radius: var(--r-lg); min-height: 64px; }
 .totem-shell.totem-21 .btn-secondary { padding: 20px 28px; font-size: 19px; min-height: 56px; }
