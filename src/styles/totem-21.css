@@ -15,7 +15,7 @@
   overflow: hidden;
   display: flex;
   justify-content: center;
-  align-items: center;
+  align-items: flex-start;
   background: var(--bg);
 }
 
@@ -25,6 +25,8 @@
   flex-shrink: 0;
   transform: scale(var(--totem-scale));
   transform-origin: top center;
+  /* Compensa o espaço de layout não escalado para preencher a altura visível */
+  margin-bottom: calc((1 - var(--totem-scale)) * var(--totem-ref-h) * -1px);
 }
 
 /* ── Tipografia e controles (legibilidade à ~1 m no totem 21") ── */
@@ -37,8 +39,8 @@
 .totem-shell.totem-21 .status-txt { font-size: 16px; }
 .totem-shell.totem-21 .back-btn { padding: 14px 24px; font-size: 19px; border-radius: 16px; gap: 10px; min-height: 56px; border-width: 2px; }
 
-.totem-shell.totem-21 .btn-primary { padding: 24px 32px; font-size: 22px; border-radius: var(--r-lg); min-height: 64px; }
-.totem-shell.totem-21 .btn-secondary { padding: 20px 28px; font-size: 19px; min-height: 56px; }
+.totem-shell.totem-21 .btn-primary { padding: 32px 40px; font-size: 30px; border-radius: var(--r-lg); min-height: 88px; font-weight: 700; }
+.totem-shell.totem-21 .btn-secondary { padding: 28px 36px; font-size: 26px; min-height: 76px; font-weight: 600; }
 .totem-shell.totem-21 .chip { padding: 12px 20px; font-size: 18px; border-radius: 24px; }
 .totem-shell.totem-21 .chips { padding: 0 32px 18px; gap: 12px; }
 
@@ -51,9 +53,9 @@
 .totem-shell.totem-21 .fab-label { font-size: 21px; }
 .totem-shell.totem-21 .fab-hint { font-size: 16px; }
 
-.totem-shell.totem-21 .input-prefix { font-size: 21px; padding: 20px 18px 20px 20px; }
-.totem-shell.totem-21 .input-f { font-size: 26px; padding: 20px; }
-.totem-shell.totem-21 .input-wrap { border-radius: 16px; }
+.totem-shell.totem-21 .input-prefix { font-size: 28px; padding: 28px 22px 28px 28px; font-weight: 600; }
+.totem-shell.totem-21 .input-f { font-size: 34px; padding: 28px; font-weight: 500; }
+.totem-shell.totem-21 .input-wrap { border-radius: 20px; border-width: 2.5px; }
 
 .totem-shell.totem-21 .slot { padding: 18px 0; font-size: 20px; border-radius: 14px; }
 .totem-shell.totem-21 .slots-grid--compact .slot { padding: 15px 0; font-size: 19px; }
@@ -92,8 +94,9 @@
   flex: 1 1 0;
   min-height: 0;
   display: flex;
-  align-items: center;
-  justify-content: center;
+  flex-direction: column;
+  align-items: stretch;
+  justify-content: stretch;
   padding: 12px 24px 8px;
   position: relative;
   z-index: 1;
@@ -101,7 +104,11 @@
 
 .print-done-card {
   width: 100%;
-  max-width: 480px;
+  flex: 1 1 0;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  max-width: none;
   background: var(--s1);
   border: 1px solid var(--border2);
   border-radius: var(--r-xl);
@@ -217,6 +224,9 @@
   flex-direction: column;
   gap: 8px;
   text-align: left;
+  flex: 1 1 0;
+  min-height: 0;
+  justify-content: center;
 }
 
 .print-done-step {
@@ -257,6 +267,8 @@
 
 .print-done-qr-section {
   padding-top: 4px;
+  flex-shrink: 0;
+  margin-top: auto;
 }
 
 .print-done-qr-divider {
@@ -356,19 +368,23 @@
 }
 
 .totem-shell.totem-21 .print-done-body { padding: 16px 36px 10px; }
-.totem-shell.totem-21 .print-done-card { max-width: 540px; padding: 24px 28px 20px; }
-.totem-shell.totem-21 .print-done-header { gap: 16px; margin-bottom: 20px; }
-.totem-shell.totem-21 .print-done-icon { width: 58px; height: 58px; font-size: 34px; }
-.totem-shell.totem-21 .print-done-title { font-size: 30px; }
-.totem-shell.totem-21 .print-done-msg { font-size: 16px; }
-.totem-shell.totem-21 .print-done-code { font-size: 46px; letter-spacing: 10px; }
-.totem-shell.totem-21 .print-done-code-label { font-size: 12px; }
-.totem-shell.totem-21 .print-done-pickup-badge { font-size: 13px; padding: 6px 14px; }
-.totem-shell.totem-21 .print-done-step-text { font-size: 15px; }
-.totem-shell.totem-21 .print-done-step-num { width: 26px; height: 26px; font-size: 13px; }
-.totem-shell.totem-21 .print-done-qr-divider { font-size: 12px; margin-bottom: 12px; }
-.totem-shell.totem-21 .print-done-footer { padding: 18px 36px 40px; }
-.totem-shell.totem-21 .print-done-btn { max-width: 440px; }
+.totem-shell.totem-21 .print-done-card { padding: 28px 32px 24px; }
+.totem-shell.totem-21 .print-done-header { gap: 18px; margin-bottom: 24px; flex-shrink: 0; }
+.totem-shell.totem-21 .print-done-icon { width: 64px; height: 64px; font-size: 36px; }
+.totem-shell.totem-21 .print-done-title { font-size: 42px; }
+.totem-shell.totem-21 .print-done-msg { font-size: 22px; }
+.totem-shell.totem-21 .print-done-code-hero { padding: 32px 32px 28px; margin-bottom: 24px; flex-shrink: 0; }
+.totem-shell.totem-21 .print-done-code { font-size: 80px; letter-spacing: 16px; }
+.totem-shell.totem-21 .print-done-code-label { font-size: 20px; letter-spacing: 2px; }
+.totem-shell.totem-21 .print-done-pickup-badge { font-size: 22px; padding: 10px 24px; }
+.totem-shell.totem-21 .print-done-steps { gap: 16px; margin-bottom: 22px; }
+.totem-shell.totem-21 .print-done-step { padding: 20px 22px; gap: 16px; }
+.totem-shell.totem-21 .print-done-step-text { font-size: 26px; font-weight: 600; line-height: 1.4; }
+.totem-shell.totem-21 .print-done-step-num { width: 44px; height: 44px; font-size: 20px; }
+.totem-shell.totem-21 .print-done-qr-divider { font-size: 20px; margin-bottom: 18px; }
+.totem-shell.totem-21 .print-done-footer { padding: 24px 36px 44px; }
+.totem-shell.totem-21 .print-done-btn { max-width: none; min-height: 92px; font-size: 30px; }
+.totem-shell.totem-21 .print-done-btn-timer { font-size: 22px; padding: 4px 14px; }
 
 .totem-shell.totem-21 .print-stage-msg { font-size: 22px !important; margin-bottom: 24px !important; }
 .totem-shell.totem-21 .print-stage-spinner { width: 26px !important; height: 26px !important; }
@@ -390,12 +406,17 @@
 }
 
 .totem-shell.totem-21 .qr-scan-prompt {
-  --qr-frame: 200px;
-  --qr-code: 158px;
-  --qr-corner: 26px;
-  --qr-phone-w: 76px;
-  --qr-phone-h: 118px;
-  --qr-stage-gap: 8px;
+  --qr-frame: 320px;
+  --qr-code: 256px;
+  --qr-corner: 40px;
+  --qr-phone-w: 110px;
+  --qr-phone-h: 168px;
+  --qr-stage-gap: 14px;
+}
+
+.totem-shell.totem-21 .print-done-qr-section .qr-scan-prompt {
+  --qr-frame: 340px;
+  --qr-code: 272px;
 }
 
 .qr-scan-prompt__title {
@@ -407,7 +428,7 @@
   color: var(--t3);
 }
 
-.totem-shell.totem-21 .qr-scan-prompt__title { font-size: 15px; }
+.totem-shell.totem-21 .qr-scan-prompt__title { font-size: 22px; }
 
 .qr-scan-prompt__hint {
   margin: 0 0 12px;
@@ -417,7 +438,7 @@
   line-height: 1.35;
 }
 
-.totem-shell.totem-21 .qr-scan-prompt__hint { font-size: 18px; margin-bottom: 14px; }
+.totem-shell.totem-21 .qr-scan-prompt__hint { font-size: 28px; margin-bottom: 18px; font-weight: 700; }
 
 .qr-scan-prompt__stage {
   position: relative;
@@ -864,111 +885,124 @@
 
 /* ── Carrinho — totem 21" tela cheia ── */
 .totem-shell.totem-21 .cart-header {
-  padding: 6px 20px 14px;
+  padding: 8px 24px 18px;
 }
 
 .totem-shell.totem-21 .cart-title {
-  font-size: 52px;
+  font-size: 62px;
 }
 
 .totem-shell.totem-21 .cart-lead {
-  font-size: 22px;
+  font-size: 28px;
   max-width: none;
+  color: var(--t2);
+  margin-top: 10px;
+  line-height: 1.45;
 }
 
 .totem-shell.totem-21 .cart-count-badge {
-  padding: 10px 20px;
-  margin-top: 14px;
+  padding: 12px 26px;
+  margin-top: 18px;
+  gap: 12px;
 }
 
 .totem-shell.totem-21 .cart-count-num {
-  font-size: 32px;
+  font-size: 40px;
 }
 
 .totem-shell.totem-21 .cart-count-label {
-  font-size: 18px;
+  font-size: 22px;
 }
 
 .totem-shell.totem-21 .cart-body {
-  padding: 0 20px;
+  padding: 0 24px;
 }
 
 .totem-shell.totem-21 .cart-panel--full .cart-panel-list {
-  gap: 16px;
+  gap: 20px;
+  padding-bottom: 16px;
 }
 
 .totem-shell.totem-21 .cart-panel-item {
-  padding: 18px 20px;
+  padding: 22px 24px;
   border-width: 2px;
+  gap: 18px;
 }
 
 .totem-shell.totem-21 .cart-panel-item-index {
-  width: 44px;
-  height: 44px;
-  font-size: 22px;
-}
-
-.totem-shell.totem-21 .cart-panel-item-img {
-  width: 96px;
-  height: 96px;
-  border-radius: 18px;
-}
-
-.totem-shell.totem-21 .cart-panel-item-name {
-  font-size: 30px;
-  margin-bottom: 6px;
-}
-
-.totem-shell.totem-21 .cart-panel-item-meta {
-  font-size: 22px;
-  margin-bottom: 6px;
-}
-
-.totem-shell.totem-21 .cart-panel-item-price {
+  width: 52px;
+  height: 52px;
   font-size: 26px;
 }
 
+.totem-shell.totem-21 .cart-panel-item-img {
+  width: 112px;
+  height: 112px;
+  border-radius: 20px;
+}
+
+.totem-shell.totem-21 .cart-panel-item-name {
+  font-size: 36px;
+  margin-bottom: 8px;
+}
+
+.totem-shell.totem-21 .cart-panel-item-meta {
+  font-size: 26px;
+  margin-bottom: 8px;
+}
+
+.totem-shell.totem-21 .cart-panel-item-cut {
+  font-size: 26px;
+}
+
+.totem-shell.totem-21 .cart-panel-item-price {
+  font-size: 34px;
+}
+
 .totem-shell.totem-21 .cart-panel-total {
-  padding: 20px 22px;
+  padding: 24px 26px;
 }
 
 .totem-shell.totem-21 .cart-panel-total-label {
-  font-size: 22px;
+  font-size: 28px;
+  font-weight: 700;
+  color: var(--t2);
 }
 
 .totem-shell.totem-21 .cart-panel-total-val {
-  font-size: 38px;
+  font-size: 48px;
 }
 
 .totem-shell.totem-21 .cart-checkout {
-  padding: 20px 20px 24px;
-  gap: 16px;
+  padding: 22px 24px 28px;
+  gap: 18px;
 }
 
 .totem-shell.totem-21 .cart-pay-note {
-  padding: 20px 22px;
-  font-size: 20px;
-  border-radius: 16px;
+  padding: 22px 26px;
+  font-size: 24px;
+  line-height: 1.45;
+  border-radius: 18px;
   border-width: 2px;
 }
 
 .totem-shell.totem-21 .cart-pay-icon {
-  font-size: 34px;
+  font-size: 40px;
 }
 
 .totem-shell.totem-21 .cart-add-btn {
-  min-height: 80px !important;
-  font-size: 26px !important;
+  min-height: 88px !important;
+  font-size: 30px !important;
   border-radius: var(--r-xl) !important;
-  padding: 22px 28px !important;
+  padding: 26px 32px !important;
 }
 
 .totem-shell.totem-21 .cart-continue-btn {
-  min-height: 112px !important;
-  font-size: 32px !important;
+  min-height: 120px !important;
+  font-size: 36px !important;
   font-weight: 700 !important;
   border-radius: var(--r-xl) !important;
-  padding: 30px 36px !important;
+  padding: 32px 40px !important;
   box-shadow: 0 10px 36px var(--primary-glow) !important;
 }
 
@@ -988,23 +1022,23 @@
 }
 
 .totem-shell.totem-21 .cart-panel--compact .cart-panel-item-name {
-  font-size: 24px;
+  font-size: 28px;
 }
 
 .totem-shell.totem-21 .cart-panel--compact .cart-panel-item-meta {
-  font-size: 19px;
-}
-
-.totem-shell.totem-21 .cart-panel--compact .cart-panel-item-price {
   font-size: 22px;
 }
 
+.totem-shell.totem-21 .cart-panel--compact .cart-panel-item-price {
+  font-size: 26px;
+}
+
 .totem-shell.totem-21 .cart-panel--compact .cart-panel-total-label {
-  font-size: 20px;
+  font-size: 24px;
 }
 
 .totem-shell.totem-21 .cart-panel--compact .cart-panel-total-val {
-  font-size: 30px;
+  font-size: 34px;
 }
 
 .totem-shell.totem-21 .schedule-add-more-btn {
@@ -1161,19 +1195,25 @@
   margin-top: 14px;
 }
 
+.totem-shell.totem-21 .phone-header { padding: 6px 32px 20px; }
+.totem-shell.totem-21 .phone-body { padding: 0 32px 16px; }
+.totem-shell.totem-21 .phone-footer { padding: 26px 32px 44px; gap: 22px; }
+.totem-shell.totem-21 .phone-label { font-size: 24px; letter-spacing: 1.4px; font-weight: 700; }
+.totem-shell.totem-21 .phone-disclaimer { font-size: 24px; line-height: 1.55; }
+
 .totem-shell.totem-21 .phone-order-summary {
-  padding: 20px 22px;
+  padding: 24px 26px;
   border-radius: var(--r-xl);
   border-width: 2px;
 }
 
 .totem-shell.totem-21 .phone-order-summary-label {
-  font-size: 18px;
-  margin-bottom: 14px;
+  font-size: 22px;
+  margin-bottom: 16px;
 }
 
-.totem-shell.totem-21 .phone-heading { font-size: 40px !important; }
-.totem-shell.totem-21 .phone-lead { font-size: 20px !important; }
+.totem-shell.totem-21 .phone-heading { font-size: 58px !important; }
+.totem-shell.totem-21 .phone-lead { font-size: 26px !important; }
 
 .totem-shell.totem-21 .inactivity-ring { width: 140px !important; height: 140px !important; margin-bottom: 32px !important; }
 .totem-shell.totem-21 .inactivity-count { font-size: 60px !important; }

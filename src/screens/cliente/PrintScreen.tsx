@@ -5,7 +5,7 @@ import { getOrderTrackingUrl } from '../../utils/orderTrackingUrl'
 import QrScanPrompt from '../../components/QrScanPrompt'
 import { generateQrDataUrl, generateQrObjectUrl } from '../../utils/qrCode'
 
-const QR_DISPLAY_SIZE = 256
+const QR_DISPLAY_SIZE = 384
 /** Tempo na tela do QR antes de voltar ao início automaticamente */
 const QR_SCAN_DISPLAY_SECONDS = 20
 
