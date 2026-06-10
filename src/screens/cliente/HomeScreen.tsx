@@ -59,7 +59,7 @@ export default function HomeScreen({ onStart, onProduct }: Props) {
       onMouseDown={(e) => onDragStart(e.clientX)}
       onMouseUp={(e) => onDragEnd(e.clientX)}
       onTouchStart={(e) => onDragStart(e.touches[0].clientX)}
-      onTouchEnd={(e) => onDragEnd(e.changedTouches[0].clientX)}
+      onTouchEnd={(e) => { e.preventDefault(); onDragEnd(e.changedTouches[0].clientX) }}
     >
       {/* Hero */}
       <div style={{ flex: 1, position: 'relative', overflow: 'hidden' }}>
