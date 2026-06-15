@@ -4,6 +4,7 @@ import { prisma } from '../config/database'
 import { env } from '../config/env'
 import { AdminLoginInput, CreateStoreInput, UpdateStoreInput, CreateOperatorInput, ResetPasswordInput } from '../schemas/admin.schema'
 import { NotFoundError, UnauthorizedError, ConflictError } from '../errors/AppError'
+import { seedCatalogForStore } from './catalog-seed.service'
 
 // ─── Auth ─────────────────────────────────────────────────────────────────────
 
@@ -119,7 +120,7 @@ export async function createStore(input: CreateStoreInput) {
   const exists = await prisma.store.findUnique({ where: { slug: input.slug } })
   if (exists) throw new ConflictError(`Slug "${input.slug}" já está em uso`)
 
-  return prisma.store.create({
+  const store = await prisma.store.create({
     data: {
       id:       input.slug,
       name:     input.name,
@@ -130,6 +131,17 @@ export async function createStore(input: CreateStoreInput) {
     },
     include: { config: true },
   })
+
+  await seedCatalogForStore(prisma, store.id)
+
+  return store
+}
+
+export async function syncStoreCatalog(storeId: string) {
+  const store = await prisma.store.findUnique({ where: { id: storeId } })
+  if (!store) throw new NotFoundError('Loja')
+  const count = await seedCatalogForStore(prisma, storeId)
+  return { count }
 }
 
 export async function updateStore(storeId: string, input: UpdateStoreInput) {
