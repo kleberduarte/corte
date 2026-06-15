@@ -45,11 +45,27 @@ export default function KanbanScreen() {
     return <LoginScreen onSuccess={() => setLoggedIn(true)} />
   }
 
+  const slotMinutes = (slotTime: string): number => {
+    if (slotTime === 'Preferencial' || slotTime === 'Imediata' || slotTime === 'Balcão') return -1
+    const match = slotTime.match(/^(\d{2}):(\d{2})$/)
+    if (!match) return 9999
+    return parseInt(match[1]) * 60 + parseInt(match[2])
+  }
+
   const sortQueue = (list: Order[]) =>
     [...list].sort((a, b) => {
+      // 1. Preferencial sempre primeiro
       if (a.priority && !b.priority) return -1
       if (!a.priority && b.priority) return 1
-      return b.createdAt.getTime() - a.createdAt.getTime()
+      // 2. Imediata/Balcão logo após preferenciais, antes de agendados
+      const aMin = slotMinutes(a.slotTime)
+      const bMin = slotMinutes(b.slotTime)
+      if (aMin === -1 && bMin !== -1) return -1
+      if (aMin !== -1 && bMin === -1) return 1
+      // 3. Horário mais próximo primeiro
+      if (aMin !== bMin) return aMin - bMin
+      // 4. Desempate: quem chegou primeiro
+      return a.createdAt.getTime() - b.createdAt.getTime()
     })
 
   const waiting = sortQueue(orders.filter((o) => o.status === 'aguardando'))
@@ -203,6 +219,15 @@ function KanbanCol({ title, color, orders, primaryLabel, onPrimary, isGreen, clo
   )
 }
 
+function urgencyBar(minutesLeft: number, isPriority: boolean, isGreen: boolean | undefined): { color: string; label: string } {
+  if (isGreen)    return { color: 'var(--green)',  label: 'Pronto' }
+  if (isPriority) return { color: '#4A90D9',       label: 'Preferencial' }
+  if (minutesLeft <= 0)  return { color: 'var(--primary)', label: 'AGORA' }
+  if (minutesLeft < 5)   return { color: 'var(--primary)', label: `${minutesLeft} min` }
+  if (minutesLeft < 10)  return { color: 'var(--gold)',    label: `${minutesLeft} min` }
+  return { color: 'var(--green)', label: `${minutesLeft} min` }
+}
+
 function KanbanCard({ order, primaryLabel, onPrimary, isGreen, clock }: {
   order: Order; primaryLabel: string; onPrimary: (o: Order) => void; isGreen?: boolean; clock?: Date
 }) {
@@ -214,9 +239,12 @@ function KanbanCard({ order, primaryLabel, onPrimary, isGreen, clock }: {
   const timerLabel = minutesLeft > 0 ? `${minutesLeft}min` : 'AGORA'
 
   const isPriority = order.priority || order.slotTime === 'Preferencial'
+  const bar = urgencyBar(minutesLeft, isPriority, isGreen)
 
   return (
-    <div className={`tkc${isPriority ? ' priority' : ''}${minutesLeft < 5 && !isPriority ? ' urgent' : ''}`} style={{ animation: 'tkcIn .45s ease' }}>
+    <div className={`tkc${isPriority ? ' priority' : ''}${minutesLeft < 5 && !isPriority ? ' urgent' : ''}`} style={{ animation: 'tkcIn .45s ease', overflow: 'hidden' }}>
+      {/* Barra de urgência no topo */}
+      <div style={{ margin: '-14px -14px 12px', height: 5, background: bar.color, borderRadius: '14px 14px 0 0', opacity: 0.85 }} />
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
         <div style={{ fontFamily: 'var(--font-serif)', fontSize: 15, fontWeight: 700, color: 'var(--t1)', letterSpacing: 1 }}>
           {order.pickupCode}
