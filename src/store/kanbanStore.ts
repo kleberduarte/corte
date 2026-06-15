@@ -3,6 +3,7 @@ import type { Order } from './cartStore'
 import { normalizeOrder } from './cartStore'
 import { api } from '../lib/api'
 import { getOperatorToken } from '../lib/auth'
+import { flushQueue, loadQueue } from './syncQueue'
 
 const LS_KEY = 'corte:orders'
 
@@ -117,24 +118,37 @@ export const useKanbanStore = create<KanbanStore>((set, get) => ({
     const token = getOperatorToken()
     if (!token) return
 
+    // Tenta sincronizar pedidos que falharam anteriormente
+    const confirmed = await flushQueue()
+    if (confirmed.length > 0) {
+      set((s) => {
+        const orders = s.orders.map((o) => {
+          const match = confirmed.find((c) => c.localId === o.id)
+          if (!match) return o
+          return { ...o, id: match.apiOrder.id, pickupCode: match.apiOrder.pickupCode }
+        })
+        saveLocalOrders(orders)
+        return { orders }
+      })
+    }
+
     set({ loading: true, error: null })
     try {
       const data = await api.get<Record<string, unknown>[]>('/orders', token)
       const apiOrders = data.map(apiOrderToLocal)
       const apiIds = new Set(apiOrders.map((o) => o.id))
 
-      // Preserva pedidos locais criados nos últimos 2 minutos que a API ainda não devolveu
-      const now = Date.now()
-      const localOnlyRecent = get().orders.filter(
-        (o) => !apiIds.has(o.id) && now - o.createdAt.getTime() < 2 * 60 * 1000
+      // Mantém pedidos locais que ainda estão na fila de retry (não sincronizados)
+      const pendingLocalIds = new Set(loadQueue().map((e) => e.localId))
+      const pendingOrders = get().orders.filter(
+        (o) => pendingLocalIds.has(o.id) && !apiIds.has(o.id)
       )
 
-      const merged = [...localOnlyRecent, ...apiOrders]
+      const merged = [...pendingOrders, ...apiOrders]
       saveLocalOrders(merged)
       set({ orders: merged, loading: false })
     } catch {
       set({ loading: false, error: 'Não foi possível carregar pedidos da API' })
-      // Mantém os pedidos locais como fallback
       set({ orders: get().orders.length ? get().orders : loadLocalOrders() })
     }
   },

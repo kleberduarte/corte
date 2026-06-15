@@ -1,6 +1,7 @@
 import { create } from 'zustand'
 import type { Product, CutType } from '../data/products'
 import { api } from '../lib/api'
+import { enqueue } from './syncQueue'
 
 export type CartItem = {
   product: Product
@@ -82,27 +83,30 @@ export const useCartStore = create<CartStore>((set, get) => ({
     const { items } = get()
     if (items.length === 0) throw new Error('No items in cart')
 
+    const payload = {
+      pickupMode: slotTime === 'Imediata' ? 'IMMEDIATE' : 'SCHEDULED',
+      scheduledAt: slotTime !== 'Imediata' && slotTime !== 'Balcão'
+        ? new Date(`${new Date().toISOString().split('T')[0]}T${slotTime}:00`).toISOString()
+        : undefined,
+      customerPhone: customerPhone || undefined,
+      items: items.map((i) => ({
+        productId: i.product.id,
+        cutType: i.cutType.name,
+        quantity: i.weightKg,
+      })),
+    }
+
     let pickupCode = generateCode()
     let orderId: string = crypto.randomUUID()
+    let syncFailed = false
 
     try {
-      const apiOrder = await api.post<ApiOrder>(`/totem/${storeSlug}/orders`, {
-        pickupMode: slotTime === 'Imediata' ? 'IMMEDIATE' : 'SCHEDULED',
-        scheduledAt: slotTime !== 'Imediata' && slotTime !== 'Balcão'
-          ? new Date(`${new Date().toISOString().split('T')[0]}T${slotTime}:00`).toISOString()
-          : undefined,
-        customerPhone: customerPhone || undefined,
-        items: items.map((i) => ({
-          productId: i.product.id,
-          cutType: i.cutType.name,
-          quantity: i.weightKg,
-        })),
-      })
+      const apiOrder = await api.post<ApiOrder>(`/totem/${storeSlug}/orders`, payload)
       pickupCode = apiOrder.pickupCode
       orderId = apiOrder.id
     } catch {
-      // Fallback offline: continua com dados locais se a API estiver indisponível
-      console.warn('[cartStore] API indisponível — pedido criado localmente')
+      syncFailed = true
+      console.warn('[cartStore] API indisponível — pedido enfileirado para retry')
     }
 
     const order: Order = {
@@ -114,26 +118,36 @@ export const useCartStore = create<CartStore>((set, get) => ({
       status: 'aguardando',
       createdAt: new Date(),
     }
+
+    if (syncFailed) {
+      enqueue({ localId: orderId, storeSlug, payload, localOrder: { ...order, createdAt: order.createdAt.toISOString() }, queuedAt: new Date().toISOString() })
+    }
+
     set({ currentOrder: order })
     return order
   },
 
   createCounterTicket: async (storeSlug, slotTime, options) => {
     const priority = options?.priority ?? false
+
+    const payload = {
+      pickupMode: 'IMMEDIATE',
+      items: [],
+      priority,
+      notes: priority ? 'Atendimento preferencial' : undefined,
+    }
+
     let pickupCode = generateCode()
     let orderId: string = crypto.randomUUID()
+    let syncFailed = false
 
     try {
-      const apiOrder = await api.post<ApiOrder>(`/totem/${storeSlug}/orders`, {
-        pickupMode: 'IMMEDIATE',
-        items: [],
-        priority,
-        notes: priority ? 'Atendimento preferencial' : undefined,
-      })
+      const apiOrder = await api.post<ApiOrder>(`/totem/${storeSlug}/orders`, payload)
       pickupCode = apiOrder.pickupCode
       orderId = apiOrder.id
     } catch {
-      console.warn('[cartStore] API indisponível — senha de balcão criada localmente')
+      syncFailed = true
+      console.warn('[cartStore] API indisponível — senha de balcão enfileirada para retry')
     }
 
     const order: Order = {
@@ -146,6 +160,11 @@ export const useCartStore = create<CartStore>((set, get) => ({
       status: 'aguardando',
       createdAt: new Date(),
     }
+
+    if (syncFailed) {
+      enqueue({ localId: orderId, storeSlug, payload, localOrder: { ...order, createdAt: order.createdAt.toISOString() }, queuedAt: new Date().toISOString() })
+    }
+
     set({ items: [], currentOrder: order })
     return order
   },
