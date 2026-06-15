@@ -120,9 +120,18 @@ export const useKanbanStore = create<KanbanStore>((set, get) => ({
     set({ loading: true, error: null })
     try {
       const data = await api.get<Record<string, unknown>[]>('/orders', token)
-      const orders = data.map(apiOrderToLocal)
-      saveLocalOrders(orders)
-      set({ orders, loading: false })
+      const apiOrders = data.map(apiOrderToLocal)
+      const apiIds = new Set(apiOrders.map((o) => o.id))
+
+      // Preserva pedidos locais criados nos últimos 2 minutos que a API ainda não devolveu
+      const now = Date.now()
+      const localOnlyRecent = get().orders.filter(
+        (o) => !apiIds.has(o.id) && now - o.createdAt.getTime() < 2 * 60 * 1000
+      )
+
+      const merged = [...localOnlyRecent, ...apiOrders]
+      saveLocalOrders(merged)
+      set({ orders: merged, loading: false })
     } catch {
       set({ loading: false, error: 'Não foi possível carregar pedidos da API' })
       // Mantém os pedidos locais como fallback
