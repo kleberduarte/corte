@@ -6,7 +6,7 @@ import {
 } from '../schemas/admin.schema'
 import {
   loginAdmin, getAdminMe, getAdminStats, listStores, getStore, createStore, updateStore, toggleStore,
-  listOperators, createOperator, resetOperatorPassword, toggleOperator,
+  listOperators, createOperator, resetOperatorPassword, toggleOperator, syncStoreCatalog,
 } from '../services/admin.service'
 
 export async function adminRoutes(app: FastifyInstance) {
@@ -66,6 +66,11 @@ export async function adminRoutes(app: FastifyInstance) {
   app.patch<{ Params: { storeId: string } }>('/stores/:storeId/toggle', async (req, reply) => {
     const { active } = toggleStoreSchema.parse(req.body)
     return reply.send(await toggleStore(req.params.storeId, active))
+  })
+
+  // POST /admin/stores/:storeId/sync-catalog — sincroniza catálogo mestre para a loja
+  app.post<{ Params: { storeId: string } }>('/stores/:storeId/sync-catalog', async (req, reply) => {
+    return reply.send(await syncStoreCatalog(req.params.storeId))
   })
 
   // ─── Operadores ─────────────────────────────────────────────────────────────
