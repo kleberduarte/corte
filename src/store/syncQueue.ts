@@ -4,6 +4,7 @@
  */
 
 import { api } from '../lib/api'
+import { notifyBoardUpdate } from '../lib/boardSync'
 import type { Order } from './cartStore'
 
 const QUEUE_KEY = 'corte:sync_queue'
@@ -62,6 +63,7 @@ export async function flushQueue(): Promise<Array<{ localId: string; apiOrder: A
       )
       dequeue(entry.localId)
       confirmed.push({ localId: entry.localId, apiOrder })
+      notifyBoardUpdate()
     } catch {
       // Mantém na fila para o próximo retry
     }
