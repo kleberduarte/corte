@@ -1,6 +1,7 @@
 import { create } from 'zustand'
 import type { Product, CutType } from '../data/products'
 import { api } from '../lib/api'
+import { notifyBoardUpdate } from '../lib/boardSync'
 import { enqueue } from './syncQueue'
 
 export type CartItem = {
@@ -104,6 +105,7 @@ export const useCartStore = create<CartStore>((set, get) => ({
       const apiOrder = await api.post<ApiOrder>(`/totem/${storeSlug}/orders`, payload)
       pickupCode = apiOrder.pickupCode
       orderId = apiOrder.id
+      notifyBoardUpdate()
     } catch {
       syncFailed = true
       console.warn('[cartStore] API indisponível — pedido enfileirado para retry')
@@ -145,6 +147,7 @@ export const useCartStore = create<CartStore>((set, get) => ({
       const apiOrder = await api.post<ApiOrder>(`/totem/${storeSlug}/orders`, payload)
       pickupCode = apiOrder.pickupCode
       orderId = apiOrder.id
+      notifyBoardUpdate()
     } catch {
       syncFailed = true
       console.warn('[cartStore] API indisponível — senha de balcão enfileirada para retry')

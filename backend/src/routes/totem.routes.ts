@@ -95,6 +95,59 @@ export async function totemRoutes(app: FastifyInstance) {
     },
   )
 
+  // GET /totem/:storeSlug/board — painel público de pedidos (aguardando / preparando / pronto)
+  app.get<{ Params: { storeSlug: string } }>(
+    '/:storeSlug/board',
+    {
+      config: { rateLimit: { max: 120, timeWindow: '1 minute' } },
+    },
+    async (req, reply) => {
+      const store = await findStoreBySlug(req.params.storeSlug)
+      if (!store || !store.active) throw new NotFoundError('Loja')
+
+      const { prisma } = await import('../config/database')
+
+      const startOfDay = new Date()
+      startOfDay.setHours(0, 0, 0, 0)
+      const endOfDay = new Date()
+      endOfDay.setHours(23, 59, 59, 999)
+
+      const orders = await prisma.order.findMany({
+        where: {
+          storeId: store.id,
+          createdAt: { gte: startOfDay, lte: endOfDay },
+          status: { in: ['PENDING', 'PREPARING', 'READY'] },
+        },
+        select: {
+          pickupCode: true,
+          orderNumber: true,
+          status: true,
+          createdAt: true,
+          updatedAt: true,
+        },
+        orderBy: [{ priority: 'desc' }, { createdAt: 'asc' }],
+      })
+
+      const waiting = orders
+        .filter((o) => o.status === 'PENDING')
+        .slice(0, 5)
+        .map((o) => ({ pickupCode: o.pickupCode, orderNumber: o.orderNumber }))
+
+      const preparing = orders
+        .filter((o) => o.status === 'PREPARING')
+        .slice(0, 5)
+        .map((o) => ({ pickupCode: o.pickupCode, orderNumber: o.orderNumber }))
+
+      const ready = orders
+        .filter((o) => o.status === 'READY')
+        .sort((a, b) => a.updatedAt.getTime() - b.updatedAt.getTime())
+        .slice(-5)
+        .map((o) => ({ pickupCode: o.pickupCode, orderNumber: o.orderNumber }))
+
+      return reply.send({ waiting, preparing, ready })
+    },
+  )
+
   // GET /totem/:storeSlug/orders/:code — rastreamento público por ID ou pickupCode
   app.get<{ Params: { storeSlug: string; code: string } }>(
     '/:storeSlug/orders/:code',

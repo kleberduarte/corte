@@ -3,6 +3,7 @@ import type { Order } from './cartStore'
 import { normalizeOrder } from './cartStore'
 import { api } from '../lib/api'
 import { getOperatorToken } from '../lib/auth'
+import { notifyBoardUpdate } from '../lib/boardSync'
 import { flushQueue, loadQueue } from './syncQueue'
 
 const LS_KEY = 'corte:orders'
@@ -87,6 +88,7 @@ export const useKanbanStore = create<KanbanStore>((set, get) => ({
     set((s) => {
       const orders = [order, ...s.orders]
       saveLocalOrders(orders)
+      notifyBoardUpdate()
       return { orders }
     }),
 
@@ -95,6 +97,7 @@ export const useKanbanStore = create<KanbanStore>((set, get) => ({
     set((s) => {
       const orders = s.orders.map((o) => (o.id === id ? { ...o, status } : o))
       saveLocalOrders(orders)
+      notifyBoardUpdate()
       return { orders }
     })
 
@@ -103,6 +106,7 @@ export const useKanbanStore = create<KanbanStore>((set, get) => ({
     if (token) {
       try {
         await api.patch(`/orders/${id}/status`, { status: STATUS_MAP_REVERSE[status] }, token)
+        notifyBoardUpdate()
       } catch {
         console.warn('[kanbanStore] Falha ao sincronizar status com a API')
       }
@@ -147,6 +151,7 @@ export const useKanbanStore = create<KanbanStore>((set, get) => ({
       const merged = [...pendingOrders, ...apiOrders]
       saveLocalOrders(merged)
       set({ orders: merged, loading: false })
+      notifyBoardUpdate()
     } catch {
       set({ loading: false, error: 'Não foi possível carregar pedidos da API' })
       set({ orders: get().orders.length ? get().orders : loadLocalOrders() })

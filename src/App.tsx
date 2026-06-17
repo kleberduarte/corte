@@ -20,6 +20,7 @@ import ScheduleScreen from './screens/cliente/ScheduleScreen'
 import PhoneScreen from './screens/cliente/PhoneScreen'
 import PrintScreen from './screens/cliente/PrintScreen'
 import OrderTrackingScreen from './screens/cliente/OrderTrackingScreen'
+import OrdersBoardScreen from './screens/cliente/OrdersBoardScreen'
 import KanbanScreen from './screens/operador/KanbanScreen'
 import AdminApp from './screens/admin/AdminApp'
 
@@ -385,6 +386,8 @@ function TotemApp({ view }: { view: string | null }) {
     <StoreContext.Provider value={store}>
       {view === 'operador' ? (
         <OperadorView />
+      ) : view === 'painel' ? (
+        <OrdersBoardScreen />
       ) : view === 'pedido' && trackingOrderId ? (
         <OrderTrackingScreen orderId={trackingOrderId} />
       ) : (
