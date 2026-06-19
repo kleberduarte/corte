@@ -3,7 +3,7 @@ import { api } from '../lib/api'
 import { notifyBoardUpdate, subscribeBoardUpdate } from '../lib/boardSync'
 import { normalizeOrder } from './cartStore'
 import type { Order } from './cartStore'
-import { flushQueue, loadQueue } from './syncQueue'
+import { flushQueue, loadQueue, removeQueueEntries, type QueueEntry } from './syncQueue'
 
 export type BoardOrder = {
   pickupCode: string
@@ -19,6 +19,32 @@ export type BoardData = {
 const LS_ORDERS_KEY = 'corte:orders'
 const POLL_MS = 3_000
 const MAX_PER_COLUMN = 5
+/** Janela curta para retry offline antes de descartar fantasmas na fila de sync. */
+const RECENT_SYNC_MS = 2 * 60 * 1000
+
+function apiPickupCodes(api: BoardData) {
+  return new Set([
+    ...api.waiting.map((o) => o.pickupCode),
+    ...api.preparing.map((o) => o.pickupCode),
+    ...api.ready.map((o) => o.pickupCode),
+  ])
+}
+
+function isRecentQueueEntry(entry: QueueEntry) {
+  return Date.now() - new Date(entry.queuedAt).getTime() < RECENT_SYNC_MS
+}
+
+function activePendingPickupCodes(queue: QueueEntry[]) {
+  return new Set(
+    queue
+      .filter(isRecentQueueEntry)
+      .map((e) => e.localOrder.pickupCode),
+  )
+}
+
+function activePendingIds(queue: QueueEntry[]) {
+  return new Set(queue.filter(isRecentQueueEntry).map((e) => e.localId))
+}
 
 function isToday(date: Date) {
   const now = new Date()
@@ -94,23 +120,36 @@ function saveLocalOrders(orders: Order[]) {
   localStorage.setItem(LS_ORDERS_KEY, JSON.stringify(orders))
 }
 
-/** Remove pedidos locais que nunca chegaram à API (fantasmas do modo offline). */
-function pruneGhostOrders(localOrders: Order[], api: BoardData, apiOk: boolean): Order[] {
-  if (!apiOk) return localOrders
+/** Remove pedidos locais e entradas antigas da fila que nunca chegaram à API. */
+function purgeStaleOfflineData(
+  localOrders: Order[],
+  api: BoardData,
+  apiOk: boolean,
+): { orders: Order[]; changed: boolean } {
+  if (!apiOk) return { orders: localOrders, changed: false }
 
-  const pendingIds = new Set(loadQueue().map((e) => e.localId))
-  const apiCodes = new Set([
-    ...api.waiting.map((o) => o.pickupCode),
-    ...api.preparing.map((o) => o.pickupCode),
-    ...api.ready.map((o) => o.pickupCode),
-  ])
+  const queue = loadQueue()
+  const apiCodes = apiPickupCodes(api)
+  const recentPendingIds = activePendingIds(queue)
 
-  return localOrders.filter((o) => {
-    if (pendingIds.has(o.id)) return true
+  const staleQueueIds = new Set(
+    queue
+      .filter((e) => !apiCodes.has(e.localOrder.pickupCode) && !isRecentQueueEntry(e))
+      .map((e) => e.localId),
+  )
+  const queueChanged = removeQueueEntries(staleQueueIds)
+
+  const orders = localOrders.filter((o) => {
     if (apiCodes.has(o.pickupCode)) return true
+    if (recentPendingIds.has(o.id)) return true
     if (o.status === 'pronto') return true
     return false
   })
+
+  return {
+    orders,
+    changed: queueChanged || orders.length !== localOrders.length,
+  }
 }
 
 function mergeBoard(
@@ -120,7 +159,7 @@ function mergeBoard(
   apiOk: boolean,
 ): BoardData {
   const localByCode = new Map(localOrders.map((o) => [o.pickupCode, o]))
-  const pendingPickupCodes = new Set(loadQueue().map((e) => e.localOrder.pickupCode))
+  const pendingPickupCodes = activePendingPickupCodes(loadQueue())
 
   const codes = new Set<string>()
   for (const col of [
@@ -245,8 +284,8 @@ export const useBoardStore = create<BoardStore>((set, get) => ({
     }
 
     if (apiOk) {
-      const pruned = pruneGhostOrders(localOrders, apiData, apiOk)
-      if (pruned.length !== localOrders.length) {
+      const { orders: pruned, changed } = purgeStaleOfflineData(localOrders, apiData, apiOk)
+      if (changed) {
         localOrders = pruned
         saveLocalOrders(pruned)
         notifyBoardUpdate()

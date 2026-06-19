@@ -43,6 +43,14 @@ export function dequeue(localId: string) {
   saveQueue(queue)
 }
 
+export function removeQueueEntries(localIds: Set<string>) {
+  if (localIds.size === 0) return false
+  const queue = loadQueue().filter((e) => !localIds.has(e.localId))
+  if (queue.length === loadQueue().length) return false
+  saveQueue(queue)
+  return true
+}
+
 type ApiOrder = { id: string; pickupCode: string }
 
 /**
