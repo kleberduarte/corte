@@ -4,6 +4,9 @@ import type { Order } from '../../store/cartStore'
 import { useStore } from '../../data/config'
 import { isOperatorLoggedIn, logoutOperator } from '../../lib/auth'
 import LoginScreen from './LoginScreen'
+import { EmptyState } from '../../components/ui/EmptyState'
+import { Badge } from '../../components/ui/Badge'
+import { useToast } from '../../components/ui/Toast'
 
 function beep() {
   try {
@@ -21,6 +24,7 @@ function beep() {
 export default function KanbanScreen() {
   const { orders, moveOrder, resetOrders, startPolling } = useKanbanStore()
   const store = useStore()
+  const toast = useToast()
   const [clock, setClock] = useState(new Date())
   const [loggedIn, setLoggedIn] = useState(isOperatorLoggedIn)
   const prevCount = useRef(0)
@@ -140,14 +144,21 @@ export default function KanbanScreen() {
           color="var(--t3)"
           orders={waiting}
           primaryLabel="▶ Iniciar"
-          onPrimary={(o) => moveOrder(o.id, 'em_preparo')}
+          onPrimary={async (o) => {
+            const ok = await moveOrder(o.id, 'em_preparo')
+            if (!ok) toast.error('Falha ao atualizar pedido — verifique a conexão')
+          }}
         />
         <KanbanCol
           title="Em Preparo"
           color="var(--orange)"
           orders={inProg}
           primaryLabel="✓ Pronto"
-          onPrimary={(o) => moveOrder(o.id, 'pronto')}
+          onPrimary={async (o) => {
+            const ok = await moveOrder(o.id, 'pronto')
+            if (ok) toast.success(`Pedido ${o.pickupCode} marcado como pronto`)
+            else     toast.error('Falha ao atualizar pedido — verifique a conexão')
+          }}
           clock={clock}
         />
         <KanbanCol
@@ -155,7 +166,10 @@ export default function KanbanScreen() {
           color="var(--green)"
           orders={done}
           primaryLabel="Retirado"
-          onPrimary={(o) => moveOrder(o.id, 'retirado')}
+          onPrimary={async (o) => {
+            const ok = await moveOrder(o.id, 'retirado')
+            if (!ok) toast.error('Falha ao registrar retirada — verifique a conexão')
+          }}
           isGreen
         />
       </div>
@@ -208,7 +222,7 @@ function KanbanCol({ title, color, orders, primaryLabel, onPrimary, isGreen, clo
       </div>
       <div className="scroll" style={{ flex: 1 }}>
         {orders.length === 0 ? (
-          <div className="empty-col"><strong>Vazio</strong><br />Pedidos aparecem aqui</div>
+          <EmptyState compact title="Vazio" description="Pedidos aparecem aqui" />
         ) : (
           orders.map((o) => (
             <KanbanCard key={o.id} order={o} primaryLabel={primaryLabel} onPrimary={onPrimary} isGreen={isGreen} clock={clock} />
@@ -250,11 +264,7 @@ function KanbanCard({ order, primaryLabel, onPrimary, isGreen, clock }: {
           {order.pickupCode}
         </div>
         <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-          {isPriority && (
-            <span style={{ fontSize: 9, fontWeight: 800, letterSpacing: 0.8, textTransform: 'uppercase', padding: '3px 7px', borderRadius: 6, background: 'rgba(74,144,217,.2)', color: '#7eb8f0', border: '1px solid rgba(74,144,217,.45)' }}>
-              Preferencial
-            </span>
-          )}
+          {isPriority && <Badge variant="blue" size="sm">Preferencial</Badge>}
           {clock && !isPriority && <div className={`timer-badge ${timerClass}`}>{timerLabel}</div>}
         </div>
       </div>

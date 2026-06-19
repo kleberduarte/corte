@@ -9,5 +9,6 @@ export async function corsPlugin(app: FastifyInstance) {
     origin: origins,
     methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE'],
     allowedHeaders: ['Content-Type', 'Authorization'],
+    credentials: true,
   })
 }

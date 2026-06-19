@@ -1,6 +1,5 @@
 import { useEffect, useState } from 'react'
 import { api, ApiError } from '../../../lib/api'
-import { getAdminToken } from '../../../lib/adminAuth'
 import { CHAIN_LABELS, ORDER_STATUS_LABELS, formatBRL, formatDateTime } from '../constants'
 
 type AdminStats = {
@@ -30,7 +29,7 @@ export default function OverviewPanel({ onManageStores }: { onManageStores: () =
     setLoading(true)
     setError(null)
     try {
-      setStats(await api.get<AdminStats>('/admin/stats', getAdminToken() ?? ''))
+      setStats(await api.get<AdminStats>('/admin/stats'))
     } catch (err) {
       setError(err instanceof ApiError ? err.message : 'Erro ao carregar métricas')
     } finally {

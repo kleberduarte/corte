@@ -1,6 +1,5 @@
 import { useEffect, useState } from 'react'
 import { api, ApiError } from '../../../lib/api'
-import { getAdminToken } from '../../../lib/adminAuth'
 import { tenantLogoPath, tenantLogoUrl } from '../../../lib/publicUrl'
 import { CHAIN_OPTIONS } from '../constants'
 import { useAdminUi } from '../adminUi'
@@ -42,7 +41,7 @@ export default function StoreFormPanel({ storeId, onBack, onSaved }: {
   useEffect(() => {
     if (!storeId) { setForm(DEFAULT); return }
     setLoading(true)
-    api.get<any>(`/admin/stores/${storeId}`, getAdminToken() ?? '').then((data) => {
+    api.get<any>(`/admin/stores/${storeId}`).then((data) => {
       setForm({
         name: data.name, chain: data.chain, slug: data.slug, active: data.active,
         config: { ...DEFAULT.config, ...data.config, logoUrl: data.config?.logoUrl ?? '' },
@@ -82,13 +81,12 @@ export default function StoreFormPanel({ storeId, onBack, onSaved }: {
     setSaving(true)
     setError(null)
     try {
-      const token = getAdminToken() ?? ''
       const payload = { ...form, config: { ...form.config, logoUrl: form.config.logoUrl || null } }
       if (isEdit) {
-        await api.put(`/admin/stores/${storeId}`, payload, token)
+        await api.put(`/admin/stores/${storeId}`, payload)
         toast('Loja atualizada com sucesso')
       } else {
-        await api.post('/admin/stores', payload, token)
+        await api.post('/admin/stores', payload)
         toast('Loja criada com sucesso')
       }
       onSaved()

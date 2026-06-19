@@ -2,7 +2,9 @@ const CHANNEL_NAME = 'corte-board'
 
 export function notifyBoardUpdate() {
   try {
-    new BroadcastChannel(CHANNEL_NAME).postMessage({ type: 'refresh' })
+    const ch = new BroadcastChannel(CHANNEL_NAME)
+    ch.postMessage({ type: 'refresh' })
+    ch.close()
   } catch {
     /* BroadcastChannel indisponível */
   }

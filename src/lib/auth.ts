@@ -1,9 +1,9 @@
 // Gerenciamento de sessão do operador.
-// O token JWT fica no localStorage — ao recarregar a página o operador continua logado.
+// O token JWT fica em cookie httpOnly — invisível ao JS.
+// localStorage guarda apenas os metadados da sessão (sem token).
 
 import { api } from './api'
 
-const TOKEN_KEY = 'corte:operator_token'
 const OPERATOR_KEY = 'corte:operator'
 
 export type OperatorSession = {
@@ -18,23 +18,18 @@ export async function loginOperator(
   storeSlug: string,
   email: string,
   password: string,
-): Promise<{ token: string; operator: OperatorSession }> {
-  const result = await api.post<{ token: string; operator: OperatorSession }>(
+): Promise<{ operator: OperatorSession }> {
+  const result = await api.post<{ operator: OperatorSession }>(
     '/auth/login',
     { storeSlug, email, password },
   )
-  localStorage.setItem(TOKEN_KEY, result.token)
   localStorage.setItem(OPERATOR_KEY, JSON.stringify(result.operator))
   return result
 }
 
-export function logoutOperator() {
-  localStorage.removeItem(TOKEN_KEY)
+export async function logoutOperator() {
   localStorage.removeItem(OPERATOR_KEY)
-}
-
-export function getOperatorToken(): string | null {
-  return localStorage.getItem(TOKEN_KEY)
+  try { await api.post('/auth/logout', {}) } catch { /* best-effort */ }
 }
 
 export function getOperatorSession(): OperatorSession | null {
@@ -48,5 +43,5 @@ export function getOperatorSession(): OperatorSession | null {
 }
 
 export function isOperatorLoggedIn(): boolean {
-  return !!getOperatorToken()
+  return !!getOperatorSession()
 }

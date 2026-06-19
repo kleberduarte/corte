@@ -1530,3 +1530,251 @@ html, body, #root { height: 100%; height: 100dvh; overflow: hidden; background: 
   0%, 100% { opacity: 1; transform: scale(1); }
   50% { opacity: 0.4; transform: scale(0.7); }
 }
+
+/* =============================================================================
+   UI DESIGN SYSTEM — primitivos reutilizáveis
+   Button, Spinner, Badge, EmptyState, Toast
+   ============================================================================= */
+
+/* ── Keyframes compartilhados ───────────────────────────────────────────────── */
+@keyframes ui-spin {
+  to { transform: rotate(360deg); }
+}
+
+@keyframes ui-toast-in {
+  from { opacity: 0; transform: translateX(calc(100% + 16px)); }
+  to   { opacity: 1; transform: translateX(0); }
+}
+
+@keyframes ui-toast-progress {
+  from { transform: scaleX(1); }
+  to   { transform: scaleX(0); }
+}
+
+@keyframes ui-badge-pulse {
+  0%, 100% { box-shadow: 0 0 0 0 currentColor; }
+  50%       { box-shadow: 0 0 0 4px transparent; }
+}
+
+/* ── Button ─────────────────────────────────────────────────────────────────── */
+.ui-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  border: none;
+  border-radius: var(--r);
+  font-family: var(--font-sans);
+  font-weight: 600;
+  cursor: pointer;
+  transition: opacity .15s, transform .1s, box-shadow .15s;
+  position: relative;
+  overflow: hidden;
+  white-space: nowrap;
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.ui-btn:active:not(:disabled) { transform: scale(.97); }
+.ui-btn:disabled,
+.ui-btn[aria-disabled="true"] { opacity: .45; cursor: not-allowed; }
+
+/* Tamanhos — calibrados para toque no totem */
+.ui-btn--sm  { font-size: 14px; padding: 8px 18px;   min-height: 36px; border-radius: var(--r-sm); }
+.ui-btn--md  { font-size: 17px; padding: 14px 28px;  min-height: 50px; }
+.ui-btn--lg  { font-size: 22px; padding: 18px 40px;  min-height: 64px; border-radius: var(--r-lg); }
+.ui-btn--xl  { font-size: 28px; padding: 24px 52px;  min-height: 80px; border-radius: var(--r-xl); }
+.ui-btn--full { width: 100%; }
+
+/* Variantes */
+.ui-btn--primary {
+  background: var(--primary);
+  color: white;
+  box-shadow: 0 6px 20px var(--primary-glow);
+}
+.ui-btn--primary:hover:not(:disabled) { box-shadow: 0 8px 28px var(--primary-glow); }
+
+.ui-btn--secondary {
+  background: var(--s2);
+  color: var(--t2);
+  border: 1px solid var(--border2);
+}
+.ui-btn--secondary:hover:not(:disabled) { background: var(--s3); color: var(--t1); }
+
+.ui-btn--ghost {
+  background: transparent;
+  color: var(--t3);
+  border: 1px solid var(--border);
+}
+.ui-btn--ghost:hover:not(:disabled) { color: var(--t1); border-color: var(--border2); }
+
+.ui-btn--danger {
+  background: rgba(255, 59, 48, .12);
+  color: #ff453a;
+  border: 1px solid rgba(255, 59, 48, .25);
+}
+.ui-btn--danger:hover:not(:disabled) { background: rgba(255, 59, 48, .2); }
+
+/* Loading spinner dentro do botão */
+.ui-btn--loading { pointer-events: none; }
+.ui-btn-spinner {
+  display: inline-flex;
+  align-items: center;
+  width: 1em;
+  height: 1em;
+  flex-shrink: 0;
+}
+.ui-btn-spinner svg { animation: ui-spin .75s linear infinite; width: 100%; height: 100%; }
+.ui-btn-icon { display: inline-flex; align-items: center; font-size: .9em; }
+
+/* ── Spinner standalone ─────────────────────────────────────────────────────── */
+/* CSS gerado inline via SVG — @keyframes ui-spin já declarado acima */
+
+/* ── Badge ──────────────────────────────────────────────────────────────────── */
+.ui-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  border-radius: 100px;
+  font-family: var(--font-sans);
+  font-weight: 700;
+  letter-spacing: .4px;
+  white-space: nowrap;
+  line-height: 1;
+}
+
+.ui-badge--sm { font-size: 10px; padding: 3px 8px; }
+.ui-badge--md { font-size: 12px; padding: 5px 11px; }
+
+.ui-badge-dot {
+  width: 7px; height: 7px;
+  border-radius: 50%;
+  background: currentColor;
+  flex-shrink: 0;
+}
+
+.ui-badge--default { background: var(--s3); color: var(--t2); }
+.ui-badge--success { background: rgba(52, 199, 89, .15); color: #30d158; border: 1px solid rgba(52,199,89,.3); }
+.ui-badge--warning { background: rgba(255, 149, 0, .15); color: #ff9f0a; border: 1px solid rgba(255,149,0,.3); }
+.ui-badge--danger  { background: rgba(255, 59, 48, .15); color: #ff453a; border: 1px solid rgba(255,59,48,.3); }
+.ui-badge--info    { background: rgba(10, 132, 255, .15); color: #409cff; border: 1px solid rgba(10,132,255,.3); }
+.ui-badge--gold    { background: rgba(200, 151, 58, .18); color: var(--gold); border: 1px solid rgba(200,151,58,.3); }
+.ui-badge--blue    { background: rgba(74, 144, 217, .18); color: #7eb8f0; border: 1px solid rgba(74,144,217,.35); }
+.ui-badge--pulse   { animation: ui-badge-pulse 1.5s infinite; }
+
+/* ── EmptyState ─────────────────────────────────────────────────────────────── */
+.ui-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 40px 24px;
+  text-align: center;
+  gap: 10px;
+}
+
+.ui-empty--compact {
+  padding: 24px 12px;
+  gap: 6px;
+}
+
+.ui-empty-icon {
+  font-size: 32px;
+  line-height: 1;
+  opacity: .45;
+  margin-bottom: 4px;
+}
+.ui-empty--compact .ui-empty-icon { font-size: 22px; }
+
+.ui-empty-title {
+  font-family: var(--font-sans);
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--t2);
+  margin: 0;
+}
+.ui-empty--compact .ui-empty-title { font-size: 13px; }
+
+.ui-empty-desc {
+  font-size: 13px;
+  color: var(--t3);
+  margin: 0;
+  line-height: 1.5;
+}
+.ui-empty--compact .ui-empty-desc { font-size: 11px; }
+
+.ui-empty-action { margin-top: 8px; }
+
+/* ── Toast ──────────────────────────────────────────────────────────────────── */
+.ui-toast-region {
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  z-index: 9999;
+  display: flex;
+  flex-direction: column-reverse;
+  gap: 10px;
+  pointer-events: none;
+  max-width: min(400px, calc(100vw - 48px));
+}
+
+.ui-toast {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 14px 16px;
+  border-radius: var(--r);
+  pointer-events: all;
+  animation: ui-toast-in .3s cubic-bezier(.34,1.2,.64,1) both;
+  position: relative;
+  overflow: hidden;
+  box-shadow: 0 8px 30px rgba(0,0,0,.5);
+}
+
+.ui-toast--success { background: #1c3a28; border: 1px solid rgba(52,199,89,.3); color: #30d158; }
+.ui-toast--error   { background: #3a1c1c; border: 1px solid rgba(255,59,48,.3);  color: #ff6b6b; }
+.ui-toast--warning { background: #3a2e1c; border: 1px solid rgba(255,149,0,.3);  color: #ff9f0a; }
+.ui-toast--info    { background: #1c2a3a; border: 1px solid rgba(10,132,255,.3); color: #409cff; }
+
+.ui-toast-icon {
+  font-size: 16px;
+  font-weight: 700;
+  flex-shrink: 0;
+  width: 20px;
+  text-align: center;
+}
+
+.ui-toast-msg {
+  flex: 1;
+  font-family: var(--font-sans);
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--t1);
+  line-height: 1.4;
+}
+
+.ui-toast-close {
+  background: none;
+  border: none;
+  color: var(--t3);
+  font-size: 20px;
+  cursor: pointer;
+  padding: 0 4px;
+  line-height: 1;
+  flex-shrink: 0;
+  opacity: .6;
+  transition: opacity .15s;
+}
+.ui-toast-close:hover { opacity: 1; }
+
+.ui-toast-progress {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: currentColor;
+  opacity: .4;
+  transform-origin: left;
+  animation: ui-toast-progress linear both;
+}
