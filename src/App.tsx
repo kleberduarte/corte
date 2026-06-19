@@ -4,7 +4,8 @@ import { fetchActiveStore, StoreContext, useStore } from './data/config'
 import type { StoreConfig } from './data/config'
 import { useCartStore } from './store/cartStore'
 import { useKanbanStore } from './store/kanbanStore'
-import { PRODUCTS, type Product, type CutType } from './data/products'
+import { type Product, type CutType } from './data/products'
+import { fetchCatalog, CatalogContext, useCatalog, type TotemCatalog } from './data/catalog'
 import { useInactivity } from './hooks/useInactivity'
 import { getBackScreen, type ClienteScreen } from './hooks/useClienteNavigation'
 
@@ -32,6 +33,7 @@ const PREFERENTIAL_SLOT = 'Preferencial'
 // ─── View do Cliente ─────────────────────────────────────────────────────────
 function ClienteView() {
   const store = useStore()
+  const { products: catalogProducts } = useCatalog()
   const [screen, setScreen]               = useState<ClienteScreen>('home')
   const [screenKey, setScreenKey]         = useState(0)
   const [catalogFilter, setCatalogFilter] = useState('todos')
@@ -64,7 +66,9 @@ function ClienteView() {
   function handleProductSelect(p: Product) { setSelectedProduct(p); go('detail') }
 
   function handleHeroProduct(productId: string) {
-    const product = PRODUCTS.find((p) => p.id === productId)
+    // Hero slides usam IDs de slug — busca pelo slug no catálogo da API (que tem UUIDs reais)
+    const product = catalogProducts.find((p) => p.id === productId) ??
+                    catalogProducts.find((p) => p.name.toLowerCase().replace(/\s+/g, '-') === productId)
     if (!product) return
     setFromHeroProduct(true)
     setCatalogFilter('todos')
@@ -299,15 +303,17 @@ export default function App() {
 
 function TotemApp({ view }: { view: string | null }) {
   const [store, setStore] = useState<StoreConfig | null>(null)
+  const [catalog, setCatalog] = useState<TotemCatalog | null>(null)
 
   useEffect(() => {
     fetchActiveStore().then((s) => {
       applyStoreTheme(s)
       setStore(s)
+      fetchCatalog(s.id).then(setCatalog)
     })
   }, [])
 
-  if (!store) return (
+  if (!store || !catalog) return (
     <div style={{ height: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#0d0d0e', color: 'rgba(255,255,255,.4)', fontSize: 14 }}>
       Carregando...
     </div>
@@ -327,6 +333,7 @@ function TotemApp({ view }: { view: string | null }) {
 
   return (
     <StoreContext.Provider value={store}>
+    <CatalogContext.Provider value={catalog}>
       {view === 'operador' ? (
         <OperadorView />
       ) : view === 'painel' ? (
@@ -336,6 +343,7 @@ function TotemApp({ view }: { view: string | null }) {
       ) : (
         <ClienteView />
       )}
+    </CatalogContext.Provider>
     </StoreContext.Provider>
   )
 }

@@ -73,7 +73,7 @@ type KanbanStore = {
   loading: boolean
   error: string | null
   addOrder: (order: Order) => void
-  moveOrder: (id: string, status: Order['status']) => void
+  moveOrder: (id: string, status: Order['status']) => Promise<boolean>
   resetOrders: () => void
   fetchOrders: () => Promise<void>
   startPolling: (intervalMs?: number) => () => void

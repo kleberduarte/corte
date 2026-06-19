@@ -1,6 +1,6 @@
 import { create } from 'zustand'
 import type { Product, CutType } from '../data/products'
-import { api } from '../lib/api'
+import { api, ApiError } from '../lib/api'
 import { notifyBoardUpdate } from '../lib/boardSync'
 import { enqueue } from './syncQueue'
 
@@ -61,7 +61,9 @@ async function submitOrder(
     pickupCode = apiOrder.pickupCode
     orderId = apiOrder.id
     notifyBoardUpdate()
-  } catch {
+  } catch (err) {
+    // Erros de validação (4xx) não têm sentido para retry — relança imediatamente
+    if (err instanceof ApiError && err.status >= 400 && err.status < 500) throw err
     syncFailed = true
     console.warn('[cartStore] API indisponível — pedido enfileirado para retry')
   }

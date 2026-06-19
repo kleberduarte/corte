@@ -112,12 +112,14 @@ export async function findBoardOrders(storeId: string): Promise<BoardData> {
 }
 
 export async function getNextOrderNumber(storeId: string, tx: Tx): Promise<number> {
-  // FOR UPDATE só funciona dentro de uma transação — o caller DEVE passar tx
+  // FOR UPDATE não pode ser combinado com agregados no PostgreSQL.
+  // A CTE bloqueia todas as linhas da loja antes de calcular o MAX,
+  // serializando inserções concorrentes corretamente dentro da transação.
   const result = await tx.$queryRaw<[{ next: bigint }]>`
-    SELECT COALESCE(MAX("orderNumber"), 0) + 1 AS next
-    FROM "Order"
-    WHERE "storeId" = ${storeId}
-    FOR UPDATE
+    WITH locked AS (
+      SELECT "orderNumber" FROM orders WHERE "storeId" = ${storeId} FOR UPDATE
+    )
+    SELECT COALESCE(MAX("orderNumber"), 0) + 1 AS next FROM locked
   `
   return Number(result[0].next)
 }
