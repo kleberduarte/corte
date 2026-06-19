@@ -18,6 +18,10 @@ async function request<T>(path: string, options: RequestInit = {}): Promise<T> {
 
   if (!res.ok) {
     const body = await res.json().catch(() => ({}))
+    // Cookie expirado mas localStorage ainda tem metadados → limpa sessão fantasma
+    if (res.status === 401) {
+      localStorage.removeItem('corte:operator')
+    }
     throw new ApiError(res.status, body.message ?? 'Erro inesperado', body.error)
   }
 

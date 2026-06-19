@@ -3,7 +3,7 @@
  * Cada entrada guarda o payload completo para ser reenviado no próximo retry.
  */
 
-import { api } from '../lib/api'
+import { api, ApiError } from '../lib/api'
 import { notifyBoardUpdate } from '../lib/boardSync'
 import type { Order } from './cartStore'
 
@@ -64,8 +64,12 @@ export async function flushQueue(): Promise<Array<{ localId: string; apiOrder: A
       dequeue(entry.localId)
       confirmed.push({ localId: entry.localId, apiOrder })
       notifyBoardUpdate()
-    } catch {
-      // Mantém na fila para o próximo retry
+    } catch (err) {
+      // Erros de validação (4xx) nunca vão se resolver com retry — descarta da fila
+      if (err instanceof ApiError && err.status >= 400 && err.status < 500) {
+        dequeue(entry.localId)
+      }
+      // Erros de rede/servidor (5xx, timeout) mantêm na fila para o próximo retry
     }
   }
 
