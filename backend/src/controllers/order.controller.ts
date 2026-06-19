@@ -12,6 +12,12 @@ const listOrdersQuerySchema = z.object({
   offset: z.coerce.number().int().min(0).default(0),
 })
 
+/** YYYY-MM-DD → meia-noite no fuso local (evita new Date(str) que interpreta como UTC). */
+function parseLocalDateOnly(dateStr: string): Date {
+  const [y, m, d] = dateStr.split('-').map(Number)
+  return new Date(y, m - 1, d)
+}
+
 export async function listOrdersHandler(
   req: FastifyRequest<{ Querystring: { status?: string; date?: string; limit?: string; offset?: string } }>,
   reply: FastifyReply,
@@ -20,7 +26,7 @@ export async function listOrdersHandler(
   const storeId = getStoreId(req)
   const orders = await listOrders(storeId, {
     status: query.status as OrderStatus | undefined,
-    date: query.date ? new Date(query.date) : undefined,
+    date: query.date ? parseLocalDateOnly(query.date) : undefined,
     limit: query.limit,
     offset: query.offset,
   })
