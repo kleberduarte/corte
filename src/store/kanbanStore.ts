@@ -3,7 +3,7 @@ import type { Order } from './cartStore'
 import { normalizeOrder } from './cartStore'
 import { api } from '../lib/api'
 import { isOperatorLoggedIn } from '../lib/auth'
-import { notifyBoardUpdate } from '../lib/boardSync'
+import { notifyBoardUpdate, subscribeBoardUpdate } from '../lib/boardSync'
 import { flushQueue, loadQueue } from './syncQueue'
 
 const LS_KEY = 'corte:orders'
@@ -40,9 +40,21 @@ function apiOrderToLocal(o: Record<string, unknown>): Order {
     createdAt: new Date(o.createdAt as string),
     items: ((o.items as unknown[]) ?? []).map((item) => {
       const i = item as Record<string, unknown>
+      const embedded = i.product as Record<string, unknown> | undefined
       return {
-        product: { id: i.productId as string, name: i.productName as string } as Order['items'][0]['product'],
-        cutType: { name: (i.cutType as string) ?? '' } as Order['items'][0]['cutType'],
+        product: {
+          id: i.productId as string,
+          name: i.productName as string,
+          imageUrl: (embedded?.imageUrl as string) ?? '',
+          category: (embedded?.category as string) ?? '',
+          description: (embedded?.description as string) ?? '',
+          pricePerKg: Number(embedded?.pricePerKg ?? 0),
+          rating: Number(embedded?.rating ?? 0),
+          reviews: Number(embedded?.reviews ?? 0),
+          cutTypes: (embedded?.cutTypes as Order['items'][0]['product']['cutTypes']) ?? [],
+          tags: (embedded?.tags as string[]) ?? [],
+        } as Order['items'][0]['product'],
+        cutType: { name: (i.cutType as string) ?? '', id: '', desc: '' } as Order['items'][0]['cutType'],
         weightKg: Number(i.quantity),
         estimatedPrice: Number(i.totalPrice),
       }
@@ -164,7 +176,11 @@ export const useKanbanStore = create<KanbanStore>((set, get) => ({
     const { fetchOrders } = get()
     fetchOrders()
     const timer = setInterval(fetchOrders, intervalMs)
-    return () => clearInterval(timer)
+    const unsubBoard = subscribeBoardUpdate(() => void fetchOrders())
+    return () => {
+      clearInterval(timer)
+      unsubBoard()
+    }
   },
 }))
 
