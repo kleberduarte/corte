@@ -21,6 +21,8 @@ const POLL_MS = 3_000
 const MAX_PER_COLUMN = 5
 /** Janela curta para retry offline antes de descartar fantasmas na fila de sync. */
 const RECENT_SYNC_MS = 2 * 60 * 1000
+/** Janela de graça para pedidos recém-criados enquanto o cache da API ainda está stale. */
+const RECENT_ORDER_MS = 10_000
 
 function apiPickupCodes(api: BoardData) {
   return new Set([
@@ -143,6 +145,8 @@ function purgeStaleOfflineData(
     if (apiCodes.has(o.pickupCode)) return true
     if (recentPendingIds.has(o.id)) return true
     if (o.status === 'pronto') return true
+    // Pedido criado há menos de 10s: o cache da API pode estar stale — não descartar ainda
+    if (Date.now() - new Date(o.createdAt).getTime() < RECENT_ORDER_MS) return true
     return false
   })
 
