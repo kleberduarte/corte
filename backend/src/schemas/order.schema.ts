@@ -1,9 +1,9 @@
 import { z } from 'zod'
 
 export const createOrderSchema = z.object({
-  customerPhone: z.string().optional(),
+  customerPhone: z.string().regex(/^\+?[\d\s\-\(\)]{8,20}$/, 'Telefone inválido').optional(),
   pickupMode: z.enum(['SCHEDULED', 'IMMEDIATE']),
-  scheduledAt: z.string().optional(),
+  scheduledAt: z.string().datetime({ offset: true, message: 'scheduledAt deve ser uma data ISO 8601 válida (ex: 2025-01-15T14:30:00-03:00)' }).optional(),
   notes: z.string().max(500).optional(),
   priority: z.boolean().optional(),
   items: z.array(

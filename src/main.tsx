@@ -3,9 +3,15 @@ import { createRoot } from 'react-dom/client'
 import './index.css'
 import './styles/totem-21.css'
 import App from './App.tsx'
+import { ToastProvider } from './components/ui/Toast.tsx'
+import { ErrorBoundary } from './components/ErrorBoundary.tsx'
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
-    <App />
+    <ErrorBoundary>
+      <ToastProvider>
+        <App />
+      </ToastProvider>
+    </ErrorBoundary>
   </StrictMode>,
 )

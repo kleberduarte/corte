@@ -15,7 +15,7 @@ export function applyTheme(theme: Theme) {
   root.style.setProperty('--accent',       theme.accentColor)
   root.style.setProperty('--primary-glow', hexToRgba(theme.primaryColor, 0.35))
   root.dataset.logoUrl = theme.logoUrl ?? ''
-  if (theme.fontFamily) {
+  if (theme.fontFamily && /^[\w\s,\-'"]+$/.test(theme.fontFamily)) {
     root.style.setProperty('--font-sans', theme.fontFamily)
   }
 }
@@ -25,6 +25,7 @@ export function applyStoreTheme(store: StoreConfig) {
 }
 
 function hexToRgba(hex: string, alpha: number) {
+  if (!/^#[0-9A-Fa-f]{6}$/.test(hex)) return `rgba(0,0,0,${alpha})`
   const r = parseInt(hex.slice(1, 3), 16)
   const g = parseInt(hex.slice(3, 5), 16)
   const b = parseInt(hex.slice(5, 7), 16)

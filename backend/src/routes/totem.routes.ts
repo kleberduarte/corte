@@ -1,219 +1,81 @@
 // Rotas públicas consumidas pelo totem (sem autenticação JWT).
 // O totem identifica a loja pelo slug — não há login pois é um dispositivo físico da própria loja.
-// Rate limit mais restritivo para evitar criação em massa.
 
 import { FastifyInstance } from 'fastify'
 import { z } from 'zod'
 import { createOrderSchema } from '../schemas/order.schema'
+import { printReceiptSchema } from '../schemas/print.schema'
 import { placeOrder } from '../services/order.service'
 import { printReceipt } from '../services/print.service'
-import { findStoreBySlug } from '../repositories/store.repository'
-import { getTotemCatalog } from '../services/catalog.service'
-import { NotFoundError } from '../errors/AppError'
+import { getStoreConfig, getStoreCatalog, getBoardData, getOrderByCode, resolveActiveStore } from '../services/totem.service'
+import { env } from '../config/env'
+import { authenticate } from '../middlewares/auth.middleware'
+
+const storeSlugSchema = z.object({ storeSlug: z.string().min(1) })
 
 export async function totemRoutes(app: FastifyInstance) {
   // GET /totem/:storeSlug/config — configuração completa da loja (tema, horários)
   app.get<{ Params: { storeSlug: string } }>(
     '/:storeSlug/config',
-    {
-      config: { rateLimit: { max: 60, timeWindow: '1 minute' } },
-    },
-    async (req, reply) => {
-      const store = await findStoreBySlug(req.params.storeSlug)
-      if (!store || !store.active) throw new NotFoundError('Loja')
-
-      const cfg = store.config
-      return reply.send({
-        id:     store.slug,
-        name:   store.name,
-        active: store.active,
-        chain:  store.chain,
-        theme: {
-          primaryColor: cfg?.primaryColor  ?? '#C0272D',
-          primaryDark:  cfg?.primaryDark   ?? '#7A1015',
-          accentColor:  cfg?.accentColor   ?? '#F5EDDB',
-          logoUrl:      cfg?.logoUrl       ?? null,
-          fontFamily:   cfg?.fontFamily    ?? null,
-        },
-        hours: {
-          morning:   { open: cfg?.morningOpen   ?? '08:00', close: cfg?.morningClose   ?? '12:00' },
-          afternoon: { open: cfg?.afternoonOpen ?? '14:00', close: cfg?.afternoonClose ?? '22:00' },
-        },
-        slotIntervalMin:   cfg?.slotIntervalMin   ?? 30,
-        minLeadTimeMin:    cfg?.minLeadTimeMin     ?? 30,
-        inactivityTimeout: cfg?.inactivityTimeout  ?? 90,
-      })
-    },
+    { config: { rateLimit: { max: 60, timeWindow: '1 minute' } } },
+    async (req, reply) => reply.send(await getStoreConfig(req.params.storeSlug)),
   )
 
   // GET /totem/:storeSlug/catalog — catálogo completo (produtos, categorias, preços da loja)
   app.get<{ Params: { storeSlug: string } }>(
     '/:storeSlug/catalog',
-    {
-      config: { rateLimit: { max: 60, timeWindow: '1 minute' } },
-    },
-    async (req, reply) => {
-      const store = await findStoreBySlug(req.params.storeSlug)
-      if (!store || !store.active) throw new NotFoundError('Loja')
-
-      const catalog = await getTotemCatalog(store.id, store.slug)
-      return reply.send(catalog)
-    },
+    { config: { rateLimit: { max: 60, timeWindow: '1 minute' } } },
+    async (req, reply) => reply.send(await getStoreCatalog(req.params.storeSlug)),
   )
 
   // GET /totem/:storeSlug/products — alias legado → mesmo payload que /catalog
   app.get<{ Params: { storeSlug: string } }>(
     '/:storeSlug/products',
-    {
-      config: { rateLimit: { max: 60, timeWindow: '1 minute' } },
-    },
-    async (req, reply) => {
-      const store = await findStoreBySlug(req.params.storeSlug)
-      if (!store || !store.active) throw new NotFoundError('Loja')
-
-      const catalog = await getTotemCatalog(store.id, store.slug)
-      return reply.send(catalog)
-    },
-  )
-
-  // POST /totem/:storeSlug/orders — cria pedido vindo do totem
-  app.post<{ Params: { storeSlug: string } }>(
-    '/:storeSlug/orders',
-    {
-      config: { rateLimit: { max: 20, timeWindow: '1 minute' } },
-    },
-    async (req, reply) => {
-      const storeSlugSchema = z.object({ storeSlug: z.string().min(1) })
-      const { storeSlug } = storeSlugSchema.parse(req.params)
-
-      const store = await findStoreBySlug(storeSlug)
-      if (!store || !store.active) throw new NotFoundError('Loja')
-
-      const input = createOrderSchema.parse(req.body)
-      const order = await placeOrder(store.id, input)
-      return reply.status(201).send(order)
-    },
+    { config: { rateLimit: { max: 60, timeWindow: '1 minute' } } },
+    async (req, reply) => reply.send(await getStoreCatalog(req.params.storeSlug)),
   )
 
   // GET /totem/:storeSlug/board — painel público de pedidos (aguardando / preparando / pronto)
   app.get<{ Params: { storeSlug: string } }>(
     '/:storeSlug/board',
-    {
-      config: { rateLimit: { max: 120, timeWindow: '1 minute' } },
-    },
-    async (req, reply) => {
-      const store = await findStoreBySlug(req.params.storeSlug)
-      if (!store || !store.active) throw new NotFoundError('Loja')
-
-      const { prisma } = await import('../config/database')
-
-      const startOfDay = new Date()
-      startOfDay.setHours(0, 0, 0, 0)
-      const endOfDay = new Date()
-      endOfDay.setHours(23, 59, 59, 999)
-
-      const orders = await prisma.order.findMany({
-        where: {
-          storeId: store.id,
-          createdAt: { gte: startOfDay, lte: endOfDay },
-          status: { in: ['PENDING', 'PREPARING', 'READY'] },
-        },
-        select: {
-          pickupCode: true,
-          orderNumber: true,
-          status: true,
-          createdAt: true,
-          updatedAt: true,
-        },
-        orderBy: [{ priority: 'desc' }, { createdAt: 'asc' }],
-      })
-
-      const waiting = orders
-        .filter((o) => o.status === 'PENDING')
-        .slice(0, 5)
-        .map((o) => ({ pickupCode: o.pickupCode, orderNumber: o.orderNumber }))
-
-      const preparing = orders
-        .filter((o) => o.status === 'PREPARING')
-        .slice(0, 5)
-        .map((o) => ({ pickupCode: o.pickupCode, orderNumber: o.orderNumber }))
-
-      const ready = orders
-        .filter((o) => o.status === 'READY')
-        .sort((a, b) => a.updatedAt.getTime() - b.updatedAt.getTime())
-        .slice(-5)
-        .map((o) => ({ pickupCode: o.pickupCode, orderNumber: o.orderNumber }))
-
-      return reply.send({ waiting, preparing, ready })
-    },
+    { config: { rateLimit: { max: 120, timeWindow: '1 minute' } } },
+    async (req, reply) => reply.send(await getBoardData(req.params.storeSlug)),
   )
 
   // GET /totem/:storeSlug/orders/:code — rastreamento público por ID ou pickupCode
   app.get<{ Params: { storeSlug: string; code: string } }>(
     '/:storeSlug/orders/:code',
-    {
-      config: { rateLimit: { max: 60, timeWindow: '1 minute' } },
-    },
+    { config: { rateLimit: { max: 60, timeWindow: '1 minute' } } },
+    async (req, reply) => reply.send(await getOrderByCode(req.params.storeSlug, req.params.code)),
+  )
+
+  // POST /totem/:storeSlug/orders — cria pedido vindo do totem (rate limit restritivo anti-abuso)
+  app.post<{ Params: { storeSlug: string } }>(
+    '/:storeSlug/orders',
+    { config: { rateLimit: { max: 20, timeWindow: '1 minute' } } },
     async (req, reply) => {
-      const store = await findStoreBySlug(req.params.storeSlug)
-      if (!store || !store.active) throw new NotFoundError('Loja')
-
-      const { findOrderById, findOrderByPickupCode } = await import('../repositories/order.repository')
-
-      // Tenta por ID primeiro, depois por pickupCode
-      const order =
-        (await findOrderById(store.id, req.params.code)) ??
-        (await findOrderByPickupCode(store.id, req.params.code))
-
-      if (!order) throw new NotFoundError('Pedido')
-
-      return reply.send({
-        id: order.id,
-        orderNumber: order.orderNumber,
-        pickupCode: order.pickupCode,
-        status: order.status,
-        scheduledAt: order.scheduledAt,
-        pickupMode: order.pickupMode,
-        priority: order.priority,
-        items: order.items.map((i) => ({
-          productName: i.productName,
-          cutType: i.cutType,
-          quantity: Number(i.quantity),
-          totalPrice: Number(i.totalPrice),
-        })),
-      })
+      const { storeSlug } = storeSlugSchema.parse(req.params)
+      const store = await resolveActiveStore(storeSlug)
+      const input = createOrderSchema.parse(req.body)
+      return reply.status(201).send(await placeOrder(store.id, input))
     },
   )
 
-  // POST /totem/:storeSlug/print — impressão silenciosa pelo backend (sem diálogo no totem)
-  const printSchema = z.object({
-    pickupCode: z.string(),
-    slotTime: z.string(),
-    customerPhone: z.string().optional(),
-    qrDataUrl: z.string().optional(),
-    printerName: z.string().optional(),
-    items: z.array(z.object({
-      productName: z.string(),
-      cutType: z.string(),
-      weightKg: z.number(),
-      estimatedPrice: z.number(),
-    })),
-  })
-
+  // POST /totem/:storeSlug/print — impressão silenciosa pelo backend
+  // Requer JWT de operador para evitar abuso (DoS de impressora, UNC path injection)
   app.post<{ Params: { storeSlug: string } }>(
     '/:storeSlug/print',
-    { config: { rateLimit: { max: 20, timeWindow: '1 minute' } } },
+    {
+      config: { rateLimit: { max: 20, timeWindow: '1 minute' } },
+      onRequest: [authenticate],
+    },
     async (req, reply) => {
-      const store = await findStoreBySlug(req.params.storeSlug)
-      if (!store || !store.active) throw new NotFoundError('Loja')
-
-      const body = printSchema.parse(req.body)
-
+      const store = await resolveActiveStore(req.params.storeSlug)
+      const body = printReceiptSchema.parse(req.body)
       await printReceipt(
         { storeName: store.name, ...body },
-        body.printerName ?? process.env.PRINTER_NAME,
+        body.printerName ?? env.PRINTER_NAME,
       )
-
       return reply.status(204).send()
     },
   )

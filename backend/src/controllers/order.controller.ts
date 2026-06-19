@@ -1,17 +1,28 @@
 import { FastifyReply, FastifyRequest } from 'fastify'
+import { z } from 'zod'
 import { createOrderSchema, updateOrderStatusSchema } from '../schemas/order.schema'
 import { changeOrderStatus, getOrder, listOrders, placeOrder } from '../services/order.service'
 import { getStoreId } from '../middlewares/tenant.middleware'
 import { OrderStatus } from '@prisma/client'
 
+const listOrdersQuerySchema = z.object({
+  status: z.enum(['PENDING', 'PREPARING', 'READY', 'DELIVERED', 'CANCELLED']).optional(),
+  date: z.string().date('date deve estar no formato YYYY-MM-DD').optional(),
+  limit: z.coerce.number().int().min(1).max(500).default(100),
+  offset: z.coerce.number().int().min(0).default(0),
+})
+
 export async function listOrdersHandler(
-  req: FastifyRequest<{ Querystring: { status?: string; date?: string } }>,
+  req: FastifyRequest<{ Querystring: { status?: string; date?: string; limit?: string; offset?: string } }>,
   reply: FastifyReply,
 ) {
+  const query = listOrdersQuerySchema.parse(req.query)
   const storeId = getStoreId(req)
   const orders = await listOrders(storeId, {
-    status: req.query.status as OrderStatus | undefined,
-    date: req.query.date ? new Date(req.query.date) : undefined,
+    status: query.status as OrderStatus | undefined,
+    date: query.date ? new Date(query.date) : undefined,
+    limit: query.limit,
+    offset: query.offset,
   })
   return reply.send(orders)
 }

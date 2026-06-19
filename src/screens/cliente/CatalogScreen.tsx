@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { PRODUCTS, CATEGORIES, type Product } from '../../data/products'
 
 type Props = {
@@ -15,7 +15,12 @@ export default function CatalogScreen({ initialFilter = 'todos', onProduct, cart
 
   useEffect(() => { setFilter(initialFilter) }, [initialFilter])
 
-  const visible = filter === 'todos' ? PRODUCTS : PRODUCTS.filter((p) => p.category === filter)
+  const visible = useMemo(
+    () => filter === 'todos' ? PRODUCTS : PRODUCTS.filter((p) => p.category === filter),
+    [filter],
+  )
+
+  const cartSet = useMemo(() => new Set(cartProductIds), [cartProductIds])
 
   function handleAdd(e: React.MouseEvent, p: Product) {
     e.stopPropagation()
@@ -50,7 +55,7 @@ export default function CatalogScreen({ initialFilter = 'todos', onProduct, cart
               key={p.id}
               product={p}
               added={added === p.id}
-              inCart={cartProductIds.includes(p.id)}
+              inCart={cartSet.has(p.id)}
               onClick={() => onProduct(p)}
               onAdd={(e) => handleAdd(e, p)}
             />

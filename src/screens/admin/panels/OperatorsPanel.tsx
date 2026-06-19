@@ -1,6 +1,5 @@
 import { useEffect, useState } from 'react'
 import { api, ApiError } from '../../../lib/api'
-import { getAdminToken } from '../../../lib/adminAuth'
 import { useAdminUi, totemUrl } from '../adminUi'
 
 type Operator = { id: string; name: string; email: string; role: string; active: boolean }
@@ -31,7 +30,7 @@ export default function OperatorsPanel({
     setLoading(true)
     setLoadError(null)
     try {
-      setOperators(await api.get<Operator[]>(`/admin/stores/${storeId}/operators`, getAdminToken() ?? ''))
+      setOperators(await api.get<Operator[]>(`/admin/stores/${storeId}/operators`))
     } catch (err) {
       setLoadError(err instanceof ApiError ? err.message : 'Erro ao carregar operadores')
     } finally {
@@ -46,7 +45,7 @@ export default function OperatorsPanel({
     setSaving(true)
     setError(null)
     try {
-      await api.post('/admin/operators', { ...newOp, storeId }, getAdminToken() ?? '')
+      await api.post('/admin/operators', { ...newOp, storeId })
       setShowForm(false)
       setNewOp({ name: '', email: '', password: '', role: 'OPERATOR' })
       toast('Operador criado')
@@ -69,7 +68,7 @@ export default function OperatorsPanel({
       if (!ok) return
     }
     try {
-      await api.patch(`/admin/operators/${op.id}/toggle`, { active: !op.active }, getAdminToken() ?? '')
+      await api.patch(`/admin/operators/${op.id}/toggle`, { active: !op.active })
       setOperators((s) => s.map((x) => (x.id === op.id ? { ...x, active: !op.active } : x)))
       toast(op.active ? 'Operador desativado' : 'Operador ativado')
     } catch (err) {
@@ -81,7 +80,7 @@ export default function OperatorsPanel({
     e.preventDefault()
     setSaving(true)
     try {
-      await api.patch(`/admin/operators/${resetId}/password`, { password: newPass }, getAdminToken() ?? '')
+      await api.patch(`/admin/operators/${resetId}/password`, { password: newPass })
       setResetId(null)
       setNewPass('')
       toast('Senha redefinida')

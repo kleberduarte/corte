@@ -1,10 +1,12 @@
-import { useEffect, useRef, useState, useCallback } from 'react'
+import { useEffect, useState, useCallback } from 'react'
 import { applyStoreTheme } from './data/theme'
 import { fetchActiveStore, StoreContext, useStore } from './data/config'
 import type { StoreConfig } from './data/config'
 import { useCartStore } from './store/cartStore'
 import { useKanbanStore } from './store/kanbanStore'
 import { PRODUCTS, type Product, type CutType } from './data/products'
+import { useInactivity } from './hooks/useInactivity'
+import { getBackScreen, type ClienteScreen } from './hooks/useClienteNavigation'
 
 import Topbar from './components/Topbar'
 import InactivityOverlay from './components/InactivityOverlay'
@@ -24,67 +26,8 @@ import OrdersBoardScreen from './screens/cliente/OrdersBoardScreen'
 import KanbanScreen from './screens/operador/KanbanScreen'
 import AdminApp from './screens/admin/AdminApp'
 
-type ClienteScreen = 'home' | 'pickup-mode' | 'flow-choice' | 'categories' | 'catalog' | 'detail' | 'cart' | 'schedule' | 'phone' | 'print'
-
-const INACTIVITY_MS = 90_000
-const COUNTDOWN_S   = 15
-const IMMEDIATE_SLOT = 'Imediata'
+const IMMEDIATE_SLOT    = 'Imediata'
 const PREFERENTIAL_SLOT = 'Preferencial'
-
-function getBackScreen(screen: ClienteScreen, pickupMode: PickupMode, counterOnly: boolean): ClienteScreen {
-  const map: Record<ClienteScreen, ClienteScreen> = {
-    home: 'home',
-    'pickup-mode': 'home',
-    'flow-choice': 'pickup-mode',
-    categories: pickupMode === 'scheduled' ? 'pickup-mode' : 'flow-choice',
-    catalog: 'categories',
-    detail: 'catalog',
-    cart: 'catalog',
-    schedule: 'cart',
-    phone: pickupMode === 'immediate' ? 'cart' : 'schedule',
-    print: counterOnly ? 'flow-choice' : 'phone',
-  }
-  return map[screen]
-}
-
-// ─── Hook de inatividade com countdown ───────────────────────────────────────
-function useInactivity(onReset: () => void) {
-  const [countdown, setCountdown] = useState<number | null>(null)
-  const mainTimer   = useRef<ReturnType<typeof setTimeout> | null>(null)
-  const countTimer  = useRef<ReturnType<typeof setInterval> | null>(null)
-
-  const clear = () => {
-    if (mainTimer.current)  clearTimeout(mainTimer.current)
-    if (countTimer.current) clearInterval(countTimer.current)
-    mainTimer.current = countTimer.current = null
-  }
-
-  const reset = useCallback(() => {
-    clear()
-    setCountdown(null)
-    mainTimer.current = setTimeout(() => {
-      setCountdown(COUNTDOWN_S)
-      let s = COUNTDOWN_S
-      countTimer.current = setInterval(() => {
-        s -= 1
-        setCountdown(s)
-        if (s <= 0) { clear(); setCountdown(null); onReset() }
-      }, 1000)
-    }, INACTIVITY_MS - COUNTDOWN_S * 1000)
-  }, [onReset])
-
-  const dismiss = useCallback(() => reset(), [reset])
-
-  useEffect(() => {
-    reset()
-    const events = ['touchstart', 'mousedown', 'keydown'] as const
-    const handler = () => { if (countTimer.current === null) reset() }
-    events.forEach((e) => document.addEventListener(e, handler))
-    return () => { clear(); events.forEach((e) => document.removeEventListener(e, handler)) }
-  }, [reset])
-
-  return { countdown, dismiss }
-}
 
 // ─── View do Cliente ─────────────────────────────────────────────────────────
 function ClienteView() {

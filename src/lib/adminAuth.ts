@@ -1,24 +1,20 @@
+// Sessão do admin — token em cookie httpOnly, metadados em localStorage.
+
 import { api } from './api'
 
-const TOKEN_KEY    = 'corte:admin_token'
-const ADMIN_KEY    = 'corte:admin'
+const ADMIN_KEY = 'corte:admin'
 
 export type AdminSession = { id: string; name: string; email: string }
 
 export async function loginAdmin(email: string, password: string) {
-  const result = await api.post<{ token: string; admin: AdminSession }>('/admin/login', { email, password })
-  localStorage.setItem(TOKEN_KEY, result.token)
+  const result = await api.post<{ admin: AdminSession }>('/admin/login', { email, password })
   localStorage.setItem(ADMIN_KEY, JSON.stringify(result.admin))
   return result
 }
 
-export function logoutAdmin() {
-  localStorage.removeItem(TOKEN_KEY)
+export async function logoutAdmin() {
   localStorage.removeItem(ADMIN_KEY)
-}
-
-export function getAdminToken(): string | null {
-  return localStorage.getItem(TOKEN_KEY)
+  try { await api.post('/admin/logout', {}) } catch { /* best-effort */ }
 }
 
 export function getAdminSession(): AdminSession | null {
@@ -26,19 +22,17 @@ export function getAdminSession(): AdminSession | null {
 }
 
 export function isAdminLoggedIn(): boolean {
-  return !!getAdminToken()
+  return !!getAdminSession()
 }
 
-/** Valida token com a API e atualiza sessão local; limpa storage se inválido. */
 export async function validateAdminSession(): Promise<boolean> {
-  const token = getAdminToken()
-  if (!token) return false
+  if (!getAdminSession()) return false
   try {
-    const admin = await api.get<AdminSession>('/admin/me', token)
+    const admin = await api.get<AdminSession>('/admin/me')
     localStorage.setItem(ADMIN_KEY, JSON.stringify(admin))
     return true
   } catch {
-    logoutAdmin()
+    await logoutAdmin()
     return false
   }
 }

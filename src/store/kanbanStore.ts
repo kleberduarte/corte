@@ -2,7 +2,7 @@ import { create } from 'zustand'
 import type { Order } from './cartStore'
 import { normalizeOrder } from './cartStore'
 import { api } from '../lib/api'
-import { getOperatorToken } from '../lib/auth'
+import { isOperatorLoggedIn } from '../lib/auth'
 import { notifyBoardUpdate } from '../lib/boardSync'
 import { flushQueue, loadQueue } from './syncQueue'
 
@@ -101,16 +101,19 @@ export const useKanbanStore = create<KanbanStore>((set, get) => ({
       return { orders }
     })
 
-    // Sincroniza com a API em background
-    const token = getOperatorToken()
-    if (token) {
+    // Sincroniza com a API em background — retorna true em caso de sucesso
+    if (isOperatorLoggedIn()) {
       try {
-        await api.patch(`/orders/${id}/status`, { status: STATUS_MAP_REVERSE[status] }, token)
+        await api.patch(`/orders/${id}/status`, { status: STATUS_MAP_REVERSE[status] })
         notifyBoardUpdate()
+        return true
       } catch {
-        console.warn('[kanbanStore] Falha ao sincronizar status com a API')
+        // Não reverte o estado local — o pedido continua no status atualizado
+        // para o operador continuar trabalhando. O próximo fetchOrders vai reconciliar.
+        return false
       }
     }
+    return true
   },
 
   resetOrders: () => {
@@ -119,8 +122,7 @@ export const useKanbanStore = create<KanbanStore>((set, get) => ({
   },
 
   fetchOrders: async () => {
-    const token = getOperatorToken()
-    if (!token) return
+    if (!isOperatorLoggedIn()) return
 
     // Tenta sincronizar pedidos que falharam anteriormente
     const confirmed = await flushQueue()
@@ -138,7 +140,7 @@ export const useKanbanStore = create<KanbanStore>((set, get) => ({
 
     set({ loading: true, error: null })
     try {
-      const data = await api.get<Record<string, unknown>[]>('/orders', token)
+      const data = await api.get<Record<string, unknown>[]>('/orders')
       const apiOrders = data.map(apiOrderToLocal)
       const apiIds = new Set(apiOrders.map((o) => o.id))
 

@@ -1,13 +1,22 @@
 import { FastifyInstance } from 'fastify'
 import { authenticateAdmin } from '../middlewares/admin.middleware'
+import { env } from '../config/env'
+
+const ADMIN_COOKIE = 'corte_admin_token'
+const COOKIE_OPTS = {
+  httpOnly: true,
+  secure: env.NODE_ENV === 'production',
+  sameSite: 'strict' as const,
+  path: '/admin',
+  maxAge: 60 * 60 * 8,
+}
 import {
   adminLoginSchema, createStoreSchema, updateStoreSchema,
   toggleStoreSchema, createOperatorSchema, resetPasswordSchema,
 } from '../schemas/admin.schema'
-import {
-  loginAdmin, getAdminMe, getAdminStats, listStores, getStore, createStore, updateStore, toggleStore,
-  listOperators, createOperator, resetOperatorPassword, toggleOperator, syncStoreCatalog,
-} from '../services/admin.service'
+import { loginAdmin, getAdminMe, getAdminStats } from '../services/admin-auth.service'
+import { listStores, getStore, createStore, updateStore, toggleStore, syncStoreCatalog } from '../services/store.service'
+import { listOperators, createOperator, resetOperatorPassword, toggleOperator } from '../services/operator.service'
 
 export async function adminRoutes(app: FastifyInstance) {
 
@@ -17,17 +26,25 @@ export async function adminRoutes(app: FastifyInstance) {
   }, async (req, reply) => {
     const input = adminLoginSchema.parse(req.body)
     const result = await loginAdmin(app, input)
-    return reply.send(result)
+    reply.setCookie(ADMIN_COOKIE, result.token, COOKIE_OPTS)
+    return reply.send({ admin: result.admin })
+  })
+
+  // POST /admin/logout
+  app.post('/logout', async (_req, reply) => {
+    reply.clearCookie(ADMIN_COOKIE, { path: '/admin' })
+    return reply.status(204).send()
   })
 
   // Todas as rotas abaixo exigem token admin
+  const PUBLIC_ROUTES = new Set(['/login', '/logout'])
   app.addHook('onRequest', async (req, reply) => {
-    if (req.url?.endsWith('/login')) return
+    if (PUBLIC_ROUTES.has((req.routeOptions as any)?.url)) return
     await authenticateAdmin(req, reply)
   })
 
   // GET /admin/me — valida sessão e retorna dados do admin
-  app.get('/me', async (req: any, reply) => {
+  app.get('/me', async (req, reply) => {
     const adminId = (req.user as { sub: string }).sub
     return reply.send(await getAdminMe(adminId))
   })
@@ -40,9 +57,11 @@ export async function adminRoutes(app: FastifyInstance) {
   // ─── Lojas ──────────────────────────────────────────────────────────────────
 
   // GET  /admin/stores
-  app.get('/stores', async (req: any, reply) => {
-    const chain = (req.query as any).chain
-    return reply.send(await listStores(chain))
+  app.get('/stores', async (req, reply) => {
+    const { chain } = req.query as { chain?: string }
+    const VALID_CHAINS = ['PAO_DE_ACUCAR','EXTRA','VIOLETA','CARREFOUR','ATACADAO','ASSAI','SUPERMERCADOS_MATEUS','BIG','PREZUNIC','MUNDIAL','SONDA','CONDOR','SUPER_MUFFATO','ZAFFARI','BOURBON','COOP','HIROTA','REDE_SMART','ST_MARCHE','CORTE_SUPERMERCADO','OUTROS'] as const
+    const safeChain = chain && (VALID_CHAINS as readonly string[]).includes(chain) ? chain : undefined
+    return reply.send(await listStores(safeChain))
   })
 
   // GET  /admin/stores/:storeId

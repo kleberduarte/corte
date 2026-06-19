@@ -22,14 +22,6 @@ export type Order = {
   createdAt: Date
 }
 
-// Resposta da API ao criar pedido
-type ApiOrder = {
-  id: string
-  pickupCode: string
-  orderNumber: number
-  status: string
-}
-
 type CartStore = {
   items: CartItem[]
   currentOrder: Order | null
@@ -47,10 +39,46 @@ type CartStore = {
 
 function generateCode() {
   const letters = 'ABCDEFGHJKLMNPQRSTUVWXYZ'
-  const nums = '0123456789'
   const l = letters[Math.floor(Math.random() * letters.length)]
-  const n = Array.from({ length: 4 }, () => nums[Math.floor(Math.random() * nums.length)]).join('')
+  const n = Array.from({ length: 4 }, () => Math.floor(Math.random() * 10)).join('')
   return `${l}-${n}`
+}
+
+async function submitOrder(
+  storeSlug: string,
+  payload: Record<string, unknown>,
+  orderBase: Omit<Order, 'id' | 'pickupCode'>,
+): Promise<Order> {
+  let pickupCode = generateCode()
+  let orderId: string = crypto.randomUUID()
+  let syncFailed = false
+
+  try {
+    const apiOrder = await api.post<{ id: string; pickupCode: string; orderNumber: number; status: string }>(
+      `/totem/${storeSlug}/orders`,
+      payload,
+    )
+    pickupCode = apiOrder.pickupCode
+    orderId = apiOrder.id
+    notifyBoardUpdate()
+  } catch {
+    syncFailed = true
+    console.warn('[cartStore] API indisponível — pedido enfileirado para retry')
+  }
+
+  const order: Order = { ...orderBase, id: orderId, pickupCode }
+
+  if (syncFailed) {
+    enqueue({
+      localId: orderId,
+      storeSlug,
+      payload,
+      localOrder: { ...order, createdAt: order.createdAt.toISOString() },
+      queuedAt: new Date().toISOString(),
+    })
+  }
+
+  return order
 }
 
 export const useCartStore = create<CartStore>((set, get) => ({
@@ -87,7 +115,14 @@ export const useCartStore = create<CartStore>((set, get) => ({
     const payload = {
       pickupMode: slotTime === 'Imediata' ? 'IMMEDIATE' : 'SCHEDULED',
       scheduledAt: slotTime !== 'Imediata' && slotTime !== 'Balcão'
-        ? new Date(`${new Date().toISOString().split('T')[0]}T${slotTime}:00`).toISOString()
+        ? (() => {
+            // toISOString() retorna UTC — usar partes locais para não cruzar meia-noite UTC
+            const now = new Date()
+            const y = now.getFullYear()
+            const m = String(now.getMonth() + 1).padStart(2, '0')
+            const d = String(now.getDate()).padStart(2, '0')
+            return new Date(`${y}-${m}-${d}T${slotTime}:00`).toISOString()
+          })()
         : undefined,
       customerPhone: customerPhone || undefined,
       items: items.map((i) => ({
@@ -97,33 +132,13 @@ export const useCartStore = create<CartStore>((set, get) => ({
       })),
     }
 
-    let pickupCode = generateCode()
-    let orderId: string = crypto.randomUUID()
-    let syncFailed = false
-
-    try {
-      const apiOrder = await api.post<ApiOrder>(`/totem/${storeSlug}/orders`, payload)
-      pickupCode = apiOrder.pickupCode
-      orderId = apiOrder.id
-      notifyBoardUpdate()
-    } catch {
-      syncFailed = true
-      console.warn('[cartStore] API indisponível — pedido enfileirado para retry')
-    }
-
-    const order: Order = {
-      id: orderId,
+    const order = await submitOrder(storeSlug, payload, {
       items: [...items],
-      pickupCode,
       slotTime,
       customerPhone,
       status: 'aguardando',
       createdAt: new Date(),
-    }
-
-    if (syncFailed) {
-      enqueue({ localId: orderId, storeSlug, payload, localOrder: { ...order, createdAt: order.createdAt.toISOString() }, queuedAt: new Date().toISOString() })
-    }
+    })
 
     set({ currentOrder: order })
     return order
@@ -139,34 +154,14 @@ export const useCartStore = create<CartStore>((set, get) => ({
       notes: priority ? 'Atendimento preferencial' : undefined,
     }
 
-    let pickupCode = generateCode()
-    let orderId: string = crypto.randomUUID()
-    let syncFailed = false
-
-    try {
-      const apiOrder = await api.post<ApiOrder>(`/totem/${storeSlug}/orders`, payload)
-      pickupCode = apiOrder.pickupCode
-      orderId = apiOrder.id
-      notifyBoardUpdate()
-    } catch {
-      syncFailed = true
-      console.warn('[cartStore] API indisponível — senha de balcão enfileirada para retry')
-    }
-
-    const order: Order = {
-      id: orderId,
+    const order = await submitOrder(storeSlug, payload, {
       items: [],
-      pickupCode,
       slotTime,
       customerPhone: '',
       priority,
       status: 'aguardando',
       createdAt: new Date(),
-    }
-
-    if (syncFailed) {
-      enqueue({ localId: orderId, storeSlug, payload, localOrder: { ...order, createdAt: order.createdAt.toISOString() }, queuedAt: new Date().toISOString() })
-    }
+    })
 
     set({ items: [], currentOrder: order })
     return order

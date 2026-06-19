@@ -14,7 +14,6 @@ import {
   veltrixExternalCode,
   veltrixProductId,
 } from '../integrations/veltrix-category'
-import { upsertStoreProduct } from '../repositories/product.repository'
 import { AppError } from '../errors/AppError'
 
 function toNumber(value: number | string | null | undefined, fallback = 0): number {
@@ -49,54 +48,74 @@ export async function syncCatalogFromVeltrix(
   const token = await veltrixLogin(baseUrl, email, password)
   const remote = await veltrixFetchProducts(baseUrl, token)
 
+  if (remote.length === 0) {
+    throw new AppError('Veltrix retornou zero produtos ativos para esta empresa', 404)
+  }
+
   const seenIds = new Set<string>()
 
-  for (const p of remote) {
-    if (p.active === false) continue
+  await prisma.$transaction(
+    async (tx) => {
+      for (const p of remote) {
+        if (p.active === false) continue
 
-    const productId = veltrixProductId(p.id)
-    seenIds.add(productId)
-    const category = mapVeltrixCategory(p.categoria)
-    const price = effectivePrice(p)
-    const available = (p.stock ?? 0) > 0
+        const productId = veltrixProductId(p.id)
+        seenIds.add(productId)
+        const category = mapVeltrixCategory(p.categoria)
+        const price = effectivePrice(p)
+        const available = (p.stock ?? 0) > 0
 
-    await prisma.product.upsert({
-      where: { id: productId },
-      update: {
-        name: p.name,
-        category,
-        unit: mapVeltrixUnit(p.tipo),
-        description: p.descricao?.trim() || p.name,
-        imageUrl: absolutizeVeltrixImageUrl(baseUrl, p.imagemUrl),
-        sku: buildSku(p),
-        ean: p.gtinEan?.trim() || null,
-        active: true,
-        cutTypes: defaultCutTypesForCategory(category),
-        tags: p.categoria ? [p.categoria] : [],
-      },
-      create: {
-        id: productId,
-        name: p.name,
-        category,
-        unit: mapVeltrixUnit(p.tipo),
-        description: p.descricao?.trim() || p.name,
-        imageUrl: absolutizeVeltrixImageUrl(baseUrl, p.imagemUrl),
-        sku: buildSku(p),
-        ean: p.gtinEan?.trim() || null,
-        active: true,
-        cutTypes: defaultCutTypesForCategory(category),
-        tags: p.categoria ? [p.categoria] : [],
-        reviewCount: 0,
-      },
-    })
+        await tx.product.upsert({
+          where: { id: productId },
+          update: {
+            name: p.name,
+            category,
+            unit: mapVeltrixUnit(p.tipo),
+            description: p.descricao?.trim() || p.name,
+            imageUrl: absolutizeVeltrixImageUrl(baseUrl, p.imagemUrl),
+            sku: buildSku(p),
+            ean: p.gtinEan?.trim() || null,
+            active: true,
+            cutTypes: defaultCutTypesForCategory(category),
+            tags: p.categoria ? [p.categoria] : [],
+          },
+          create: {
+            id: productId,
+            name: p.name,
+            category,
+            unit: mapVeltrixUnit(p.tipo),
+            description: p.descricao?.trim() || p.name,
+            imageUrl: absolutizeVeltrixImageUrl(baseUrl, p.imagemUrl),
+            sku: buildSku(p),
+            ean: p.gtinEan?.trim() || null,
+            active: true,
+            cutTypes: defaultCutTypesForCategory(category),
+            tags: p.categoria ? [p.categoria] : [],
+            reviewCount: 0,
+          },
+        })
 
-    await upsertStoreProduct(storeId, productId, {
-      price,
-      available,
-      externalProductCode: veltrixExternalCode(p.id),
-      priceSource: PriceSource.INTEGRATION,
-    })
-  }
+        await tx.storeProduct.upsert({
+          where: { storeId_productId: { storeId, productId } },
+          update: {
+            price,
+            available,
+            externalProductCode: veltrixExternalCode(p.id),
+            priceSource: PriceSource.INTEGRATION,
+          },
+          create: {
+            storeId,
+            productId,
+            price,
+            available,
+            externalProductCode: veltrixExternalCode(p.id),
+            priceSource: PriceSource.INTEGRATION,
+          },
+        })
+      }
+    },
+    { timeout: 60_000 },
+  )
 
   const deactivated = await prisma.product.updateMany({
     where: {
@@ -105,10 +124,6 @@ export async function syncCatalogFromVeltrix(
     },
     data: { active: false },
   })
-
-  if (remote.length === 0) {
-    throw new AppError('Veltrix retornou zero produtos ativos para esta empresa', 404)
-  }
 
   return { imported: seenIds.size, deactivated: deactivated.count }
 }
