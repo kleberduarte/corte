@@ -1,6 +1,6 @@
 import { create } from 'zustand'
 import { api } from '../lib/api'
-import { notifyBoardUpdate, subscribeBoardUpdate } from '../lib/boardSync'
+import { subscribeBoardUpdate } from '../lib/boardSync'
 import { normalizeOrder } from './cartStore'
 import type { Order } from './cartStore'
 import { flushQueue, loadQueue, removeQueueEntries, type QueueEntry } from './syncQueue'
