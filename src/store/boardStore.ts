@@ -292,7 +292,6 @@ export const useBoardStore = create<BoardStore>((set, get) => ({
       if (changed) {
         localOrders = pruned
         saveLocalOrders(pruned)
-        notifyBoardUpdate()
       }
     } else if (confirmed.length > 0) {
       saveLocalOrders(localOrders)
