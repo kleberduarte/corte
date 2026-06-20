@@ -1,7 +1,7 @@
 import { create } from 'zustand'
 import type { Order } from './cartStore'
 import { normalizeOrder } from './cartStore'
-import { api } from '../lib/api'
+import { api, ApiError } from '../lib/api'
 import { isOperatorLoggedIn } from '../lib/auth'
 import { notifyBoardUpdate, subscribeBoardUpdate } from '../lib/boardSync'
 import { flushQueue, loadQueue } from './syncQueue'
@@ -80,21 +80,47 @@ function saveLocalOrders(orders: Order[]) {
   localStorage.setItem(LS_KEY, JSON.stringify(orders))
 }
 
+function todayDateParam(): string {
+  const now = new Date()
+  const y = now.getFullYear()
+  const m = String(now.getMonth() + 1).padStart(2, '0')
+  const d = String(now.getDate()).padStart(2, '0')
+  return `${y}-${m}-${d}`
+}
+
+function isToday(date: Date) {
+  const now = new Date()
+  return (
+    date.getFullYear() === now.getFullYear() &&
+    date.getMonth() === now.getMonth() &&
+    date.getDate() === now.getDate()
+  )
+}
+
+function isActiveOrder(order: Order) {
+  return order.status !== 'retirado'
+}
+
 type KanbanStore = {
   orders: Order[]
   loading: boolean
   error: string | null
+  sessionExpired: boolean
   addOrder: (order: Order) => void
   moveOrder: (id: string, status: Order['status']) => Promise<boolean>
   resetOrders: () => void
   fetchOrders: () => Promise<void>
   startPolling: (intervalMs?: number) => () => void
+  clearSessionExpired: () => void
 }
 
 export const useKanbanStore = create<KanbanStore>((set, get) => ({
-  orders: loadLocalOrders(),
+  orders: loadLocalOrders().filter((o) => isToday(o.createdAt) && isActiveOrder(o)),
   loading: false,
   error: null,
+  sessionExpired: false,
+
+  clearSessionExpired: () => set({ sessionExpired: false }),
 
   addOrder: (order) =>
     set((s) => {
@@ -105,6 +131,9 @@ export const useKanbanStore = create<KanbanStore>((set, get) => ({
     }),
 
   moveOrder: async (id, status) => {
+    // Captura o status anterior para poder reverter se a API falhar
+    const previous = get().orders.find((o) => o.id === id)?.status
+
     // Atualiza localmente de imediato (optimistic update)
     set((s) => {
       const orders = s.orders.map((o) => (o.id === id ? { ...o, status } : o))
@@ -120,8 +149,15 @@ export const useKanbanStore = create<KanbanStore>((set, get) => ({
         notifyBoardUpdate()
         return true
       } catch {
-        // Não reverte o estado local — o pedido continua no status atualizado
-        // para o operador continuar trabalhando. O próximo fetchOrders vai reconciliar.
+        // Reverte o estado local ao status anterior para manter consistência com o banco
+        if (previous !== undefined) {
+          set((s) => {
+            const orders = s.orders.map((o) => (o.id === id ? { ...o, status: previous } : o))
+            saveLocalOrders(orders)
+            notifyBoardUpdate()
+            return { orders }
+          })
+        }
         return false
       }
     }
@@ -150,25 +186,39 @@ export const useKanbanStore = create<KanbanStore>((set, get) => ({
       })
     }
 
-    set({ loading: true, error: null })
+    set({ loading: true, error: null, sessionExpired: false })
     try {
-      const data = await api.get<Record<string, unknown>[]>('/orders')
-      const apiOrders = data.map(apiOrderToLocal)
+      const data = await api.get<Record<string, unknown>[]>(`/orders?date=${todayDateParam()}`)
+      if (!Array.isArray(data)) throw new Error('Resposta inválida da API')
+
+      const apiOrders = data
+        .map(apiOrderToLocal)
+        .filter((o) => isToday(o.createdAt) && isActiveOrder(o))
       const apiIds = new Set(apiOrders.map((o) => o.id))
 
       // Mantém pedidos locais que ainda estão na fila de retry (não sincronizados)
       const pendingLocalIds = new Set(loadQueue().map((e) => e.localId))
       const pendingOrders = get().orders.filter(
-        (o) => pendingLocalIds.has(o.id) && !apiIds.has(o.id)
+        (o) => pendingLocalIds.has(o.id) && !apiIds.has(o.id) && isActiveOrder(o),
       )
 
       const merged = [...pendingOrders, ...apiOrders]
       saveLocalOrders(merged)
-      set({ orders: merged, loading: false })
+      set({ orders: merged, loading: false, error: null })
       notifyBoardUpdate()
-    } catch {
+    } catch (err) {
+      if (err instanceof ApiError && err.status === 401) {
+        set({
+          loading: false,
+          error: 'Sessão expirada — faça login novamente',
+          sessionExpired: true,
+          orders: [],
+        })
+        return
+      }
       set({ loading: false, error: 'Não foi possível carregar pedidos da API' })
-      set({ orders: get().orders.length ? get().orders : loadLocalOrders() })
+      const fallback = loadLocalOrders().filter((o) => isToday(o.createdAt) && isActiveOrder(o))
+      set({ orders: get().orders.length ? get().orders : fallback })
     }
   },
 
@@ -188,7 +238,8 @@ export const useKanbanStore = create<KanbanStore>((set, get) => ({
 if (typeof window !== 'undefined') {
   window.addEventListener('storage', (e) => {
     if (e.key === LS_KEY) {
-      useKanbanStore.setState({ orders: loadLocalOrders() })
+      const orders = loadLocalOrders().filter((o) => isToday(o.createdAt) && isActiveOrder(o))
+      useKanbanStore.setState({ orders })
     }
   })
 }

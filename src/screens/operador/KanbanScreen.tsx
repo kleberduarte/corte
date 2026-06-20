@@ -22,12 +22,20 @@ function beep() {
 }
 
 export default function KanbanScreen() {
-  const { orders, moveOrder, resetOrders, startPolling } = useKanbanStore()
+  const { orders, moveOrder, resetOrders, startPolling, sessionExpired, clearSessionExpired } = useKanbanStore()
   const store = useStore()
   const toast = useToast()
   const [clock, setClock] = useState(new Date())
   const [loggedIn, setLoggedIn] = useState(isOperatorLoggedIn)
   const prevCount = useRef(0)
+
+  useEffect(() => {
+    if (sessionExpired) {
+      setLoggedIn(false)
+      clearSessionExpired()
+      toast.error('Sessão expirada — faça login novamente')
+    }
+  }, [sessionExpired, clearSessionExpired, toast])
 
   useEffect(() => {
     if (orders.length > prevCount.current) beep()
