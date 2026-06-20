@@ -2,6 +2,7 @@ import Fastify from 'fastify'
 import helmet from '@fastify/helmet'
 import cookie from '@fastify/cookie'
 import { corsPlugin } from './plugins/cors'
+import { csrfPlugin } from './plugins/csrf'
 import { jwtPlugin } from './plugins/jwt'
 import { rateLimitPlugin } from './plugins/rateLimit'
 import { requestIdPlugin } from './plugins/requestId'
@@ -30,6 +31,7 @@ export async function buildApp() {
   // Segurança
   await app.register(helmet)
   await corsPlugin(app)
+  await csrfPlugin(app)
   await rateLimitPlugin(app)
   await app.register(cookie)
 

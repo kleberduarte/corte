@@ -20,6 +20,13 @@ export async function findOperatorByEmail(storeId: string, email: string) {
   })
 }
 
+export async function findOperatorById(operatorId: string) {
+  return prisma.operator.findUnique({
+    where: { id: operatorId },
+    select: { id: true, active: true },
+  })
+}
+
 export async function findStoreIntegration(storeId: string) {
   return prisma.storeIntegration.findUnique({ where: { storeId } })
 }

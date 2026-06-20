@@ -12,7 +12,11 @@ dist
 dist-ssr
 *.local
 
-# Backend
+# Env files — nunca commitar credenciais
+.env
+.env.*
+!.env.example
+!.env.totem
 backend/.env
 backend/node_modules
 backend/dist

@@ -1,3 +1,4 @@
+import { randomInt } from 'crypto'
 import {
   createOrder,
   findOrderById,
@@ -13,8 +14,8 @@ import { prisma } from '../config/database'
 
 function generatePickupCode(): string {
   const letters = 'ABCDEFGHJKLMNPQRSTUVWXYZ'
-  const l = letters[Math.floor(Math.random() * letters.length)]
-  const n = Array.from({ length: 4 }, () => Math.floor(Math.random() * 10)).join('')
+  const l = letters[randomInt(letters.length)]
+  const n = Array.from({ length: 4 }, () => randomInt(10)).join('')
   return `${l}-${n}`
 }
 

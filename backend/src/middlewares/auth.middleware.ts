@@ -1,5 +1,6 @@
 import { FastifyReply, FastifyRequest } from 'fastify'
 import { UnauthorizedError } from '../errors/AppError'
+import { findOperatorById } from '../repositories/store.repository'
 
 export type JwtPayload = {
   sub: string       // operatorId
@@ -11,7 +12,13 @@ export async function authenticate(req: FastifyRequest, reply: FastifyReply) {
   try {
     const token = req.cookies['corte_token']
     if (!token) throw new Error('no token')
-    req.user = req.server.jwt.verify<JwtPayload>(token)
+    const payload = req.server.jwt.verify<JwtPayload>(token)
+
+    // Garante que o operador ainda existe e está ativo (revoga sessão ao desativar conta)
+    const operator = await findOperatorById(payload.sub)
+    if (!operator || !operator.active) throw new Error('operator inactive')
+
+    req.user = payload
   } catch {
     const err = new UnauthorizedError('Token inválido ou expirado')
     return reply.status(err.statusCode).send({ error: err.code, message: err.message })
