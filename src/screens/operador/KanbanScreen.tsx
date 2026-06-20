@@ -93,7 +93,7 @@ export default function KanbanScreen() {
   const dateStr = clock.toLocaleDateString('pt-BR', { weekday: 'short', day: '2-digit', month: '2-digit' })
 
   return (
-    <div style={{ width: '100%', height: '100%', display: 'flex', flexDirection: 'column', background: 'var(--bg)' }}>
+    <div className="screen kanban-screen">
       {/* Top bar */}
       <div style={{ flexShrink: 0, height: 'auto', minHeight: 52, display: 'flex', alignItems: 'center', padding: '10px 16px', gap: 12, background: 'var(--s1)', borderBottom: '1px solid var(--border)', flexWrap: 'wrap' }}>
         <div style={{ width: 34, height: 34, background: 'linear-gradient(145deg, var(--primary-dark), var(--primary))', borderRadius: 10, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 17 }}>🔪</div>
@@ -108,9 +108,9 @@ export default function KanbanScreen() {
         </div>
         <div style={{ width: 34, height: 34, borderRadius: 10, background: 'var(--s2)', border: '1px solid var(--border)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 15, position: 'relative', cursor: 'pointer' }}>
           🔔
-          {orders.length > 0 && (
+          {waiting.length > 0 && (
             <div style={{ position: 'absolute', top: 4, right: 4, width: 14, height: 14, borderRadius: '50%', background: 'var(--primary)', fontSize: 8, fontWeight: 700, color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-              {orders.length}
+              {waiting.length}
             </div>
           )}
         </div>
@@ -127,11 +127,10 @@ export default function KanbanScreen() {
       </div>
 
       {/* Métricas */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(5, 1fr)', gap: 6, padding: '8px 12px', flexShrink: 0, borderBottom: '1px solid var(--border)' }}>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 6, padding: '8px 12px', flexShrink: 0, borderBottom: '1px solid var(--border)' }}>
         <MetricCard color="var(--t4)" value={waiting.length} label="Aguardando" />
         <MetricCard color="var(--orange)" value={inProg.length} label="Em preparo" />
         <MetricCard color="var(--green)" value={done.length} label="Prontos" />
-        <MetricCard color="var(--blue)" value={orders.length} label="Total hoje" />
         <MetricCard color="var(--primary)" value={urgent.length} label="Urgente" pulse />
       </div>
 
@@ -140,13 +139,13 @@ export default function KanbanScreen() {
         <div>
           <div style={{ fontFamily: 'var(--font-serif)', fontSize: 16, fontWeight: 700, color: 'var(--t1)' }}>Pedidos do Dia</div>
           <div style={{ fontSize: 10, color: 'var(--t3)' }}>
-            {orders.length === 0 ? 'Fila vazia · faça um pedido no totem' : `${orders.length} pedido(s) no total`}
+            {orders.length === 0 ? 'Fila vazia · faça um pedido no totem' : `${orders.length} pedido(s) na fila`}
           </div>
         </div>
       </div>
 
-      {/* Colunas */}
-      <div style={{ flex: 1, display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 10, padding: '0 12px 0', overflow: 'hidden', minHeight: 0 }}>
+      {/* Colunas — cada uma rola independentemente (touch) */}
+      <div className="kanban-board">
         <KanbanCol
           title="Aguardando Corte"
           color="var(--t3)"
@@ -222,13 +221,13 @@ function KanbanCol({ title, color, orders, primaryLabel, onPrimary, isGreen, clo
   isGreen?: boolean; clock?: Date
 }) {
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', minHeight: 0, overflow: 'hidden' }}>
+    <div className="kanban-col">
       <div className="kanban-col-head">
         <div className="col-dot" style={{ background: color }} />
         <div className="col-name">{title}</div>
         <div className="col-cnt">{orders.length}</div>
       </div>
-      <div className="scroll" style={{ flex: 1 }}>
+      <div className="scroll kanban-col-scroll">
         {orders.length === 0 ? (
           <EmptyState compact title="Vazio" description="Pedidos aparecem aqui" />
         ) : (

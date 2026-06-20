@@ -12,6 +12,7 @@
     "db:generate": "prisma generate",
     "db:studio": "prisma studio",
     "db:seed": "tsx prisma/seed.ts",
+    "db:predeploy-cleanup": "tsx prisma/predeploy-cleanup.ts",
     "db:bootstrap-admin": "node prisma/bootstrap-admin.cjs"
   },
   "dependencies": {

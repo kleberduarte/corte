@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { api, ApiError } from '../../../lib/api'
+import { api, ApiError, apiErrorMessage } from '../../../lib/api'
 import { useAdminUi, totemUrl } from '../adminUi'
 
 type Operator = { id: string; name: string; email: string; role: string; active: boolean }
@@ -51,7 +51,7 @@ export default function OperatorsPanel({
       toast('Operador criado')
       load()
     } catch (err) {
-      setError(err instanceof ApiError ? err.message : 'Erro ao criar')
+      setError(apiErrorMessage(err, 'Erro ao criar'))
     } finally {
       setSaving(false)
     }
@@ -128,10 +128,21 @@ export default function OperatorsPanel({
             <div className="admin-field">
               <label htmlFor="op-email">E-mail</label>
               <input id="op-email" type="email" required value={newOp.email} onChange={(e) => setNewOp((v) => ({ ...v, email: e.target.value }))} />
+              <p className="admin-field__hint">Use um domínio válido, ex.: corte@operador.com</p>
             </div>
             <div className="admin-field">
               <label htmlFor="op-pass">Senha</label>
-              <input id="op-pass" type="password" required minLength={6} value={newOp.password} onChange={(e) => setNewOp((v) => ({ ...v, password: e.target.value }))} />
+              <input
+                id="op-pass"
+                type="password"
+                required
+                minLength={8}
+                pattern="(?=.*[A-Z])(?=.*[0-9]).{8,}"
+                title="Mínimo 8 caracteres, com ao menos uma letra maiúscula e um número"
+                value={newOp.password}
+                onChange={(e) => setNewOp((v) => ({ ...v, password: e.target.value }))}
+              />
+              <p className="admin-field__hint">Mínimo 8 caracteres, com ao menos uma maiúscula e um número</p>
             </div>
             <div className="admin-field">
               <label htmlFor="op-role">Função</label>
@@ -158,8 +169,17 @@ export default function OperatorsPanel({
           <h2 className="admin-form-section__title" style={{ color: '#ff8a8f' }}>Redefinir senha</h2>
           <div className="admin-field">
             <label htmlFor="new-pass">Nova senha</label>
-            <input id="new-pass" type="password" required minLength={6} value={newPass} onChange={(e) => setNewPass(e.target.value)} />
-            <p className="admin-field__hint">Mínimo de 6 caracteres</p>
+            <input
+              id="new-pass"
+              type="password"
+              required
+              minLength={8}
+              pattern="(?=.*[A-Z])(?=.*[0-9]).{8,}"
+              title="Mínimo 8 caracteres, com ao menos uma letra maiúscula e um número"
+              value={newPass}
+              onChange={(e) => setNewPass(e.target.value)}
+            />
+            <p className="admin-field__hint">Mínimo 8 caracteres, com ao menos uma maiúscula e um número</p>
           </div>
           <div style={{ display: 'flex', gap: 8, marginTop: 12 }}>
             <button type="button" className="admin-btn admin-btn--ghost" style={{ flex: 1 }} onClick={() => setResetId(null)}>

@@ -1022,7 +1022,30 @@ html, body, #root { height: 100%; height: 100dvh; overflow: hidden; background: 
   padding: 14px 16px;
 }
 
-.kanban-col-head { display: flex; align-items: center; gap: 8px; margin-bottom: 10px; padding: 0 2px; }
+.kanban-col-head { display: flex; align-items: center; gap: 8px; margin-bottom: 10px; padding: 0 2px; flex-shrink: 0; }
+
+/* ── Kanban operador — scroll touch por coluna ── */
+.kanban-screen { background: var(--bg); }
+.kanban-board {
+  flex: 1 1 0;
+  min-height: 0;
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 10px;
+  padding: 0 12px;
+  overflow: hidden;
+}
+.kanban-col {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  overflow: hidden;
+}
+.kanban-col-scroll {
+  flex: 1 1 0;
+  min-height: 0;
+  padding-bottom: 72px; /* espaço para o botão "Zerar fila" fixo */
+}
 .col-dot { width: 9px; height: 9px; border-radius: 50%; }
 .col-name { font-size: calc(11px * var(--font-scale)); font-weight: 700; text-transform: uppercase; letter-spacing: 1px; color: var(--t3); flex: 1; }
 .col-cnt { font-size: calc(11px * var(--font-scale)); font-weight: 700; color: var(--t4); background: var(--s3); padding: 2px 8px; border-radius: 10px; }

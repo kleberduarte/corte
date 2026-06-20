@@ -23,7 +23,7 @@ async function request<T>(path: string, options: RequestInit = {}): Promise<T> {
       localStorage.removeItem('corte:operator')
       localStorage.removeItem('corte:admin')
     }
-    throw new ApiError(res.status, body.message ?? 'Erro inesperado', body.error)
+    throw new ApiError(res.status, body.message ?? 'Erro inesperado', body.error, body.details)
   }
 
   if (res.status === 204) return undefined as T
@@ -51,11 +51,36 @@ export const api = {
 export class ApiError extends Error {
   readonly status: number
   readonly code?: string
+  readonly details?: Record<string, string[]>
 
-  constructor(status: number, message: string, code?: string) {
+  constructor(status: number, message: string, code?: string, details?: Record<string, string[]>) {
     super(message)
     this.name = 'ApiError'
     this.status = status
     this.code = code
+    this.details = details
   }
+}
+
+const FIELD_LABELS: Record<string, string> = {
+  name: 'Nome',
+  email: 'E-mail',
+  password: 'Senha',
+  role: 'Função',
+  storeId: 'Loja',
+}
+
+/** Mensagem legível a partir de erro da API (inclui detalhes de validação 422). */
+export function apiErrorMessage(err: unknown, fallback: string): string {
+  if (!(err instanceof ApiError)) return fallback
+  if (err.details) {
+    const parts = Object.entries(err.details).flatMap(([field, messages]) =>
+      (messages ?? []).map((msg) => {
+        const label = FIELD_LABELS[field] ?? field
+        return `${label}: ${msg}`
+      }),
+    )
+    if (parts.length > 0) return parts.join('. ')
+  }
+  return err.message || fallback
 }
