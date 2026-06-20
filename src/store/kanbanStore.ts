@@ -131,9 +131,6 @@ export const useKanbanStore = create<KanbanStore>((set, get) => ({
     }),
 
   moveOrder: async (id, status) => {
-    // Captura o status anterior para poder reverter se a API falhar
-    const previous = get().orders.find((o) => o.id === id)?.status
-
     // Atualiza localmente de imediato (optimistic update)
     set((s) => {
       const orders = s.orders.map((o) => (o.id === id ? { ...o, status } : o))
@@ -149,15 +146,8 @@ export const useKanbanStore = create<KanbanStore>((set, get) => ({
         notifyBoardUpdate()
         return true
       } catch {
-        // Reverte o estado local ao status anterior para manter consistência com o banco
-        if (previous !== undefined) {
-          set((s) => {
-            const orders = s.orders.map((o) => (o.id === id ? { ...o, status: previous } : o))
-            saveLocalOrders(orders)
-            notifyBoardUpdate()
-            return { orders }
-          })
-        }
+        // Não reverte o estado local — o pedido continua no status atualizado
+        // para o operador continuar trabalhando. O próximo fetchOrders vai reconciliar.
         return false
       }
     }
