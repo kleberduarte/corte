@@ -21,6 +21,7 @@ async function request<T>(path: string, options: RequestInit = {}): Promise<T> {
     // Cookie expirado mas localStorage ainda tem metadados → limpa sessão fantasma
     if (res.status === 401) {
       localStorage.removeItem('corte:operator')
+      localStorage.removeItem('corte:admin')
     }
     throw new ApiError(res.status, body.message ?? 'Erro inesperado', body.error)
   }
