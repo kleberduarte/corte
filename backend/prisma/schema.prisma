@@ -273,6 +273,8 @@ model Order {
   @@unique([storeId, orderNumber])
   @@index([storeId, status])
   @@index([storeId, scheduledAt])
+  @@index([storeId, createdAt])
+  @@index([storeId, pickupCode])
   @@map("orders")
 }
 

@@ -1,6 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { api, ApiError } from '../../../lib/api'
-import { getAdminToken } from '../../../lib/adminAuth'
 import { CHAIN_LABELS, CHAIN_OPTIONS } from '../constants'
 import { useAdminUi, totemUrl } from '../adminUi'
 
@@ -26,7 +25,7 @@ export default function StoresPanel({ onNew, onEdit, onOperators }: {
     setError(null)
     try {
       const path = chainFilter ? `/admin/stores?chain=${chainFilter}` : '/admin/stores'
-      const data = await api.get<Store[]>(path, getAdminToken() ?? '')
+      const data = await api.get<Store[]>(path)
       setStores(data)
     } catch (err) {
       setError(err instanceof ApiError ? err.message : 'Erro ao carregar lojas')
@@ -46,7 +45,7 @@ export default function StoresPanel({ onNew, onEdit, onOperators }: {
       if (!ok) return
     }
     try {
-      await api.patch(`/admin/stores/${store.id}/toggle`, { active: !store.active }, getAdminToken() ?? '')
+      await api.patch(`/admin/stores/${store.id}/toggle`, { active: !store.active })
       setStores((s) => s.map((x) => (x.id === store.id ? { ...x, active: !store.active } : x)))
       toast(store.active ? 'Loja desativada' : 'Loja ativada')
     } catch (err) {

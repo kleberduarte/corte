@@ -21,6 +21,14 @@ export async function findStoreProductById(storeId: string, productId: string) {
   })
 }
 
+export async function findStoreProductsByIds(storeId: string, productIds: string[]) {
+  const rows = await prisma.storeProduct.findMany({
+    where: { storeId, productId: { in: productIds } },
+    include: { product: true },
+  })
+  return new Map(rows.map((r) => [r.productId, r]))
+}
+
 export async function findStoreProductByExternalCode(storeId: string, externalProductCode: string) {
   return prisma.storeProduct.findUnique({
     where: { storeId_externalProductCode: { storeId, externalProductCode } },

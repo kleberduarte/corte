@@ -7,21 +7,21 @@ export type JwtPayload = {
   role: string
 }
 
-// Verifica JWT e injeta operador no request
 export async function authenticate(req: FastifyRequest, reply: FastifyReply) {
   try {
-    await req.jwtVerify<JwtPayload>()
+    const token = req.cookies['corte_token']
+    if (!token) throw new Error('no token')
+    req.user = req.server.jwt.verify<JwtPayload>(token)
   } catch {
     const err = new UnauthorizedError('Token inválido ou expirado')
-    reply.status(err.statusCode).send({ error: err.code, message: err.message })
+    return reply.status(err.statusCode).send({ error: err.code, message: err.message })
   }
 }
 
-// Acesso restrito a MANAGER
 export async function requireManager(req: FastifyRequest, reply: FastifyReply) {
   const payload = req.user as JwtPayload
   if (payload.role !== 'MANAGER') {
     const err = new UnauthorizedError('Apenas gerentes podem executar esta ação')
-    reply.status(err.statusCode).send({ error: err.code, message: err.message })
+    return reply.status(err.statusCode).send({ error: err.code, message: err.message })
   }
 }

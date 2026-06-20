@@ -1,5 +1,6 @@
-import { useEffect, useState } from 'react'
-import { PRODUCTS, CATEGORIES, type Product } from '../../data/products'
+import { useEffect, useMemo, useState } from 'react'
+import type { Product } from '../../data/products'
+import { useCatalog } from '../../data/catalog'
 
 type Props = {
   initialFilter?: string
@@ -10,12 +11,18 @@ type Props = {
 }
 
 export default function CatalogScreen({ initialFilter = 'todos', onProduct, cartCount, cartProductIds = [], onCart }: Props) {
+  const catalog = useCatalog()
   const [filter, setFilter] = useState(initialFilter)
   const [added, setAdded]   = useState<string | null>(null)
 
   useEffect(() => { setFilter(initialFilter) }, [initialFilter])
 
-  const visible = filter === 'todos' ? PRODUCTS : PRODUCTS.filter((p) => p.category === filter)
+  const visible = useMemo(
+    () => filter === 'todos' ? catalog.products : catalog.products.filter((p) => p.category === filter),
+    [filter, catalog.products],
+  )
+
+  const cartSet = useMemo(() => new Set(cartProductIds), [cartProductIds])
 
   function handleAdd(e: React.MouseEvent, p: Product) {
     e.stopPropagation()
@@ -36,7 +43,7 @@ export default function CatalogScreen({ initialFilter = 'todos', onProduct, cart
       </div>
 
       <div className="chips">
-        {CATEGORIES.map((c) => (
+        {catalog.categories.map((c) => (
           <div key={c.id} className={`chip${filter === c.id ? ' on' : ''}`} onClick={() => setFilter(c.id)}>
             {c.label}
           </div>
@@ -50,7 +57,7 @@ export default function CatalogScreen({ initialFilter = 'todos', onProduct, cart
               key={p.id}
               product={p}
               added={added === p.id}
-              inCart={cartProductIds.includes(p.id)}
+              inCart={cartSet.has(p.id)}
               onClick={() => onProduct(p)}
               onAdd={(e) => handleAdd(e, p)}
             />

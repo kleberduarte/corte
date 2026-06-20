@@ -3,7 +3,8 @@
  * Cada entrada guarda o payload completo para ser reenviado no próximo retry.
  */
 
-import { api } from '../lib/api'
+import { api, ApiError } from '../lib/api'
+import { notifyBoardUpdate } from '../lib/boardSync'
 import type { Order } from './cartStore'
 
 const QUEUE_KEY = 'corte:sync_queue'
@@ -42,6 +43,14 @@ export function dequeue(localId: string) {
   saveQueue(queue)
 }
 
+export function removeQueueEntries(localIds: Set<string>) {
+  if (localIds.size === 0) return false
+  const queue = loadQueue().filter((e) => !localIds.has(e.localId))
+  if (queue.length === loadQueue().length) return false
+  saveQueue(queue)
+  return true
+}
+
 type ApiOrder = { id: string; pickupCode: string }
 
 /**
@@ -62,8 +71,13 @@ export async function flushQueue(): Promise<Array<{ localId: string; apiOrder: A
       )
       dequeue(entry.localId)
       confirmed.push({ localId: entry.localId, apiOrder })
-    } catch {
-      // Mantém na fila para o próximo retry
+      notifyBoardUpdate()
+    } catch (err) {
+      // Erros de validação (4xx) nunca vão se resolver com retry — descarta da fila
+      if (err instanceof ApiError && err.status >= 400 && err.status < 500) {
+        dequeue(entry.localId)
+      }
+      // Erros de rede/servidor (5xx, timeout) mantêm na fila para o próximo retry
     }
   }
 

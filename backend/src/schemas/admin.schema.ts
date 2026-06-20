@@ -15,7 +15,7 @@ export const createStoreSchema = z.object({
     primaryDark:       z.string().default('#7A1015'),
     accentColor:       z.string().default('#F5EDDB'),
     logoUrl:           z.string().url().optional().nullable(),
-    fontFamily:        z.string().optional().nullable(),
+    fontFamily:        z.string().regex(/^[\w\s,\-'"]+$/, 'fontFamily contém caracteres inválidos').optional().nullable(),
     morningOpen:       z.string().default('08:00'),
     morningClose:      z.string().default('12:00'),
     afternoonOpen:     z.string().default('14:00'),
@@ -36,13 +36,17 @@ export const toggleStoreSchema = z.object({
 export const createOperatorSchema = z.object({
   name:     z.string().min(2),
   email:    z.string().email(),
-  password: z.string().min(6),
+  password: z.string().min(8, 'Senha deve ter no mínimo 8 caracteres')
+    .regex(/[A-Z]/, 'Senha deve conter ao menos uma letra maiúscula')
+    .regex(/[0-9]/, 'Senha deve conter ao menos um número'),
   role:     z.enum(['OPERATOR', 'MANAGER']).default('OPERATOR'),
   storeId:  z.string().min(1),
 })
 
 export const resetPasswordSchema = z.object({
-  password: z.string().min(6),
+  password: z.string().min(8, 'Senha deve ter no mínimo 8 caracteres')
+    .regex(/[A-Z]/, 'Senha deve conter ao menos uma letra maiúscula')
+    .regex(/[0-9]/, 'Senha deve conter ao menos um número'),
 })
 
 export type AdminLoginInput       = z.infer<typeof adminLoginSchema>

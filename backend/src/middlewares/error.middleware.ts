@@ -12,24 +12,27 @@ export function errorHandler(error: FastifyError | Error, req: FastifyRequest, r
     })
   }
 
-  // Erros de negócio esperados
+  // Erros de negócio esperados — não logar como erro, são fluxos normais
   if (error instanceof AppError) {
+    if (error.statusCode >= 500) {
+      req.log.error({ err: error, requestId: req.id }, error.message)
+    }
     return reply.status(error.statusCode).send({
       error: error.code ?? 'APP_ERROR',
       message: error.message,
     })
   }
 
-  // Erros do Fastify (ex: schema validation nativa)
-  if ('statusCode' in error && error.statusCode) {
+  // Erros do Fastify (ex: body parser, schema nativo)
+  if ('statusCode' in error && error.statusCode && error.statusCode < 500) {
     return reply.status(error.statusCode).send({
       error: 'REQUEST_ERROR',
       message: error.message,
     })
   }
 
-  // Erro inesperado — não expor detalhes em produção
-  console.error('[UNHANDLED ERROR]', error)
+  // Erro inesperado — logar com contexto e não expor detalhes em produção
+  req.log.error({ err: error, requestId: req.id }, 'Erro interno não tratado')
   return reply.status(500).send({
     error: 'INTERNAL_ERROR',
     message: 'Erro interno do servidor',
