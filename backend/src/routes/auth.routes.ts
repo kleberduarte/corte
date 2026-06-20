@@ -7,7 +7,10 @@ const COOKIE_NAME = 'corte_token'
 const COOKIE_OPTS = {
   httpOnly: true,
   secure: env.NODE_ENV === 'production',
-  sameSite: 'strict' as const,
+  // Em produção frontend (Vercel) e backend (Railway) estão em domínios distintos,
+  // então o cookie precisa de sameSite: 'none' + secure para ser enviado cross-site.
+  // Em dev ambos rodam em localhost, então 'lax' é suficiente e mais seguro.
+  sameSite: (env.NODE_ENV === 'production' ? 'none' : 'lax') as 'none' | 'lax',
   path: '/',
   maxAge: 60 * 60 * 8, // 8h em segundos
 }
