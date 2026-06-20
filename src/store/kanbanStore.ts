@@ -131,36 +131,43 @@ export const useKanbanStore = create<KanbanStore>((set, get) => ({
     }),
 
   moveOrder: async (id, status) => {
-    // Captura o status anterior para poder reverter se a API falhar
-    const previous = get().orders.find((o) => o.id === id)?.status
+    // Captura o status anterior para poder reverter em caso de falha
+    const previousStatus = get().orders.find((o) => o.id === id)?.status
 
-    // Atualiza localmente de imediato (optimistic update)
+    // Atualiza localmente de imediato (optimistic update) — sem notificar o board
+    // aqui para evitar que o fetchOrders dispare antes do PATCH completar e
+    // sobrescreva o estado otimista com o status antigo da API.
     set((s) => {
       const orders = s.orders.map((o) => (o.id === id ? { ...o, status } : o))
       saveLocalOrders(orders)
-      notifyBoardUpdate()
       return { orders }
     })
 
-    // Sincroniza com a API em background — retorna true em caso de sucesso
+    // Sincroniza com a API — notifica board apenas após a confirmação
     if (isOperatorLoggedIn()) {
       try {
         await api.patch(`/orders/${id}/status`, { status: STATUS_MAP_REVERSE[status] })
+        // Só agora notifica: fetchOrders vai buscar o status atualizado da API
         notifyBoardUpdate()
         return true
       } catch {
-        // Reverte o estado local ao status anterior para manter consistência com o banco
-        if (previous !== undefined) {
+        // Reverte o estado local para que o operador veja que a atualização falhou
+        // e possa tentar novamente
+        if (previousStatus !== undefined) {
           set((s) => {
-            const orders = s.orders.map((o) => (o.id === id ? { ...o, status: previous } : o))
+            const orders = s.orders.map((o) =>
+              o.id === id ? { ...o, status: previousStatus } : o,
+            )
             saveLocalOrders(orders)
-            notifyBoardUpdate()
             return { orders }
           })
         }
+        notifyBoardUpdate()
         return false
       }
     }
+    // Offline: apenas notifica para o painel refletir via localStorage
+    notifyBoardUpdate()
     return true
   },
 
@@ -205,7 +212,6 @@ export const useKanbanStore = create<KanbanStore>((set, get) => ({
       const merged = [...pendingOrders, ...apiOrders]
       saveLocalOrders(merged)
       set({ orders: merged, loading: false, error: null })
-      notifyBoardUpdate()
     } catch (err) {
       if (err instanceof ApiError && err.status === 401) {
         set({
