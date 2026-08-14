@@ -69,7 +69,7 @@ function pickupLabel(slotTime) {
 }
 
 function receiptTitle(data) {
-  if (data.slotTime === 'Preferencial') return 'SENHA PREFERENCIAL'
+  if (data.priority || data.slotTime === 'Preferencial') return 'SENHA PREFERENCIAL'
   if (data.items.length === 0) return 'SENHA DE BALCÃO'
   if (data.slotTime === 'Imediata') return 'PEDIDO IMEDIATO'
   return 'PEDIDO AGENDADO'
@@ -106,7 +106,7 @@ function buildPdf(data, qrTmpPath) {
     dashed()
 
     if (data.items.length === 0) {
-      txt(data.slotTime === 'Preferencial'
+      txt(data.priority || data.slotTime === 'Preferencial'
         ? 'Pedido: Atendimento preferencial no balcão (fila prioritária)'
         : 'Pedido: Atendimento presencial no balcão')
     } else {

@@ -3,7 +3,11 @@ import type { Order } from '../../store/cartStore'
 import { useStore } from '../../data/config'
 import { getOrderTrackingUrl } from '../../utils/orderTrackingUrl'
 import QrScanPrompt from '../../components/QrScanPrompt'
-import { generateQrDataUrl, generateQrObjectUrl } from '../../utils/qrCode'
+import { generateQrDataUrl } from '../../utils/qrCode'
+
+/** Servidor de impressão local do totem (print-server/server.mjs, porta 3334).
+ *  Imprime silenciosamente via SumatraPDF — sem diálogo nenhum no navegador. */
+const PRINT_SERVER_URL = import.meta.env.VITE_PRINT_SERVER_URL ?? 'http://localhost:3334'
 
 const QR_DISPLAY_SIZE = 384
 /** Tempo na tela do QR antes de voltar ao início automaticamente */
@@ -66,136 +70,41 @@ function nextSteps(order: Order): string[] {
 const COUNTER_LINE = 'Atendimento presencial no balcão'
 const PREFERENTIAL_LINE = 'Atendimento preferencial no balcão (fila prioritária)'
 
-const PRINT_DIV_ID = '__corte_receipt__'
-const PRINT_STYLE_ID = '__corte_receipt_style__'
-
-function ensurePrintStyle() {
-  if (document.getElementById(PRINT_STYLE_ID)) return
-  const style = document.createElement('style')
-  style.id = PRINT_STYLE_ID
-  style.textContent = `
-    #${PRINT_DIV_ID} { display: none; }
-    @media print {
-      body > *:not(#${PRINT_DIV_ID}) { display: none !important; }
-      #${PRINT_DIV_ID} {
-        display: block !important;
-        font-family: 'Courier New', monospace;
-        font-size: 12px;
-        line-height: 1.5;
-        color: #000;
-        background: #fff;
-        width: 80mm;
-        padding: 4mm 4mm 12mm;
-      }
-      #${PRINT_DIV_ID} .rp-center  { text-align: center; }
-      #${PRINT_DIV_ID} .rp-bold    { font-weight: bold; }
-      #${PRINT_DIV_ID} .rp-large   { font-size: 18px; font-weight: bold; letter-spacing: 4px; }
-      #${PRINT_DIV_ID} .rp-small   { font-size: 10px; }
-      #${PRINT_DIV_ID} .rp-xsmall  { font-size: 9px; color: #444; }
-      #${PRINT_DIV_ID} .rp-dashed  { border-top: 1px dashed #000; margin: 6px 0; }
-      #${PRINT_DIV_ID} .rp-section { margin: 4px 0; }
-      #${PRINT_DIV_ID} .rp-label   { font-weight: bold; font-size: 10px; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 2px; }
-      #${PRINT_DIV_ID} .rp-codebox { border: 1px solid #000; padding: 6px; margin: 8px 0; text-align: center; }
-      #${PRINT_DIV_ID} .rp-qrbox  { text-align: center; margin: 8px 0; }
-      #${PRINT_DIV_ID} .rp-qrbox img {
-        display: block !important;
-        width: 96px;
-        height: 96px;
-        margin: 0 auto;
-        -webkit-print-color-adjust: exact;
-        print-color-adjust: exact;
-      }
-      @page { margin: 0; size: 80mm auto; }
-    }
-  `
-  document.head.appendChild(style)
-}
-
-function buildReceiptInnerHtml(order: Order, storeName: string, qrDataUrl: string): string {
-  const dateStr = new Date().toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit', year: 'numeric' })
-  const timeStr = new Date().toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })
-
-  const counterLine = order.priority || order.slotTime === 'Preferencial' ? PREFERENTIAL_LINE : COUNTER_LINE
-  const itemsHtml = order.items.length === 0
-    ? `<div class="rp-section"><div><b>Pedido:</b> ${counterLine}</div></div>`
-    : order.items.map((item, idx) => `
-      <div class="rp-section">
-        ${order.items.length > 1 ? `<div class="rp-label">Item ${idx + 1}</div>` : ''}
-        <div><b>Corte:</b> ${item.product.name}</div>
-        <div><b>Tipo:</b> ${item.cutType.name}</div>
-        <div><b>Peso:</b> ~${item.weightKg}kg</div>
-        <div><b>Valor est.:</b> R$ ${item.estimatedPrice.toFixed(2).replace('.', ',')}</div>
-      </div>
-      ${idx < order.items.length - 1 ? '<div class="rp-dashed"></div>' : ''}
-    `).join('')
-
-  return `
-    <div class="rp-center rp-bold" style="font-size:14px">CORTE · Açougue Inteligente</div>
-    <div class="rp-center rp-small">${storeName}</div>
-    <div class="rp-dashed"></div>
-    <div class="rp-center rp-bold" style="font-size:13px">${receiptTitle(order)}</div>
-    <div class="rp-dashed"></div>
-    ${itemsHtml}
-    <div class="rp-dashed"></div>
-    <div><b>Retirada:</b> ${pickupLabel(order.slotTime)}</div>
-    ${order.customerPhone ? `<div><b>WhatsApp:</b> ${order.customerPhone}</div>` : ''}
-    <div class="rp-dashed"></div>
-    <div class="rp-center rp-small">Código de retirada</div>
-    <div class="rp-codebox rp-large">${order.pickupCode}</div>
-    <div class="rp-dashed"></div>
-    <div class="rp-center rp-small">Acompanhe seu pedido</div>
-    <div class="rp-qrbox"><img src="${qrDataUrl}" alt="QR Code"/></div>
-    <div class="rp-center rp-xsmall">Escaneie para ver o andamento</div>
-    <div class="rp-dashed"></div>
-    <div class="rp-center rp-small">Apresente este comprovante no balcão</div>
-    <div class="rp-center rp-xsmall">${dateStr} · ${timeStr}</div>
-  `
-}
-
-async function waitForImage(img: HTMLImageElement): Promise<void> {
-  if (typeof img.decode === 'function') {
-    try {
-      await img.decode()
-      return
-    } catch { /* fallback abaixo */ }
-  }
-  if (img.complete && img.naturalWidth > 0) return
-  await new Promise<void>((resolve, reject) => {
-    img.onload = () => resolve()
-    img.onerror = () => reject(new Error('Falha ao carregar QR Code para impressão'))
-  })
-}
-
-async function printReceipt(order: Order, storeName: string, qrSrc: string) {
-  ensurePrintStyle()
-
-  let div = document.getElementById(PRINT_DIV_ID)
-  if (!div) {
-    div = document.createElement('div')
-    div.id = PRINT_DIV_ID
-    document.body.appendChild(div)
+async function printReceipt(order: Order, storeName: string, qrDataUrl: string) {
+  const payload = {
+    storeName,
+    pickupCode: order.pickupCode,
+    slotTime: order.slotTime,
+    priority: order.priority || undefined,
+    customerPhone: order.customerPhone || undefined,
+    qrDataUrl,
+    items: order.items.length === 0
+      ? []
+      : order.items.map((item) => ({
+          productName: item.product.name,
+          cutType: item.cutType.name,
+          weightKg: item.weightKg,
+          estimatedPrice: item.estimatedPrice,
+        })),
   }
 
-  div.innerHTML = buildReceiptInnerHtml(order, storeName, qrSrc)
-  const img = div.querySelector<HTMLImageElement>('.rp-qrbox img')
-  if (img) await waitForImage(img)
-
-  await new Promise<void>((resolve) => requestAnimationFrame(() => requestAnimationFrame(() => resolve())))
-
-  await new Promise<void>((resolve) => {
-    let finished = false
-    const cleanup = () => {
-      if (finished) return
-      finished = true
-      window.removeEventListener('afterprint', cleanup)
-      div!.innerHTML = ''
-      if (qrSrc.startsWith('blob:')) URL.revokeObjectURL(qrSrc)
-      resolve()
-    }
-    window.addEventListener('afterprint', cleanup)
-    window.print()
-    setTimeout(cleanup, 2000)
-  })
+  const controller = new AbortController()
+  const timeout = setTimeout(() => controller.abort(), 8000)
+  try {
+    const res = await fetch(`${PRINT_SERVER_URL}/print`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload),
+      signal: controller.signal,
+    })
+    if (!res.ok) throw new Error(`print-server respondeu ${res.status}`)
+  } catch (err) {
+    // Não abrimos o diálogo nativo como fallback: no totem em produção o
+    // print-server local está sempre ativo. Só registramos o erro.
+    console.error('[print] falha ao imprimir silenciosamente:', err)
+  } finally {
+    clearTimeout(timeout)
+  }
 }
 
 export default function PrintScreen({ order, onDone }: Props) {
@@ -221,11 +130,8 @@ export default function PrintScreen({ order, onDone }: Props) {
     let cancelled = false
 
     void (async () => {
-      const qrForPrint = await generateQrObjectUrl(getOrderTrackingUrl(order.pickupCode, store.id), 120)
-      if (cancelled) {
-        URL.revokeObjectURL(qrForPrint)
-        return
-      }
+      const qrForPrint = await generateQrDataUrl(getOrderTrackingUrl(order.pickupCode, store.id), 120)
+      if (cancelled) return
       await printReceipt(order, store.name, qrForPrint)
     })()
 
