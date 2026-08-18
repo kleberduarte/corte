@@ -3,6 +3,12 @@ cd /d "%~dp0"
 title CORTE — Sistema
 
 :: ═══════════════════════════════════════════════════════════════════
+::  Configuracao do totem (edite por maquina/loja)
+:: ═══════════════════════════════════════════════════════════════════
+set "FRONTEND_URL=https://corte.vercel.app"
+set "STORE_SLUG=corte"
+
+:: ═══════════════════════════════════════════════════════════════════
 ::  Menu principal
 :: ═══════════════════════════════════════════════════════════════════
 :menu
@@ -13,8 +19,8 @@ echo   ║        CORTE — Acougue Inteligente   ║
 echo   ╚══════════════════════════════════════╝
 echo.
 echo   [1] Desenvolvimento   (API + Vite dev, porta 5173)
-echo   [2] Totem Cliente     (build + serve + Chrome quiosque)
-echo   [3] Totem Operador    (build + serve + Chrome quiosque operador)
+echo   [2] Totem Cliente     (%FRONTEND_URL% + Chrome quiosque)
+echo   [3] Totem Operador    (%FRONTEND_URL% + Chrome quiosque operador)
 echo   [0] Sair
 echo.
 set /p MODO="   Escolha: "
@@ -114,37 +120,14 @@ if %errorlevel% NEQ 0 goto aguarda_api_loop
 goto :eof
 
 :: ═══════════════════════════════════════════════════════════════════
-::  Rotina compartilhada: build + API + serve dist + print-server
+::  Rotina compartilhada: print-server local (frontend/API ficam na nuvem)
 :: ═══════════════════════════════════════════════════════════════════
 :iniciar_producao
-call :setup
 call :instalar_print_server
-findstr /C:"4173" "%~dp0backend\.env" >nul 2>&1
-if %errorlevel% NEQ 0 (
-  echo [aviso] Inclua http://localhost:4173 em CORS_ORIGINS no backend\.env para o fallback de impressao.
-)
 
 echo [print-server] Iniciando servidor de impressao em http://localhost:3334 ...
 start /min "CORTE Print" cmd /k "cd /d %~dp0print-server & node server.mjs"
 call :aguarda_print_server
-
-echo [build] Gerando build do totem (API local 127.0.0.1)...
-call npm run build:totem
-if errorlevel 1 ( echo ERRO no build. & pause & exit /b 1 )
-
-echo [api] Iniciando API em http://localhost:3333 ...
-start /min "CORTE API" cmd /k "cd /d %~dp0backend && npm run dev"
-call :aguarda_api
-
-echo [serve] Servindo frontend em http://localhost:4173 ...
-start /min "CORTE Frontend" cmd /k "cd /d %~dp0 && npx serve dist -l 4173 --no-clipboard"
-
-echo [aguarda] Esperando frontend ficar pronto...
-:aguarda_prod
-timeout /t 2 /nobreak >nul
-powershell -Command "try{Invoke-WebRequest -Uri 'http://localhost:4173' -UseBasicParsing -TimeoutSec 1|Out-Null;exit 0}catch{exit 1}" >nul 2>&1
-if %errorlevel% NEQ 0 goto aguarda_prod
-
 goto :eof
 
 :: ═══════════════════════════════════════════════════════════════════
@@ -165,8 +148,8 @@ goto :eof
 :totem_cliente
 call :iniciar_producao
 call :localiza_chrome
-echo [chrome] Abrindo totem cliente...
-start "" "%CHROME%" --kiosk --kiosk-printing --disable-infobars --noerrdialogs --no-first-run --disable-pinch --overscroll-history-navigation=0 --disable-features=TranslateUI http://localhost:4173/
+echo [chrome] Abrindo totem cliente em %FRONTEND_URL% (loja: %STORE_SLUG%)...
+start "" "%CHROME%" --kiosk --kiosk-printing --disable-infobars --noerrdialogs --no-first-run --disable-pinch --overscroll-history-navigation=0 --disable-features=TranslateUI "%FRONTEND_URL%/?store=%STORE_SLUG%"
 goto fim
 
 :: ═══════════════════════════════════════════════════════════════════
@@ -175,13 +158,13 @@ goto fim
 :totem_operador
 call :iniciar_producao
 call :localiza_chrome
-echo [chrome] Abrindo totem operador...
-start "" "%CHROME%" --kiosk --disable-infobars --noerrdialogs --no-first-run --disable-pinch --overscroll-history-navigation=0 --disable-features=TranslateUI "http://localhost:4173/?view=operador"
+echo [chrome] Abrindo totem operador em %FRONTEND_URL% (loja: %STORE_SLUG%)...
+start "" "%CHROME%" --kiosk --disable-infobars --noerrdialogs --no-first-run --disable-pinch --overscroll-history-navigation=0 --disable-features=TranslateUI "%FRONTEND_URL%/?store=%STORE_SLUG%&view=operador"
 goto fim
 
 :: ═══════════════════════════════════════════════════════════════════
 :fim
 echo.
-echo Para encerrar, feche as janelas "CORTE API", "CORTE Frontend" e "CORTE Print".
+echo Para encerrar, feche a janela "CORTE Print".
 echo Impressora: edite print-server\.env (PRINTER_NAME) se o comprovante nao sair.
 echo.
